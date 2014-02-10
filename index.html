@@ -330,7 +330,6 @@ git commit -m "initial commit"
 <span class='line-number'>40</span>
 <span class='line-number'>41</span>
 <span class='line-number'>42</span>
-<span class='line-number'>43</span>
 </pre></td><td class='code'><pre><code class='python'><span class='line'><span class="s">&quot;&quot;</span><span class="n">Script</span> <span class="n">to</span> <span class="n">gather</span> <span class="n">IMDB</span> <span class="n">keywords</span> <span class="kn">from</span> <span class="mi">2013</span><span class="s">&#39;s top grossing movies.&quot;&quot;&quot;</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">sys</span>
 </span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
@@ -346,8 +345,7 @@ git commit -m "initial commit"
 </span><span class='line'>    <span class="n">movies_list</span> <span class="o">=</span> <span class="p">[]</span>
 </span><span class='line'>    <span class="k">for</span> <span class="n">each_url</span> <span class="ow">in</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;.title a[href*=&quot;title&quot;]&#39;</span><span class="p">):</span>
 </span><span class='line'>        <span class="n">movie_title</span> <span class="o">=</span> <span class="n">each_url</span><span class="o">.</span><span class="n">text</span>
-</span><span class='line'>        <span class="k">if</span> <span class="n">movie_title</span> <span class="o">!=</span> <span class="s">&#39;X&#39;</span><span class="p">:</span>
-</span><span class='line'>            <span class="n">movies_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">movie_title</span><span class="p">,</span> <span class="n">each_url</span><span class="p">[</span><span class="s">&#39;href&#39;</span><span class="p">]))</span>
+</span><span class='line'>        <span class="n">movies_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">movie_title</span><span class="p">,</span> <span class="n">each_url</span><span class="p">[</span><span class="s">&#39;href&#39;</span><span class="p">]))</span>
 </span><span class='line'>    <span class="k">return</span> <span class="n">movies_list</span>
 </span><span class='line'>
 </span><span class='line'>
@@ -381,7 +379,7 @@ git commit -m "initial commit"
 
 <h2>Заключение</h2>
 
-<p>Надеюсь теперь у вас есть план действий для начала работы над python-проектом с нуля. Не смотря на то, что у каждого есть свой метод начала работы над проектом, скорее всего мой метод подойдет и вам. Как всегда, если у вас есть какие-либо вопросы, не стесняйтесь задавать их в комментариях или напишите мне на <a href="&#x6d;&#97;&#105;&#x6c;&#116;&#111;&#58;&#106;&#101;&#102;&#102;&#64;&#106;&#x65;&#102;&#x66;&#x6b;&#x6e;&#x75;&#x70;&#112;&#46;&#x63;&#111;&#x6d;&#x2e;">&#x6a;&#x65;&#x66;&#x66;&#x40;&#106;&#x65;&#x66;&#102;&#x6b;&#x6e;&#117;&#x70;&#x70;&#x2e;&#x63;&#x6f;&#x6d;&#46;</a></p>
+<p>Надеюсь теперь у вас есть план действий для начала работы над python-проектом с нуля. Не смотря на то, что у каждого есть свой метод начала работы над проектом, скорее всего мой метод подойдет и вам. Как всегда, если у вас есть какие-либо вопросы, не стесняйтесь задавать их в комментариях или напишите мне на <a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#106;&#101;&#x66;&#x66;&#x40;&#106;&#x65;&#x66;&#102;&#107;&#x6e;&#117;&#112;&#x70;&#46;&#99;&#x6f;&#109;&#x2e;">&#106;&#101;&#102;&#x66;&#64;&#x6a;&#101;&#x66;&#102;&#x6b;&#110;&#x75;&#x70;&#112;&#46;&#x63;&#x6f;&#109;&#46;</a></p>
 </div>
   
   
