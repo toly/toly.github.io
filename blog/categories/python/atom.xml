@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Python, | Toly blog]]></title>
+  <link href="http://toly.github.io/blog/categories/python/atom.xml" rel="self"/>
+  <link href="http://toly.github.io/"/>
+  <updated>2014-02-10T12:38:47+04:00</updated>
+  <id>http://toly.github.io/</id>
+  <author>
+    <name><![CDATA[Toly]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Начиная Python-проект: The Right Way]]></title>
+    <link href="http://toly.github.io/blog/2014/02/09/starting-a-python-project-the-right-way/"/>
+    <updated>2014-02-09T21:33:26+04:00</updated>
+    <id>http://toly.github.io/blog/2014/02/09/starting-a-python-project-the-right-way</id>
+    <content type="html"><![CDATA[<p><a href="http://www.jeffknupp.com/blog/2014/02/04/starting-a-python-project-the-right-way/">Оригинал</a></p>
+
+<p>Если вы подобны большинству начинающих python-программистов, вы вероятно в состоянии представить себе работу приложения целиком, но когда приходит время начать писать код и перед вами пустое окно редактора, вы чувствуете себя потерянным и подавленным. В этой статье я опишу метод, который использую когда начинаю писать программу с нуля. К концу статьи у вас будет хороший план для начала разработки любого приложения.</p>
+
+<h2>Установка</h2>
+
+<p>До того как написать хоть строчку кода, первое что я делаю &ndash; создаю <em>виртуальное окружение</em>. Что такое виртуальное окружение? Это установка python отдельно от остальной части системы (и дефолтного pythona'а). Какая от этого польза? Представьте себе, что у вас есть два проекта над которыми вы работаете. Если оба испольузют какую-либо библиотеку (например, <strong>requests</strong>), и в одном из проектов используется старая версия (которую нельзя корректно обновить, т.к. другие библиотеки используют старую версию <strong>requests</strong>), как вы сможете использовать новую версию <strong>requests</strong> в другом проекте? С помощью виртуального окружения.</p>
+
+<p>Для начала установите <strong>virtualenvwrapper</strong> (обертка над фантастическим пакетом <strong>virtualenv</strong>). Добавьте в ваш <strong>.bashrc</strong> строчку <em>/usr/local/bin/virtualenvwrapper.sh</em> и перезагрузите свой профиль с помощью <strong>source</strong>:</p>
+
+<pre><code>source ~/.bashrc
+</code></pre>
+
+<p>Теперь у вас должна появиться команда <strong>mkvirtualenv</strong>, доступная через автодополнение с помощью <em>tab</em>. Если вы используете Python старше версии 3.3, виртуальное окружение поддерживает этот язык и установка этого пакета не требуется. <strong>mkvirtualenv &lt;my_project></strong> создаст новое виртуальное окружение под названием my_project с уже установленными <strong>pip</strong> и <strong>setuptools</strong>. Для Python 3 требуемые команды выглядят так:</p>
+
+<pre><code>python -m venv &lt;my_project&gt;
+source &lt;my_project&gt;/bin/activate
+</code></pre>
+
+<p>Теперь когда виртуальное окружение создано, пришло время инициализировать средство управления исходниками. Предполагая что это <strong>git</strong> (ну, потому что он&hellip;), введем</p>
+
+<pre><code>git init .
+</code></pre>
+
+<p>Так же полезно добавить в <strong>.gitignore</strong> все скомпилированые Python-ом файлы и каталоги <strong><strong>pychache</strong></strong>. Для этого создайте файл <strong>.gitignore</strong> и поместите в него следующее:</p>
+
+<pre><code>*.pyc
+__pycache__
+</code></pre>
+
+<p>Теперь подходящее время добавить в проект <strong>README</strong> файл. Даже если вы единственный, кто будет видеть код, это хорошее упражнение для организации ваших мыслей. <strong>README</strong> файл должен описывать что делает проект, его зависимости и как его использовать. Я пишу <strong>README</strong> файлы с использованием разметки <em>Markdown</em>, во-первых потому что GitHub автоматически оформляет любой файл названный <strong>README.md</strong>, а во-вторых потому что я пишу все (!) документы в разметке <em>Markdown</em>.</p>
+
+<p>И наконец, сделайте первый коммит содержащий два файла (<strong>.gitignore</strong>, <strong>README.md</strong>), которые вы только что создали. Для этого введите:</p>
+
+<pre><code>git add .gitignore README.md
+git commit -m "initial commit"
+</code></pre>
+
+<h2>Каркасы!</h2>
+
+<p>Почти каждое приложение я начинаю одинаково: создаю каркас приложения, состоящий из функций и классов с заполненой документацией, но без реализации. Я считаю, что необходимо сперва вынужденно писать документацию для функции, иначе если я не способен кратко описать что-либо, то у меня нет достаточно мыслей о проблеме.</p>
+
+<p>В качестве примера приложения я использую скрипт, недавно написанный обучаемым во время одного из наших занятий. Цель скрипта &ndash; создать csv-файл, содержащий самые кассовые фильмы прошлого года (по версии IMDB) и ключевые слова связанные с этими фильмами на IMDB. Это был довольно простой проект, для того что бы завершить его за одно занятие, но достаточный по сложности, что бы требовать размышлений.</p>
+
+<p>Сперва создайте основной файл, который будет точкой входа в приложение. Я назвал его <strong>imdb.py</strong>. Потом скопируйте следующий код в редактор:</p>
+
+<p>``` python</p>
+
+<pre><code>""Script to gather IMDB keywords from 2013's top grossing movies."""
+import sys
+
+def main():
+    """Main entry point for the script."""
+    pass
+
+if __name__ == '__main__':
+    sys.exit(main())
+</code></pre>
+
+<p>```</p>
+
+<p>Звучит неправдоподобно, но это вполне функциональная программа. Вы можете запустить ее и получить правильный код выхода (т.е. <strong>0</strong>, хотя справедливо отметить, что пустой файл будет так же возвращать правильный код). Затем я делаю заглушки для функций и/или классов, которые по моему мнению будут нужны:</p>
+
+<p>``` python</p>
+
+<pre><code>"""Script to gather IMDB keywords from 2013's top grossing movies."""
+import sys
+
+URL = "http://www.imdb.com/search/title?at=0&amp;sort=boxoffice_gross_us,desc&amp;start=1&amp;year=2013,2013"
+
+def main():
+    """Main entry point for the script."""
+    pass
+
+def get_top_grossing_movie_links(url):
+    """Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB
+    page."""
+    pass
+
+def get_keywords_for_movie(url):
+    """Return a list of keywords associated with *movie*."""
+    pass
+
+if __name__ == '__main__':
+    sys.exit(main())
+</code></pre>
+
+<p>```</p>
+
+<p>Выглядит сносно. Отмечу, что обе функции включают параметры (например, <strong>get_keywords_for_movie</strong> принимает параметр <strong>url</strong>). Это может показаться странным для заглушек. Зачем здесь параметры? Аргументация такая же, как и для предварительного документирования заглушек: если я не знаю какие агрументы должна принимать функция, значит я недостаточно об этом думал.</p>
+
+<p>В этом месте я верятно закомичусь, т.к. проделал определенную часть работы, которую не хотел бы потерять. После этого перейдем к реализации. Я всегда начинаю с реализации функции <strong>main</strong>, т.к. &ldquo;центр&rdquo; использующий все остальные функции. Вот реализация функции <strong>main</strong> в <strong>imdb.py</strong>:</p>
+
+<p>``` python</p>
+
+<pre><code>import csv
+
+def main():
+    """Main entry point for the script."""
+    movies = get_top_grossing_movie_links(URL)
+    with open('output.csv', 'w') as output:
+        csvwriter = csv.writer(output)
+        for title, url in movies:
+            keywords = get_keywords_for_movie(
+                'http://www.imdb.com{}keywords/'.format(url))
+            csvwriter.writerow([title, keywords])
+</code></pre>
+
+<p>```</p>
+
+<p>Несмотря на то что <strong>get_top_grossing_movie_links</strong> и <strong>get_keywords_for_movie</strong> не реализованы, я знаю достаточно о том, как их использовать. Функция <strong>main</strong> делает именно то, что мы обсуждали вначале: получает самые кассовые фильмы года и пишет их в csv-файл вместе с их ключевыми словами.</p>
+
+<p>Теперь все что осталось, это реализовать недостающие функции. Любопытно, что даже если мы знаем, что <strong>get_keywords_for_movie</strong> будет вызван после <strong>get_top_grossing_movie_links</strong>, мы можем реализовать их в том порядке, который больше нравится. Это не тот случай, когда пишешь скрипт с нуля и добавляешь функционал в том порядке, в которм идет разработка. Вы были бы вынуждены полностью написать первую функцию, прежде чем перети ко второй. Тот факт, что мы можем реализовать (и проверить!) функции в любом порядкепоказывает, что они слабо связаны.</p>
+
+<p>Давайте первым реализуем функцию <strong>get_keywords_for_movie</strong>:</p>
+
+<p>``` python
+def get_keywords_for_movie(url):</p>
+
+<pre><code>"""Return a list of keywords associated with *movie*."""
+keywords = []
+response = requests.get(url)
+soup = BeautifulSoup(response.text)
+tables = soup.find_all('table', class_='dataTable')
+table = tables[0]
+return [td.text for tr in table.find_all('tr') for td in tr.find_all('td')]
+</code></pre>
+
+<p>```</p>
+
+<p>Мы используем библиотеки <strong>requests</strong> и <strong>BeautifulSoup</strong>, поэтому нам нужно установить их через <em>pip</em>.  Теперь можно внести в список зависимостей проекта новые библиотеки: <strong>pip freeze requirements.txt</strong> и закомитить изменения. Таким образом мы всегда сможем создать виртуальное окружение и установить именно те библиотеки (и версии) которые нужны для запуска приложения.</p>
+
+<p>Наконец напишем реализацию для функции <strong>get_top_grossing_movie_links</strong>:</p>
+
+<p>``` python
+def get_top_grossing_movie_links(url):</p>
+
+<pre><code>"""Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB
+page."""
+response = requests.get(url)
+movies_list = []
+for each_url in BeautifulSoup(response.text).select('.title a[href*="title"]'):
+    movie_title = each_url.text 
+    movies_list.append((movie_title, each_url['href']))
+return movies_list
+</code></pre>
+
+<p>```</p>
+
+<p>Вот финальное содержание <strong>imdb.py</strong>:</p>
+
+<p>``` python
+&ldquo;"Script to gather IMDB keywords from 2013&rsquo;s top grossing movies.&rdquo;&ldquo;&rdquo;
+import sys
+import requests
+from bs4 import BeautifulSoup
+import csv</p>
+
+<p>URL = &ldquo;<a href="http://www.imdb.com/search/title?at=0&amp;sort=boxoffice_gross_us,desc&amp;start=1&amp;year=2013,2013">http://www.imdb.com/search/title?at=0&amp;sort=boxoffice_gross_us,desc&amp;start=1&amp;year=2013,2013</a>&rdquo;</p>
+
+<p>def get_top_grossing_movie_links(url):</p>
+
+<pre><code>"""Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB
+page."""
+response = requests.get(url)
+movies_list = []
+for each_url in BeautifulSoup(response.text).select('.title a[href*="title"]'):
+    movie_title = each_url.text 
+    if movie_title != 'X':
+        movies_list.append((movie_title, each_url['href']))
+return movies_list
+</code></pre>
+
+<p>def get_keywords_for_movie(url):</p>
+
+<pre><code>"""Return a list of keywords associated with *movie*."""
+keywords = []
+response = requests.get(url)
+soup = BeautifulSoup(response.text)
+tables = soup.find_all('table', class_='dataTable')
+table = tables[0]
+return [td.text for tr in table.find_all('tr') for td in tr.find_all('td')]
+</code></pre>
+
+<p>def main():</p>
+
+<pre><code>"""Main entry point for the script."""
+movies = get_top_grossing_movie_links(URL)
+with open('output.csv', 'w') as output:
+    csvwriter = csv.writer(output)
+    for title, url in movies:
+        keywords = get_keywords_for_movie('http://www.imdb.com{}keywords/'.format(url))
+        csvwriter.writerow([title, keywords])
+</code></pre>
+
+<p>if <strong>name</strong> == &lsquo;<strong>main</strong>&rsquo;:</p>
+
+<pre><code>sys.exit(main())
+</code></pre>
+
+<p>```</p>
+
+<p>Приложение, которое начиналось с пустого окна редактора готово. После запуска скрипт сгенерирует <strong>output.csv</strong>, содержащий именно то что нужно. Для скрипта такого размера я не стал бы писать тесты, т.к. результат работы программы и есть тест. Тем не менее, написание тестов в данном случае возможно (так как наши функции слабо связаны), что бы проверить каждую функцию отдельно (изолированно).</p>
+
+<h2>Заключение</h2>
+
+<p>Надеюсь теперь у вас есть план действий для начала работы над python-проектом с нуля. Не смотря на то, что у каждого есть свой метод начала работы над проектом, скорее всего мой метод подойдет и вам. Как всегда, если у вас есть какие-либо вопросы, не стесняйтесь задавать их в комментариях или напишите мне на <a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#106;&#101;&#x66;&#102;&#64;&#x6a;&#x65;&#x66;&#102;&#x6b;&#x6e;&#x75;&#112;&#x70;&#46;&#x63;&#x6f;&#109;&#x2e;">&#106;&#101;&#x66;&#x66;&#64;&#x6a;&#x65;&#x66;&#102;&#107;&#x6e;&#117;&#112;&#112;&#x2e;&#x63;&#111;&#109;&#46;</a></p>
+]]></content>
+  </entry>
+  
+</feed>
