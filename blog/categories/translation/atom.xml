@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Translation | Toly blog]]></title>
   <link href="http://toly.github.io/blog/categories/translation/atom.xml" rel="self"/>
   <link href="http://toly.github.io/"/>
-  <updated>2014-02-13T12:45:08+04:00</updated>
+  <updated>2014-02-13T12:56:46+04:00</updated>
   <id>http://toly.github.io/</id>
   <author>
     <name><![CDATA[Toly]]></name>
@@ -18,7 +18,9 @@
     <link href="http://toly.github.io/blog/2014/02/09/starting-a-python-project-the-right-way/"/>
     <updated>2014-02-09T21:33:26+04:00</updated>
     <id>http://toly.github.io/blog/2014/02/09/starting-a-python-project-the-right-way</id>
-    <content type="html"><![CDATA[<p><a href="http://www.jeffknupp.com/blog/2014/02/04/starting-a-python-project-the-right-way/">Оригинал</a></p>
+    <content type="html"><![CDATA[<blockquote><p>Достаточно вольный (настолько вольный, что отсутствуют два абзаца и изменен код) перевод статьи Джефа Кнаппа</p>
+
+<p><a href="http://www.jeffknupp.com/blog/2014/02/04/starting-a-python-project-the-right-way/">Starting A Python Project The Right Way</a></p></blockquote>
 
 <p>Если вы подобны большинству начинающих python-программистов, вы вероятно в состоянии представить себе работу приложения целиком, но когда приходит время начать писать код и перед вами пустое окно редактора, вы чувствуете себя потерянным и подавленным. В этой статье я опишу метод, который использую когда начинаю писать программу с нуля. К концу статьи у вас будет хороший план для начала разработки любого приложения.</p>
 
@@ -29,12 +31,12 @@
 
 <p>До того как написать хоть строчку кода, первое что я делаю &ndash; создаю <em>виртуальное окружение</em>. Что такое виртуальное окружение? Это установка python отдельно от остальной части системы (и дефолтного pythona'а). Какая от этого польза? Представьте себе, что у вас есть два проекта над которыми вы работаете. Если оба испольузют какую-либо библиотеку (например, <strong>requests</strong>), и в одном из проектов используется старая версия (которую нельзя корректно обновить, т.к. другие библиотеки используют старую версию <strong>requests</strong>), как вы сможете использовать новую версию <strong>requests</strong> в другом проекте? С помощью виртуального окружения.</p>
 
-<p>Для начала установите <strong>virtualenvwrapper</strong> (обертка над фантастическим пакетом <strong>virtualenv</strong>). Добавьте в ваш <strong>.bashrc</strong> строчку <em>/usr/local/bin/virtualenvwrapper.sh</em> и перезагрузите свой профиль с помощью <strong>source</strong>:</p>
+<p>Для начала установите <strong>virtualenvwrapper</strong> (обертка над фантастическим пакетом <strong>virtualenv</strong>). Добавьте в ваш <strong>.bashrc</strong> строчку <code>/usr/local/bin/virtualenvwrapper.sh</code> и перезагрузите свой профиль с помощью <strong>source</strong>:</p>
 
 <pre><code>source ~/.bashrc
 </code></pre>
 
-<p>Теперь у вас должна появиться команда <strong>mkvirtualenv</strong>, доступная через автодополнение с помощью <em>tab</em>. Если вы используете Python старше версии 3.3, виртуальное окружение поддерживает этот язык и установка этого пакета не требуется. <strong>mkvirtualenv &lt;my_project></strong> создаст новое виртуальное окружение под названием my_project с уже установленными <strong>pip</strong> и <strong>setuptools</strong>. Для Python 3 требуемые команды выглядят так:</p>
+<p>Теперь у вас должна появиться команда <strong>mkvirtualenv</strong>, доступная через автодополнение с помощью <em>tab</em>. Если вы используете Python старше версии 3.3, виртуальное окружение поддерживает этот язык и установка этого пакета не требуется. <code>mkvirtualenv &lt;my_project&gt;</code> создаст новое виртуальное окружение под названием my_project с уже установленными <strong>pip</strong> и <strong>setuptools</strong>. Для Python 3 требуемые команды выглядят так:</p>
 
 <pre><code>python -m venv &lt;my_project&gt;
 source &lt;my_project&gt;/bin/activate
@@ -45,7 +47,7 @@ source &lt;my_project&gt;/bin/activate
 <pre><code>git init .
 </code></pre>
 
-<p>Так же полезно добавить в <strong>.gitignore</strong> все скомпилированые Python-ом файлы и каталоги <strong><strong>pychache</strong></strong>. Для этого создайте файл <strong>.gitignore</strong> и поместите в него следующее:</p>
+<p>Так же полезно добавить в <strong>.gitignore</strong> все скомпилированые Python-ом файлы и каталоги <code>__pychache__</code>. Для этого создайте файл <code>.gitignore</code> и поместите в него следующее:</p>
 
 <pre><code>*.pyc
 __pycache__
@@ -151,7 +153,7 @@ return [td.text for tr in table.find_all('tr') for td in tr.find_all('td')]
 
 <p>```</p>
 
-<p>Мы используем библиотеки <strong>requests</strong> и <strong>BeautifulSoup</strong>, поэтому нам нужно установить их через <em>pip</em>.  Теперь можно внести в список зависимостей проекта новые библиотеки: <strong>pip freeze requirements.txt</strong> и закомитить изменения. Таким образом мы всегда сможем создать виртуальное окружение и установить именно те библиотеки (и версии) которые нужны для запуска приложения.</p>
+<p>Мы используем библиотеки <strong>requests</strong> и <strong>BeautifulSoup</strong>, поэтому нам нужно установить их через <em>pip</em>.  Теперь можно внести в список зависимостей проекта новые библиотеки: <code>pip freeze requirements.txt</code> и закомитить изменения. Таким образом мы всегда сможем создать виртуальное окружение и установить именно те библиотеки (и версии) которые нужны для запуска приложения.</p>
 
 <p>Наконец напишем реализацию для функции <strong>get_top_grossing_movie_links</strong>:</p>
 
@@ -226,7 +228,7 @@ with open('output.csv', 'w') as output:
 
 <h2>Заключение</h2>
 
-<p>Надеюсь теперь у вас есть план действий для начала работы над python-проектом с нуля. Не смотря на то, что у каждого есть свой метод начала работы над проектом, скорее всего мой метод подойдет и вам. Как всегда, если у вас есть какие-либо вопросы, не стесняйтесь задавать их в комментариях или напишите мне на <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#x6a;&#x65;&#102;&#x66;&#64;&#106;&#101;&#102;&#x66;&#x6b;&#110;&#x75;&#x70;&#112;&#x2e;&#x63;&#111;&#109;&#46;">&#x6a;&#101;&#x66;&#102;&#x40;&#106;&#101;&#x66;&#x66;&#107;&#x6e;&#x75;&#x70;&#112;&#46;&#x63;&#111;&#109;&#x2e;</a></p>
+<p>Надеюсь теперь у вас есть план действий для начала работы над python-проектом с нуля. Не смотря на то, что у каждого есть свой метод начала работы над проектом, скорее всего мой метод подойдет и вам. Как всегда, если у вас есть какие-либо вопросы, не стесняйтесь задавать их в комментариях или напишите мне на <a href="&#109;&#97;&#105;&#x6c;&#x74;&#x6f;&#x3a;&#106;&#x65;&#x66;&#102;&#x40;&#106;&#x65;&#102;&#102;&#x6b;&#x6e;&#x75;&#112;&#x70;&#46;&#x63;&#x6f;&#x6d;&#x2e;">&#x6a;&#x65;&#x66;&#102;&#x40;&#106;&#101;&#x66;&#x66;&#107;&#110;&#117;&#112;&#112;&#x2e;&#99;&#x6f;&#109;&#x2e;</a></p>
 ]]></content>
   </entry>
   
