@@ -1,24 +1,98 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Toly blog]]></title>
-  <link href="http://toly.github.io/atom.xml" rel="self"/>
-  <link href="http://toly.github.io/"/>
-  <updated>2014-02-14T13:10:45+04:00</updated>
-  <id>http://toly.github.io/</id>
-  <author>
-    <name><![CDATA[Toly]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Многопоточность в одну строку - Toly blog</title>
+  <meta name="author" content="Toly">
 
   
-  <entry>
-    <title type="html"><![CDATA[Многопоточность в одну строку]]></title>
-    <link href="http://toly.github.io/blog/2014/02/13/parallelism-in-one-line/"/>
-    <updated>2014-02-13T13:53:13+04:00</updated>
-    <id>http://toly.github.io/blog/2014/02/13/parallelism-in-one-line</id>
-    <content type="html"><![CDATA[<blockquote><p>Перевод статьи Криса Кила <a href="https://medium.com/p/40e9b2b36148">Parallelism in one line</a></p></blockquote>
+  <meta name="description" content="Перевод статьи Криса Кила Parallelism in one line Python имеет ужасную репутацию, когда речь идет о возможности параллельных вычислений. Не обращая &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://toly.github.io/blog/2014/02/13/parallelism-in-one-line">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Toly blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Toly blog</a></h1>
+  
+    <h2>Python and Django notes</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:toly.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Многопоточность в одну строку</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-13T13:53:13+04:00" pubdate data-updated="true">Feb 13<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><blockquote><p>Перевод статьи Криса Кила <a href="https://medium.com/p/40e9b2b36148">Parallelism in one line</a></p></blockquote>
 
 <p>Python имеет ужасную репутацию, когда речь идет о возможности параллельных вычислений. Не обращая внимания на типичные рассуждения о его потоках и GIL (который обычно нормально работает), по-моему реальная проблема многопоточности Python не техническая, а педагогическая. Распространенные руководства о библиотеках <strong>threading</strong> и <strong>multiprocessing</strong> в целом неплохие, но тяжеловаты для понимания. Они начинаются с глубоких вещей, и заканчиваются до просто применяемых практик.</p>
 
@@ -609,305 +683,176 @@
 <p>Это серъезный прирост для изменения всего лишь нескольких строчек кода. Продакшен версия еще быстрее, так как в ней разделены процессорные задачи и задачи ввода-вывода на отдельные процессы и потоки &ndash; обычный рецепт для кода с учетом блокировок.</p>
 
 <p>Так что, так. Распараллеливание в одну (почти) строку.</p>
-]]></content>
-  </entry>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
   
-  <entry>
-    <title type="html"><![CDATA[Начиная Python-проект: The Right Way]]></title>
-    <link href="http://toly.github.io/blog/2014/02/09/starting-a-python-project-the-right-way/"/>
-    <updated>2014-02-09T21:33:26+04:00</updated>
-    <id>http://toly.github.io/blog/2014/02/09/starting-a-python-project-the-right-way</id>
-    <content type="html"><![CDATA[<blockquote><p>Достаточно вольный (настолько вольный, что отсутствуют два абзаца и изменен код) перевод статьи Джефа Кнаппа</p>
 
-<p><a href="http://www.jeffknupp.com/blog/2014/02/04/starting-a-python-project-the-right-way/">Starting A Python Project The Right Way</a></p></blockquote>
+<span class="byline author vcard">Posted by <span class="fn">Toly</span></span>
 
-<p>Если вы подобны большинству начинающих python-программистов, вы вероятно в состоянии представить себе работу приложения целиком, но когда приходит время начать писать код и перед вами пустое окно редактора, вы чувствуете себя потерянным и подавленным. В этой статье я опишу метод, который использую когда начинаю писать программу с нуля. К концу статьи у вас будет хороший план для начала разработки любого приложения.</p>
-
-<!-- more -->
+      
 
 
-<h2>Установка</h2>
-
-<p>До того как написать хоть строчку кода, первое что я делаю &ndash; создаю <em>виртуальное окружение</em>. Что такое виртуальное окружение? Это установка python отдельно от остальной части системы (и дефолтного pythona&#8217;а). Какая от этого польза? Представьте себе, что у вас есть два проекта, над которыми вы работаете. Если оба испольузют какую-либо библиотеку (например, <strong>requests</strong>), и в одном из проектов используется старая версия (которую нельзя корректно обновить, т.к. другие библиотеки используют старую версию <strong>requests</strong>), как вы сможете использовать новую версию <strong>requests</strong> в другом проекте? С помощью виртуального окружения.</p>
-
-<p>Для начала установите <strong>virtualenvwrapper</strong> (обертка над фантастическим пакетом <strong>virtualenv</strong>). Добавьте в ваш <strong>.bashrc</strong> строчку <code>/usr/local/bin/virtualenvwrapper.sh</code> и перезагрузите свой профиль с помощью <strong>source</strong>:</p>
-
-<pre><code>source ~/.bashrc
-</code></pre>
-
-<p>Теперь у вас должна появиться команда <strong>mkvirtualenv</strong>, доступная через автодополнение с помощью <em>tab</em>. Если вы используете Python старше версии 3.3, виртуальное окружение поддерживает этот язык и установка этого пакета не требуется. <code>mkvirtualenv &lt;my_project&gt;</code> создаст новое виртуальное окружение под названием my_project с уже установленными <strong>pip</strong> и <strong>setuptools</strong>. Для Python 3 требуемые команды выглядят так:</p>
-
-<pre><code>python -m venv &lt;my_project&gt;
-source &lt;my_project&gt;/bin/activate
-</code></pre>
-
-<p>Теперь когда виртуальное окружение создано, пришло время инициализировать средство управления исходниками. Предполагая что это <strong>git</strong> (ну, потому что он&hellip;), введем</p>
-
-<pre><code>git init .
-</code></pre>
-
-<p>Так же полезно добавить в <strong>.gitignore</strong> все скомпилированые Python-ом файлы и каталоги <code>__pychache__</code>. Для этого создайте файл <code>.gitignore</code> и поместите в него следующее:</p>
-
-<pre><code>*.pyc
-__pycache__
-</code></pre>
-
-<p>Теперь подходящее время добавить в проект <strong>README</strong> файл. Даже если вы единственный, кто будет видеть код, это хорошее упражнение для организации ваших мыслей. <strong>README</strong> файл должен описывать что делает проект, его зависимости и как его использовать. Я пишу <strong>README</strong> файлы с использованием разметки <em>Markdown</em>, во-первых потому что GitHub автоматически оформляет любой файл названный <strong>README.md</strong>, а во-вторых потому что я пишу все (!) документы в разметке <em>Markdown</em>.</p>
-
-<p>И наконец, сделайте первый коммит содержащий два файла (<strong>.gitignore</strong>, <strong>README.md</strong>), которые вы только что создали. Для этого введите:</p>
-
-<pre><code>git add .gitignore README.md
-git commit -m "initial commit"
-</code></pre>
-
-<h2>Каркасы!</h2>
-
-<p>Почти каждое приложение я начинаю одинаково: создаю каркас приложения, состоящий из функций и классов с заполненой документацией, но без реализации. Я считаю, что необходимо сперва вынужденно писать документацию для функции, иначе если я не способен кратко описать что-либо, то у меня нет достаточно мыслей о проблеме.</p>
-
-<p>В качестве примера приложения я использую скрипт, недавно написанный обучаемым во время одного из наших занятий. Цель скрипта &ndash; создать csv-файл, содержащий самые кассовые фильмы прошлого года (по версии IMDB) и ключевые слова связанные с этими фильмами на IMDB. Это был довольно простой проект, для того что бы завершить его за одно занятие, но достаточный по сложности, что бы требовать размышлений.</p>
-
-<p>Сперва создайте основной файл, который будет точкой входа в приложение. Я назвал его <strong>imdb.py</strong>. Потом скопируйте следующий код в редактор:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="s">&quot;&quot;</span><span class="n">Script</span> <span class="n">to</span> <span class="n">gather</span> <span class="n">IMDB</span> <span class="n">keywords</span> <span class="kn">from</span> <span class="mi">2013</span><span class="s">&#39;s top grossing movies.&quot;&quot;&quot;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">sys</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Main entry point for the script.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="k">pass</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
-</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Звучит неправдоподобно, но это вполне функциональная программа. Вы можете запустить ее и получить правильный код выхода (т.е. <strong>0</strong>, хотя справедливо отметить, что пустой файл будет так же возвращать правильный код). Затем я делаю заглушки для функций и/или классов, которые по моему мнению будут нужны:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="sd">&quot;&quot;&quot;Script to gather IMDB keywords from 2013&#39;s top grossing movies.&quot;&quot;&quot;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">sys</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">URL</span> <span class="o">=</span> <span class="s">&quot;http://www.imdb.com/search/title?at=0&amp;sort=boxoffice_gross_us,desc&amp;start=1&amp;year=2013,2013&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Main entry point for the script.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="k">pass</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">get_top_grossing_movie_links</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB</span>
-</span><span class='line'><span class="sd">    page.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="k">pass</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">get_keywords_for_movie</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Return a list of keywords associated with *movie*.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="k">pass</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
-</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Выглядит сносно. Отмечу, что обе функции включают параметры (например, <strong>get_keywords_for_movie</strong> принимает параметр <strong>url</strong>). Это может показаться странным для заглушек. Зачем здесь параметры? Аргументация такая же, как и для предварительного документирования заглушек: если я не знаю какие агрументы должна принимать функция, значит я недостаточно об этом думал.</p>
-
-<p>В этом месте я верятно закомичусь, т.к. проделал определенную часть работы, которую не хотел бы потерять. После этого перейдем к реализации. Я всегда начинаю с реализации функции <strong>main</strong>, т.к. &ldquo;центр&rdquo; использующий все остальные функции. Вот реализация функции <strong>main</strong> в <strong>imdb.py</strong>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">csv</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Main entry point for the script.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="n">movies</span> <span class="o">=</span> <span class="n">get_top_grossing_movie_links</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;output.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
-</span><span class='line'>        <span class="n">csvwriter</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">for</span> <span class="n">title</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">movies</span><span class="p">:</span>
-</span><span class='line'>            <span class="n">keywords</span> <span class="o">=</span> <span class="n">get_keywords_for_movie</span><span class="p">(</span>
-</span><span class='line'>                <span class="s">&#39;http://www.imdb.com{}keywords/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
-</span><span class='line'>            <span class="n">csvwriter</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">title</span><span class="p">,</span> <span class="n">keywords</span><span class="p">])</span>
-</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Несмотря на то что <strong>get_top_grossing_movie_links</strong> и <strong>get_keywords_for_movie</strong> не реализованы, я знаю достаточно о том, как их использовать. Функция <strong>main</strong> делает именно то, что мы обсуждали вначале: получает самые кассовые фильмы года и пишет их в csv-файл вместе с их ключевыми словами.</p>
-
-<p>Теперь все что осталось, это реализовать недостающие функции. Любопытно, что даже если мы знаем, что <strong>get_keywords_for_movie</strong> будет вызван после <strong>get_top_grossing_movie_links</strong>, мы можем реализовать их в том порядке, который больше нравится. Это не тот случай, когда пишешь скрипт с нуля и добавляешь функционал в том порядке, в которм идет разработка. Вы были бы вынуждены полностью написать первую функцию, прежде чем перети ко второй. Тот факт, что мы можем реализовать (и проверить!) функции в любом порядкепоказывает, что они слабо связаны.</p>
-
-<p>Давайте первым реализуем функцию <strong>get_keywords_for_movie</strong>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">get_keywords_for_movie</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Return a list of keywords associated with *movie*.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="n">keywords</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">tables</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;table&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s">&#39;dataTable&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">table</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">[</span><span class="n">td</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;tr&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">td</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;td&#39;</span><span class="p">)]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Мы используем библиотеки <strong>requests</strong> и <strong>BeautifulSoup</strong>, поэтому нам нужно установить их через <em>pip</em>.  Теперь можно внести в список зависимостей проекта новые библиотеки: <code>pip freeze requirements.txt</code> и закомитить изменения. Таким образом мы всегда сможем создать виртуальное окружение и установить именно те библиотеки (и версии) которые нужны для запуска приложения.</p>
-
-<p>Наконец напишем реализацию для функции <strong>get_top_grossing_movie_links</strong>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">get_top_grossing_movie_links</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB</span>
-</span><span class='line'><span class="sd">    page.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">movies_list</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span class='line'>    <span class="k">for</span> <span class="n">each_url</span> <span class="ow">in</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;.title a[href*=&quot;title&quot;]&#39;</span><span class="p">):</span>
-</span><span class='line'>        <span class="n">movie_title</span> <span class="o">=</span> <span class="n">each_url</span><span class="o">.</span><span class="n">text</span>
-</span><span class='line'>        <span class="n">movies_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">movie_title</span><span class="p">,</span> <span class="n">each_url</span><span class="p">[</span><span class="s">&#39;href&#39;</span><span class="p">]))</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">movies_list</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Вот финальное содержание <strong>imdb.py</strong>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="s">&quot;&quot;</span><span class="n">Script</span> <span class="n">to</span> <span class="n">gather</span> <span class="n">IMDB</span> <span class="n">keywords</span> <span class="kn">from</span> <span class="mi">2013</span><span class="s">&#39;s top grossing movies.&quot;&quot;&quot;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">sys</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">requests</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">csv</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">URL</span> <span class="o">=</span> <span class="s">&quot;http://www.imdb.com/search/title?at=0&amp;sort=boxoffice_gross_us,desc&amp;start=1&amp;year=2013,2013&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">get_top_grossing_movie_links</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB</span>
-</span><span class='line'><span class="sd">    page.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">movies_list</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span class='line'>    <span class="k">for</span> <span class="n">each_url</span> <span class="ow">in</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s">&#39;.title a[href*=&quot;title&quot;]&#39;</span><span class="p">):</span>
-</span><span class='line'>        <span class="n">movie_title</span> <span class="o">=</span> <span class="n">each_url</span><span class="o">.</span><span class="n">text</span>
-</span><span class='line'>        <span class="n">movies_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">movie_title</span><span class="p">,</span> <span class="n">each_url</span><span class="p">[</span><span class="s">&#39;href&#39;</span><span class="p">]))</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">movies_list</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">get_keywords_for_movie</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Return a list of keywords associated with *movie*.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="n">keywords</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">tables</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;table&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s">&#39;dataTable&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">table</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">[</span><span class="n">td</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;tr&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">td</span> <span class="ow">in</span> <span class="n">tr</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s">&#39;td&#39;</span><span class="p">)]</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-</span><span class='line'>    <span class="sd">&quot;&quot;&quot;Main entry point for the script.&quot;&quot;&quot;</span>
-</span><span class='line'>    <span class="n">movies</span> <span class="o">=</span> <span class="n">get_top_grossing_movie_links</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;output.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
-</span><span class='line'>        <span class="n">csvwriter</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">for</span> <span class="n">title</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">movies</span><span class="p">:</span>
-</span><span class='line'>            <span class="n">keywords</span> <span class="o">=</span> <span class="n">get_keywords_for_movie</span><span class="p">(</span><span class="s">&#39;http://www.imdb.com{}keywords/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
-</span><span class='line'>            <span class="n">csvwriter</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">title</span><span class="p">,</span> <span class="n">keywords</span><span class="p">])</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Приложение, которое начиналось с пустого окна редактора готово. После запуска скрипт сгенерирует <strong>output.csv</strong>, содержащий именно то, что нужно. Для скрипта такого размера я не стал бы писать тесты, т.к. результат работы программы и есть тест. Тем не менее, написание тестов в данном случае возможно (так как наши функции слабо связаны), что бы проверить каждую функцию отдельно (изолированно).</p>
-
-<h2>Заключение</h2>
-
-<p>Надеюсь теперь у вас есть план действий для начала работы над python-проектом с нуля. Не смотря на то, что у каждого есть свой метод начала работы над проектом, скорее всего мой метод подойдет и вам. Как всегда, если у вас есть какие-либо вопросы, не стесняйтесь задавать их в комментариях или напишите мне на <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#x6a;&#101;&#x66;&#x66;&#64;&#x6a;&#101;&#102;&#x66;&#x6b;&#x6e;&#x75;&#x70;&#112;&#46;&#99;&#111;&#109;&#x2e;">&#x6a;&#101;&#102;&#102;&#x40;&#106;&#x65;&#102;&#x66;&#107;&#x6e;&#117;&#x70;&#x70;&#x2e;&#x63;&#x6f;&#x6d;&#x2e;</a></p>
-]]></content>
-  </entry>
   
-</feed>
+
+
+<time datetime="2014-02-13T13:53:13+04:00" pubdate data-updated="true">Feb 13<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/threading/'>threading</a>, <a class='category' href='/blog/categories/translation/'>translation</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://toly.github.io/blog/2014/02/13/parallelism-in-one-line/" data-via="" data-counturl="http://toly.github.io/blog/2014/02/13/parallelism-in-one-line/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/02/09/starting-a-python-project-the-right-way/" title="Previous Post: Начиная python-проект: The Right Way">&laquo; Начиная python-проект: The Right Way</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/02/13/parallelism-in-one-line/">Многопоточность в одну строку</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/09/starting-a-python-project-the-right-way/">Начиная Python-проект: The Right Way</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/toly">@toly</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'toly',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Toly -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'tolyblog';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://toly.github.io/blog/2014/02/13/parallelism-in-one-line/';
+        var disqus_url = 'http://toly.github.io/blog/2014/02/13/parallelism-in-one-line/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
