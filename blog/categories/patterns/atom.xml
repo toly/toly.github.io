@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Patterns | Toly blog]]></title>
+  <link href="http://toly.github.io/blog/categories/patterns/atom.xml" rel="self"/>
+  <link href="http://toly.github.io/"/>
+  <updated>2014-03-08T18:31:21+04:00</updated>
+  <id>http://toly.github.io/</id>
+  <author>
+    <name><![CDATA[Toly]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Передовые паттерны проектирования в Python]]></title>
+    <link href="http://toly.github.io/blog/2014/03/05/advanced-design-patterns-in-python/"/>
+    <updated>2014-03-05T19:56:33+04:00</updated>
+    <id>http://toly.github.io/blog/2014/03/05/advanced-design-patterns-in-python</id>
+    <content type="html"><![CDATA[<blockquote><p>Перевод статьи <a href="http://pypix.com/python/advanced-data-structures/">Advanced Design Patterns in Python</a></p></blockquote>
+
+<p>Цель данной статьи &ndash; показать передовые структуры в Python и лучший способ их использовать. В зависимости от того, что вам нужно от структуры данных, будь то быстрый поиск, постоянство, индексация и т.д., вы можете выбрать оптимальную структуру данных для работы, и большую часть времени вы будете смешивать их вместе что бы получить логичную и простую для понимания модель данных. Структуры данных в Python очень интуитивны с точки зрения синтаксиса и они предлагают большой выбор операций. Это руководство пытается собрать наиболее распространенную и полезную информацию о каждой структуре данных, а так же советы о том когда лучше всего использовать ту или иную структуру.</p>
+
+<!-- more -->
+
+
+<h2>Генераторы</h2>
+
+<p>Если вы очень долго используете Python, скорее всего вы слышали о генераторах списков. Они подходят для цикла, блока <strong>if</strong> и способны уместить  все это в одну строку. Другими словами, вы можете отобразить (<strong>map</strong>) и отфильтровать (<strong>filter</strong>) список одним выражением.</p>
+
+<p>Генератор списка состоит из следующих частей:</p>
+
+<ul>
+<li>входная последовательность</li>
+<li>переменная, представляющая элементы входной последовательности</li>
+<li>условие (опционально)</li>
+<li>выходное выражение, полученное из элементов входного списка, которые удовлетворяют условию</li>
+</ul>
+
+
+<p>Допустим, нам нужно получить список всех квадратов целых чисел, которые больше нуля:</p>
+
+<p>``` python
+num = [1, 4, -5, 10, -7, 2, 3, -1]
+filtered_and_squared = []</p>
+
+<p>for number in num:</p>
+
+<pre><code>if number &gt; 0:
+    filtered_and_squared.append(number ** 2)
+</code></pre>
+
+<p>print filtered_and_squared</p>
+
+<h1>[1, 16, 100, 4, 9]</h1>
+
+<p>```</p>
+
+<p>Согласитесь, довольно просто? Но это занимает 4-е строчки, 2-у уровня вложенности, и вдобавок мы делаем довольно тривиальную вещь. Вы можете уменьшить количество кода с помощью функций <strong>filter</strong>, <strong>lambda</strong> и <strong>map</strong>:</p>
+
+<p>``` python
+num = [1, 4, -5, 10, -7, 2, 3, -1]
+filtered_and_squared = map(lambda x: x ** 2, filter(lambda x: x > 0, num))
+print filtered_and_squared</p>
+
+<h1>[1, 16, 100, 4, 9]</h1>
+
+<p>```</p>
+
+<p>Теперь код расширяется горизонтально! Что можно сделать, что бы упростить код? Применить генераторы списков.</p>
+
+<p>``` python
+num = [1, 4, -5, 10, -7, 2, 3, -1]
+filtered_and_squared = [ x**2 for x in num if x > 0]
+print filtered_and_squared</p>
+
+<h1>[1, 16, 100, 4, 9]</h1>
+
+<p>```</p>
+
+<p>Генератор списков заключен в квадратные скобки, таким образом, видно что список производится сразу. В этом генераторе списка только один вызов функции и нет вызовов загадочной <strong>lambda</strong> &ndash; используется обычный итератор, выходное выражение и опциональное условие.</p>
+
+<p>Но, есть и минусы: результирующий списов вычисляется и сохраняется в память сразу. Это не проблема для небольших списков, наподобие приведенных выше, или даже списков на порядок больших. Но иногда это может быть неэффективно.</p>
+
+<p><strong>Генераторы</strong> выручат и сейчас. Выражение-генератор не загружает весь список в память сразу, а вместо этого создает объект генератора, поэтому за один раз можно получить только один элемент.</p>
+
+<p>Выражения-генераторы имеют синтаксис, похожий на синтаксис генераторов списков, только вместо квадратных скобок &ndash; круглые:</p>
+
+<p>``` python
+num = [1, 4, -5, 10, -7, 2, 3, -1]
+filtered_and_squared = ( x**2 for x in num if x > 0 )
+print filtered_and_squared</p>
+
+<h1><generator object <genexpr> at 0x00583E18></h1>
+
+<p>for item in filtered_and_squared:</p>
+
+<pre><code>print item
+</code></pre>
+
+<h1>1, 16, 100 4,9</h1>
+
+<p>```</p>
+
+<p>Это даже немного эффективнее использования генераторов списков. Заменим пример более эффективным кодом:</p>
+
+<p>``` python
+num = [1, 4, -5, 10, -7, 2, 3, -1]</p>
+
+<p>def square_generator(optional_parameter):</p>
+
+<pre><code>return (x ** 2 for x in num if x &gt; optional_parameter)
+</code></pre>
+
+<p>print square_generator(0)</p>
+
+<h1><generator object <genexpr> at 0x004E6418></h1>
+
+<h1>Option I</h1>
+
+<p>for k in square_generator(0):</p>
+
+<pre><code>print k
+</code></pre>
+
+<h1>1, 16, 100, 4, 9</h1>
+
+<h1>Option II</h1>
+
+<p>g = list(square_generator(0))
+print g</p>
+
+<h1>[1, 16, 100, 4, 9]</h1>
+
+<p>```</p>
+
+<p>Использование выражения-генератора вероятно более хорошая практика, но вы не увидите разницы в эффективности, если список не очень велик.</p>
+
+<p>Так же, вы можете использовать функцию <strong>zip</strong> для работы с двумя и более элементами за раз:</p>
+
+<p>``` python
+alist = [&lsquo;a1&rsquo;, &lsquo;a2&rsquo;, &lsquo;a3&rsquo;]
+blist = [&lsquo;1&rsquo;, &lsquo;2&rsquo;, &lsquo;3&rsquo;]</p>
+
+<p>for a, b in zip(alist, blist):</p>
+
+<pre><code>print a, b
+</code></pre>
+
+<h1>a1 1</h1>
+
+<h1>a2 2</h1>
+
+<h1>a3 3</h1>
+
+<p>```</p>
+
+<p>Пример двухуровневого генератора с использованием <strong>os.walk()</strong>:</p>
+
+<p>``` python
+import os
+def tree(top):</p>
+
+<pre><code>for path, names, fnames in os.walk(top):
+    for fname in fnames:
+        yield os.path.join(path, fname)
+</code></pre>
+
+<p>for name in tree(&lsquo;C:\Users\XXX\Downloads\Test&rsquo;):</p>
+
+<pre><code>print name
+</code></pre>
+
+<p>```</p>
+
+<h2>Декораторы</h2>
+
+<p>Декораторы предоставляют очень удобный метод для добавления функциональности для существующих функций и классов. Похоже на АОП (аспектно-ориентированное программирование) в Java, не так ли? Кроме того, что это проще, а значит мощнее. Например, предположим вам нужно что-либо сделать на точках входа и выхода их функции (защиту, отслеживание, блокирование и др. &ndash; стандартные элементы АОП).</p>
+
+<p>Декоратор &ndash; это функция, которая обертывает другую функцию: вызывается основная функция и ее результат передается в декоратор. Затем декоратор возвращает функцию, которая заменяет оборачиваемую функцию так как нужно.</p>
+
+<p>``` python
+def timethis(func):</p>
+
+<pre><code>'''
+Decorator that reports the execution time.
+'''
+pass
+</code></pre>
+
+<p>@timethis
+def countdown(n):</p>
+
+<pre><code>while n &gt; 0:
+    n -= 1
+</code></pre>
+
+<p>```</p>
+
+<p>Символ <strong>@</strong> указывает на применение декоратора.</p>
+
+<p>Теперь давайте реализуем код декоратора. Здесь мы фактически используем код декорируемой функции:</p>
+
+<p>``` python
+import time
+from functools import wraps</p>
+
+<p>def timethis(func):</p>
+
+<pre><code>'''
+Decorator that reports the execution time.
+'''
+@wraps(func)
+def wrapper(*args, **kwargs):
+    start = time.time()
+    result = func(*args, **kwargs)
+    end = time.time()
+    print(func.__name__, end-start)
+    return result
+return wrapper
+</code></pre>
+
+<p>@timethis
+def countdown(n):</p>
+
+<pre><code>while n &gt; 0:
+    n -= 1
+</code></pre>
+
+<p>countdown(100000)</p>
+
+<h1>(&lsquo;countdown&rsquo;, 0.006999969482421875)</h1>
+
+<p>```</p>
+
+<p>Когда вы пишете код вроде этого:</p>
+
+<p><code>python
+@timethis
+def countdown(n):
+</code></p>
+
+<p>это то же самое, как если бы выполнялось следующее</p>
+
+<p>``` python
+def countdown(n):</p>
+
+<pre><code>...
+</code></pre>
+
+<p>countdown = timethis(countdown)
+```</p>
+
+<p>Код внитри декоратора обычно включает в себя создание новой функции, которая принимает любые аргументы (с использованием *args и **kwargs) как показано в случае с функцией wrapper в этом примере. Внутри этой функции вы принимает входные аргументы оригинальной функции и возвращаете результат. Однако, вы так же можете разместить там дополнительный код (например, замер времени и т.д.). Таким образов созданная функция-обертка возвращает результат, как если бы это была оригинальная функция.</p>
+
+<p>Давайте рассмотрим другой пример:</p>
+
+<p>``` python
+@decorator
+def function():</p>
+
+<pre><code>print("inside function")
+</code></pre>
+
+<p>```</p>
+
+<p>Когда компилятор проходит этот код, <code>function()</code> компилируется и получившийся объект-функция передается в код декоратора <code>decorator</code>, который создает из нее другой объект-функцию, что бы заменить первоначальную функцию <code>function()</code>.</p>
+
+<p>Как выглядит код декоратора? В основном в примерах показывают его как функцию, но я обнаружил, что легче разобраться в декораторах с помощью классов. Кроме того, классы дают больше возможностей.</p>
+
+<p>Единственное ограничение на результат возвращаемый декоратором, это то, что он может быть вызван как функция &ndash; т.е. что его можно вызвать. Таким образом, любые классы, которые мы используем в качестве декораторов должны быть с методом <code>__call__</code>.</p>
+
+<p>Что должен делать декоратор после вызова? Вообще-то, все что угодно, но обычно ожидается, что будет использован код оригинальной функции. Однако, это не обязательно:</p>
+
+<p>``` python
+class decorator(object):</p>
+
+<pre><code>def __init__(self, f):
+    print("inside decorator.__init__()")
+    f() # Prove that function definition has completed
+
+def __call__(self):
+    print("inside decorator.__call__()")
+</code></pre>
+
+<p>@decorator
+def function():</p>
+
+<pre><code>print("inside function()")
+</code></pre>
+
+<p>print(&ldquo;Finished decorating function()&rdquo;)</p>
+
+<p>function()</p>
+
+<h1>inside decorator.<strong>init</strong>()</h1>
+
+<h1>inside function()</h1>
+
+<h1>Finished decorating function()</h1>
+
+<h1>inside decorator.<strong>call</strong>()</h1>
+
+<p>```</p>
+
+<p>Практический пример:</p>
+
+<p>``` python
+def decorator(func):</p>
+
+<pre><code>def modify(*args, **kwargs):
+    variable = kwargs.pop('variable', None)
+    print variable
+    x,y=func(*args, **kwargs)
+    return x,y
+return modify
+</code></pre>
+
+<p>@decorator
+def func(a,b):</p>
+
+<pre><code>print a**2,b**2
+return a**2,b**2
+</code></pre>
+
+<p>func(a=4, b=5, variable=&ldquo;hi&rdquo;)
+func(a=4, b=5)</p>
+
+<h1>hi</h1>
+
+<h1>16 25</h1>
+
+<h1>None</h1>
+
+<h1>16 25</h1>
+
+<p>```</p>
+
+<h2>ContextLib (менеджеры контекста)</h2>
+
+<p>Модуль <strong>contextlib</strong> содержит средства для работы с менеджерами контекста и оператором <strong>with</strong>. Обычно, что бы написать менеджер контекста, вы определяете класс с методами <code>__enter__()</code> и <code>__exit__()</code>. Например:</p>
+
+<p>``` python
+import time
+class demo:</p>
+
+<pre><code>def __init__(self, label):
+    self.label = label
+
+def __enter__(self):
+    self.start = time.time()
+
+def __exit__(self, exc_ty, exc_val, exc_tb):
+    end = time.time()
+    print('{}: {}'.format(self.label, end - self.start))
+</code></pre>
+
+<p>```</p>
+
+<p>Полный пример:</p>
+
+<p>``` python
+import time</p>
+
+<p>class demo:</p>
+
+<pre><code>def __init__(self, label):
+    self.label = label
+
+def __enter__(self):
+    self.start = time.time()
+
+def __exit__(self, exc_ty, exc_val, exc_tb):
+    end = time.time()
+    print('{}: {}'.format(self.label, end - self.start))
+</code></pre>
+
+<p>with demo(&lsquo;counting&rsquo;):</p>
+
+<pre><code>n = 10000000
+while n &gt; 0:
+    n -= 1
+</code></pre>
+
+<h1>counting: 1.36000013351</h1>
+
+<p>```</p>
+
+<p>Менеджер контекста &ldquo;включается&rdquo; оператором <strong>with</strong>. Возвращаемый объект будет использоваться в контексте. Метод <code>__enter__()</code> выполняется, когда поток управления входит в блок кода внутри оператора <strong>with</strong>. Когда поток управления покидает блок кода внутри <strong>with</strong>, вызывается метод <code>__exit__()</code>, что бы очистить используемые ресурсы.</p>
+
+<p>Заново напишем исходный пример, используя декоратор <code>@contextmanager</code> из модуля <strong>contextlib</strong>:</p>
+
+<p>``` python
+from contextlib import contextmanager
+import time</p>
+
+<p>@contextmanager
+def demo(label):</p>
+
+<pre><code>start = time.time()
+try:
+    yield
+finally:
+    end = time.time()
+    print('{}: {}'.format(label, end - start))
+</code></pre>
+
+<p>with demo(&lsquo;counting&rsquo;):</p>
+
+<pre><code>n = 10000000
+while n &gt; 0:
+    n -= 1
+</code></pre>
+
+<h1>counting: 1.32399988174</h1>
+
+<p>```</p>
+
+<p>В функции <code>demo(label)</code> весь код до оператора <strong>yield</strong> исполняется как метод менеджера контекста <code>__enter__()</code>. Весь код после оператора <strong>yield</strong> выполняется как метод <code>__exit__()</code>. Если в блоке внутри <strong>with</strong> возникнет исключение, оно &ldquo;объявится&rdquo; на месте оператора <strong>yield</strong>.</p>
+
+<h2>Дескрипторы</h2>
+
+<p>Дескрипторы определяют как осуществляется доступ к аттрибутам объекта. Дескриптор является способом изменить то, что происходит, когда вы обращаетесть к аттрибуту объекта.</p>
+
+<p>Что бы создать дескриптор, нужно определить хотя бы один из следующих трех методов. Обратите внимание, что <code>instance</code> &ndash; это объект, к аттрибуту которого меняется доступ, а <code>owner</code> &ndash; класс, для которого дескриптор является аттрибутом.</p>
+
+<p><code>__get__(self, instance, owner)</code> &ndash; вызывается, когда запрашивается аттрибут (value = obj.attr); то что возвращается будет передано коду, запрашивающему аттрибут.</p>
+
+<p><code>__set__(self, instance, value)</code> &ndash; вызывается, когда аттрибуту устанавливается значение (obj.attr = value); ничего не возвращает.</p>
+
+<p><code>__delete__(self, instance)</code> &ndash; вызывается, когда аттрибут объекта удалаяется (del obj.attr)</p>
+
+<p>Ленивые аттрибуты:</p>
+
+<p>``` python
+import weakref</p>
+
+<p>class lazyattribute(object):</p>
+
+<pre><code>def __init__(self, f):
+    self.data = weakref.WeakKeyDictionary()
+    self.f = f
+def __get__(self, obj, cls):
+    if obj not in self.data:
+        self.data[obj] = self.f(obj)
+    return self.data[obj]
+</code></pre>
+
+<p>class Foo(object):</p>
+
+<pre><code>@lazyattribute
+def bar(self):
+    print "Being lazy"
+    return 42
+</code></pre>
+
+<p>f = Foo()</p>
+
+<p>print f.bar</p>
+
+<h1>Being lazy</h1>
+
+<h1>42</h1>
+
+<p>print f.bar
+```</p>
+
+<blockquote><p>Дескрипторы &ndash; это обобщение концепции связанных методов, лежащих в основе реализации классических классов. В классических классах, когда аттрибут экзампляра не найден в словаре экземпляра, поиск продолжается в словаре класса, а затем рекурсивно в словарях базовых классов. Когда аттрибут найден в словаре класса (не в словаре экземпляра), интерпретатор проверяет, является ли найденный объект функцией. Если это так, то возвращается не найденный объект, а обернутый объект, который действует как каррированая функция. Когда вызывается обернутый объект, он вызывает оригинальную функцию с экземпляром в качестве одного из аргументов.</p></blockquote>
+
+<p>Как отмечено выше, дескрипторы закрепляются за классом, и когда осуществляется доступ к аттрибуту, автоматически вызываются специальные методы, причем используемый метод зависит от того, какой типа доступа осуществляется.</p>
+
+<h2>Метаклассы</h2>
+
+<p>Метаклассы предлагают мощный способ изменить поведение классов в Python.</p>
+
+<p>Метакласс определяется как &ldquo;класса класса&rdquo;. Любой класс, экземпляры которого являются сами классы, является метаклассом.</p>
+
+<p>``` python
+class demo(object):</p>
+
+<pre><code>pass
+</code></pre>
+
+<p>obj = demo()</p>
+
+<p>print &ldquo;Class of obj is {0}&rdquo;.format(obj.<strong>class</strong>)
+print &ldquo;Class of obj is {0}&rdquo;.format(demo.<strong>class</strong>)</p>
+
+<h1>Class of obj is <class '__main__.demo'></h1>
+
+<h1>Class of obj is <type 'type'></h1>
+
+<p>```</p>
+
+<p>Мы создали класс и объект этого класса. Запросив у экземпляра аттрибут <code>__class__</code>, мы увидели, что это <code>demo</code>. Дальше интереснее. Что такое класс <code>demo</code>? У него мы тоже можем посмотреть аттрибут <code>__class__</code> &ndash; это <code>type</code>.</p>
+
+<p>Итак, <code>type</code> &ndash; это класс классов в Python. Другими словами, в приведенном выше примере <code>obj</code> &ndash; это объект класса <code>demo</code>, сам класс <code>demo</code> является объектом <code>type</code>.</p>
+
+<p>Таким образом это делает <code>type</code> метаклассом &ndash; в действительности наиболее часто используемый метакласс в Python, т.к. это дефолтный метакласс для всех классов.</p>
+
+<p>Т.к. метакласс &ndash; это класс классов, он используется для создания классов (тех, что создают объекты). Но подождите, не мы ли создаем классы, когда определяем их стандартным способом? Все верно, но то что делает Python &ldquo;под капотом&rdquo; выглядит так:</p>
+
+<ul>
+<li>когда встречается определение класса, Python собирает аттрибуты (включая методы) в словарь</li>
+<li>когда определение класса закончилось, Python определяет для него метакласс; давайте назовем его <em>Meta</em></li>
+<li>после Python выполняет <code>Meta(name, bases, dct)</code>, где:
+
+<ul>
+<li><code>Meta</code> &ndash; это метакласс, поэтому этот вызов создает его экземпляр</li>
+<li><code>name</code> &ndash; это имя только что созданного класса</li>
+<li><code>bases</code> &ndash; это кортеж базовых классов</li>
+<li><code>dct</code> &ndash; словарь, связывающий названия аттрибутов с объектами; в нем перечислены все аттрибуты класса</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Как определить какой метакласс у класса? Если у класса (или один из его базовых классов) имеет аттрибут <code>__metaclass__</code>, то он считается метаклассом. В противном случае, метаклассом является <strong>type</strong>.</p>
+
+<h2>Паттерны</h2>
+
+<p><strong>&ldquo;Проще просить прощения, чем разрешения&rdquo;</strong></p>
+
+<p>Один из принципов Python &ndash; &ldquo;Проще просить прощения, чем разрешения&rdquo;. В отличие от подхода &ldquo;семь раз отмерь&rdquo;, этот принцип заключается в том, что сначала вы должны попытаться выполнить действие и если возникает ошибка &ndash; реагировать соответствующим образом. Продвинутая обработка исключений в Python поддерживает этот принцип и помогает разрабатывать надежные и устойчивые программы.</p>
+
+<p><strong>Синглтон (одиночка)</strong></p>
+
+<p>Синглтон &ndash; это объекты, предполагающие наличие только одного экземпляра. Python предоставляет несколько путей для реализации синглтонов.</p>
+
+<p><strong>Null object</strong></p>
+
+<p>Null object может быть использован вместо <strong>None</strong>, что бы избежать проверки на None.</p>
+
+<p><strong>Обозреватель</strong></p>
+
+<p>Паттерн обозреватель позволяет нескольким объектам иметь доступ к общим данным.</p>
+
+<p><strong>Конструктор</strong></p>
+
+<p>Параметры конструктора часто назначаются переменным экземпляра. Этот паттерн может заменить много строк ручного присваивания одной строчкой.</p>
+
+<h2>Заключение</h2>
+
+<p>Спасибо за чтение. Оставляйте свои ​​комментарии для дальнейшего обсуждения.</p>
+]]></content>
+  </entry>
+  
+</feed>
