@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Django | Toly blog]]></title>
+  <link href="http://toly.github.io/blog/categories/django/atom.xml" rel="self"/>
+  <link href="http://toly.github.io/"/>
+  <updated>2014-03-14T10:18:55+04:00</updated>
+  <id>http://toly.github.io/</id>
+  <author>
+    <name><![CDATA[Toly]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Руководство: Используем AngularJS с Django]]></title>
+    <link href="http://toly.github.io/blog/2014/03/08/tutorial-using-angularjs-with-django/"/>
+    <updated>2014-03-08T20:04:27+04:00</updated>
+    <id>http://toly.github.io/blog/2014/03/08/tutorial-using-angularjs-with-django</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Перевод статьи Глена Джексона <a href="http://glynjackson.org/weblog/entry/django-angular.html">Tutorial: Using AngularJS with Django</a></p>
+</blockquote>
+
+<p>~~Я надеялся написать быстрое руководство, что бы вы начали использовать Angular с Django~~ которое становилось руководством по поглощению Red Bull. Мои извинения, если оно получится небрежным к концу!</p>
+
+<p>Почитав посты на тему совместного использования Django и AngularJS, я чувтсвовал, что большинство из них были “велосипедными”. Хотя пример кода, который здесь приводится, сырой, он должен показать, как я использую их в проектах.</p>
+
+<!-- more -->
+
+<h2 id="section">Модели</h2>
+
+<p>Давайте начнем с типичной модели</p>
+
+<p><code>python /jobs/models.py
+class Job(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+</code></p>
+
+<p>Ок, пока ничего особенного. Все что вы сделали - это создали простую модель, которая содержит основные сведения о работе.</p>
+
+<h2 id="rest-api-tastypie">REST API (Tastypie)</h2>
+
+<p>AngularJS построен так, что бы использовать веб-сервисы, поэтому вам нужен способ плучать данные только что созданной модели <code>Job</code>.</p>
+
+<p>Для Django есть хороший выбор вариантов для создания RESTful API. <em>TastyPie</em> является отличным REST фреймворком для Django. Он невероятно мощный, но простой в установке и использовании. Однако, по-моему, таких же результатов можно добиться используя <em>Django REST framework</em>, или даже самостоятельно создав ответы на запросы API средствами Django. Выбор остается за вами. В этом уроке мы будем использовать <em>TastyPie</em>.</p>
+
+<p>Если вам не знаком <em>TastyPie</em>, ознакомьтесь с <a href="http://django-tastypie.readthedocs.org/en/latest/">документацией</a>. Я не буду вдаваться в подробности относительно установки. И предполагаю, он уже установлен, добавлен в <code>INSTALLED_APPS</code> и вы готовы продолжить.</p>
+
+<p>Сперва, вам нужно создать ресурс для модели <code>Job</code>. <em>TastyPie</em> использует понятие <em>ресурс</em>. Это описывается как посредник между конечным пользователем и объектом (в данном случае это будет модель <code>Job</code>).</p>
+
+<p>Начните с создания соответствующего ресурса для модели <code>Job</code>:</p>
+
+<p>``` python
+from tastypie.resources import ModelResource
+from tastypie.authentication import Authentication
+from tastypie.authorization import Authorization
+from .models import Job</p>
+
+<p>class JobResource(ModelResource):
+    “””
+    API Facet
+    “””
+    class Meta:
+        queryset = Job.objects.all()
+        resource_name = ‘job’
+        allowed_methods = [‘post’, ‘get’, ‘patch’, ‘delete’]
+        authentication = Authentication()
+        authorization = Authorization()
+        always_return_data = True
+```</p>
+
+<p>Насколько я помню, документация TastyPie предлагает назвать файл ресурсов как <em>api.py</em>. Так же предлагаю и я, но это не обязательно. Вы можете назвать этот файл как угодно, но это хорошо для сохранения постоянства.</p>
+
+<p>Есть несколько вещей, происходящих в <code>JobResource</code>, которые выходят за рамки данного руковосдства. Но, я просто хотел бы обратить внимание на то, как <code>JobResource</code> наследует <code>ModelResource</code>. Вы используете TastyPie с ORM Django (модель <code>Job</code>). Другими словами, многие из основных API ORM вым доступны.</p>
+
+<p>TastyPie так же может обрабатывать данные и без ORM. Расширяя и наследуя ресурс, вы так же можете получить все вкусности TastyPie для API которое захотите предложить, но без привязки к ORM. Это особенно полезно при совершении запросов, не поддерживающих ORM, NoSQL баз как описано в документации.</p>
+
+<p>Пока что вы создали модель данных (<code>Job</code>) и способ взаимодействия с нею (<code>JobResource</code>). Далее, вам нужен способ подключения к ресурсу через определеный URL, что в конечном итоге позволит AnagularJS его использовать. В Django вы можете сделать это используя URL роутер. Просто подключите экземпляр ресурса к определенному URL:</p>
+
+<p>``` python
+from tastypie.api import Api
+from .apps.your_app.api import JobResource</p>
+
+<p>v1_api = Api(api_name=’v1’)
+v1_api.register(JobResource())</p>
+
+<p>urlpatterns = patterns(‘’,</p>
+
+<pre><code> (r'^api/', include(v1_api.urls)), ) ```
+</code></pre>
+
+<p>Аттрибут <code>resource_name</code>, определенный в <code>JobResource</code> - это название ресурса в URL. По нему вы знаете где находится работающее API для ресурса <code>JobResource</code>. Проверьте что все это работает, запустив локальный сервер и посетив адрес <a href="http://127.0.0.1:8000/api/v1/job/?format=json">http://127.0.0.1:8000/api/v1/job/?format=json</a></p>
+
+<p>Теперь у вас есть рабочее API для вашей модели <code>Job</code>. Просто.</p>
+
+<h2 id="section-1">Формы</h2>
+
+<p>Перед тем как начать использовать AngularJS нам нужно сделать форму для <code>Job</code> с использованием Django. Позже, эта форма позволит вам редактировать данные модели <code>Job</code> в одностраничном приложении. Я знаю о чем вы думаете: “Почему в Django”?</p>
+
+<p>Одним из приципов в Django является прицип “на повторяйся” (DRY). Так что не имеет смысла создавать формы с помощью HTML для AngularJS, а затем делать то же для Django. К тому же Django хорошо справляется с соданием форм. Возможно у вас есть несколько форм, которые нужно преобразовать, так почему бы не сделать это автоматическим? Посмотрите в сторону <a href="http://django-angular.readthedocs.org/en/latest/">django-angular</a>. Это один классный пакет, познакомившись с которым вы будете рады (я знаю о чем говорю).</p>
+
+<blockquote>
+  <p><em>django-angular</em> - это набор утилит, которые помогают упростить интеграцию Django и AngularJS с помощью повторно используемых компонентов</p>
+</blockquote>
+
+<p>Опять же, здесь я не буду вдаваться в подробности относительно установки и настройки. Я предлагаю вам ознакомиться с документацией и начать использовать django-angular прямо сейчас! Достаточно сказать, что один из его многочисленных компонентов позволит вам использовать формы Django для валидации в AngularJS. Объединив его с пакетом <code>crispy forms</code> вы получите мощное решение “все-в-одном” - вот за что я люблю Django и его сообщество.</p>
+
+<p>``` python
+from django import forms
+from djangular.forms import NgFormValidationMixin, NgModelFormMixin, AddPlaceholderFormMixin
+from crispy_forms.helper import FormHelper</p>
+
+<p>from .models import Job</p>
+
+<p>class JobForm(NgModelFormMixin, forms.ModelForm):
+    “””
+    Job Form with a little crispy forms added!
+    “””
+    def <strong>init</strong>(self, <em>args, **kwargs):
+        super(JobForm, self).<strong>init</strong>(</em>args, **kwargs)
+        setup_bootstrap_helpers(self)</p>
+
+<pre><code>class Meta:
+    model = Job
+    fields = ('name', 'description',)
+</code></pre>
+
+<p>def setup_bootstrap_helpers(object):
+    object.helper = FormHelper()
+    object.helper.form_class = ‘form-horizontal’
+    object.helper.label_class = ‘col-lg-3’
+    object.helper.field_class = ‘col-lg-8’
+```</p>
+
+<h2 id="angularjs">AngularJS</h2>
+
+<p>Для простоты сделайте 3 новых шаблона, расположенных так:</p>
+
+<p><code>
+    templates
+        jobs/index.html
+        jobs/new.html
+    base.html
+</code></p>
+
+<p>Это предполагает, что приложение <code>jobs</code> установлено и настроено. Базовый шаблон будет выглядеть примерно так:</p>
+
+<p></p>
+
+<p>``` django /jobs/base.html
+&lt;!DOCTYPE html&gt;</p>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link href="http://toly.github.io//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet" />
+
+    <script src="http://toly.github.io//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js"></script>
+    <script src="http://toly.github.io/angular-ui-router.min.js"></script>
+    <script type="text/javascript" src="http://cdn.jsdelivr.net/restangular/latest/restangular.js"></script>
+
+</head>
+<body>
+    {% block content %}{% endblock content %}
+    {% block extra_javascript %}{% endblock extra_javascript %}
+</body>
+</html>
+<p>```</p>
+
+<p></p>
+
+<p>Django-angular предлагает полезные шаблонные теги, которые включат необходимый для вас JavaScript. Я рекомендую использовать CDN и загрузить туда файлы, какие можно. Это дает географические и пропускные преимущества.</p>
+
+<p>Теперь создадим шаблон страницы, который будет рендерится нашим проектом. <em>index.html</em> будет служить главной страницей нашего одностраничного приложения, и позже может быть использован для всех CRUD (Create Read Update Delete) представлений.</p>
+
+<p></p>
+
+<p><code>django /jobs/index.html
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+&lt;div class="container content" ng-app="JobApp"&gt;
+    &lt;div ui-view &gt;Loading...&lt;/div&gt;
+&lt;/div&gt;
+{% endblock content %}
+{% block extra_javascript %}
+&lt;script src="{{ STATIC_URL }}/javascript/app.js"&gt;&lt;/script&gt;
+{% endblock extra_javascript %}
+</code></p>
+
+<p></p>
+
+<p></p>
+
+<p>``` javascript /javascript/app.js
+var app = angular.module(‘JobApp’, [
+    ‘ui.router’,
+    ‘restangular’
+])</p>
+
+<p>app.config(function ($stateProvider, $urlRouterProvider, RestangularProvider) {
+    // For any unmatched url, send to /route1
+    $urlRouterProvider.otherwise(“/”);
+    $stateProvider
+        .state(‘index’, {</p>
+
+<pre><code>        url: "/",
+        templateUrl: "/static/html/partials/_job_list.html",
+        controller: "JobList"
+    })
+
+   .state('new', {
+
+        url: "/new",
+        templateUrl: "/jobs/job-form",
+        controller: "JobFormCtrl"
+    }) })
+</code></pre>
+
+<p>app.controller(“JobFormCtrl”, [‘$scope’, ‘Restangular’, ‘CbgenRestangular’, ‘$q’,
+function ($scope, Restangular, CbgenRestangular, $q) {</p>
+
+<p>}])// end controller
+```</p>
+
+<p></p>
+
+<p>Шаблон и JS код выше очень простые, наследуется от базового шаблона. Есть несколько аттрибутов, которые вы возможно не видели прежде и в которых нужно будет разобраться.</p>
+
+<p>Первый из них: <code>ng-app="JobApp"</code>. Без этого тега процесс AngularJS не запустится. Эта директива говорит фреймворку AngularJS какой элемент является корневым в приложении. Все, что вы добавите внутрь этого элемента будет частью шаблона под управлением AngularJS.</p>
+
+<p>Далее, посмотрите на скрипт, который вы включили в <code>index.html</code>. Это скрипт <code>app.js</code>, который является модулем AngularJS. Модуль AngularJS представляет собой набор функций, которые выполняются когда приложение загружено.</p>
+
+<p><code>javascript
+var app = angular.module('JobApp', [
+</code></p>
+
+<p>Строка, расположенная выше, создает модуль <code>JobApp</code>. В index.html вы уже создали его экземпляр с помощью директивы <code>ng-app="JobApp"</code>. Основное, что здесь делается: сообщается AngularJS, что модуль <code>app.js</code> управляет содержимым этого тега.</p>
+
+<p>Фактически, вы можете установить аттрибут <code>ng-app</code> для любого элемента в DOM. Например, если вы хотите, что бы часть шаблона не управлялась через Angular, вы можете сделать так:</p>
+
+<p>``` html</p>
+<h2>I am not inside an AngularJS app</h2>
+<div ng-app="embeddedApp">
+  <h3>Inside an AngularJS app</h3>
+</div>
+<p>```</p>
+
+<p><code>app.config</code> в app.js также показывает начало вашей URL-маршрутизации. AngularJS поддерживает URL-маршрутизацию по умолчанию через сервис <code>$route</code> в ядре Angular, но этого недостаточно и это имеет некоторые ограничения.</p>
+
+<p>Один из модулей, которые вы включили, это AngularUI роутер <code>ui.route</code>. AngularUI роутер - это дополнительный модуль URL-маршрутизации для Angular, организованный в контексте состояний, которые опционально могуть иметь прикрепленные реакции на определенные URL’ы.</p>
+
+<p>В этом руководстве предусмотрено одно состояние, которое назыаается <code>new</code>, но вы можете определять много различных состояний для вашего приложения. Вы даже можете добавить поведение для того случая, когда ни одного состояния не обнаружено:</p>
+
+<p>``` javascript
+$urlRouterProvider.otherwise(“/”);
+$stateProvider
+   .state(‘index’, {</p>
+
+<pre><code>   url: "/",
+   templateUrl: "static/html/somepage.html",
+   controller: "SomeController"    }) ```
+</code></pre>
+
+<p>Если вы не знакомы с этим, то я предлагаю почитать о <a href="https://github.com/angular-ui/ui-router">AngularUI Router</a> после того как закончите с этим руководством.</p>
+
+<p>Последний элемент в index.html, с которым вам нужно разобраться - это <code>ui-view</code>. Это тоже относится к AngularUI Router. Директива <code>ui-view</code> определяет куда разместь ваш шаблон.</p>
+
+<p>Последний шаблон, который нужно создать - <em>/jobs/new.html</em>. Он будет содержать простую форму, которую вы сделали ранее с использованием django-angular.</p>
+
+<p>
+<code>django /jobs/new.html
+{% load crispy_forms_tags %}
+{% crispy JobForm %}
+&lt;button type="button" class="btn btn-default"  ng-click="submitJob()"&gt;Create&lt;/button&gt;
+</code>
+</p>
+
+<p>Теперь вам нужно всего лишь представление и URL для подключения формы.</p>
+
+<p>``` python /jobs/views.py
+from .forms import JobForm</p>
+
+<p>class JobFormView(TemplateView):
+    template_name = “jobs/new.html”</p>
+
+<pre><code>def get_context_data(self, **kwargs):
+    context = super(JobFormView, self).get_context_data(**kwargs)
+    context.update(JobForm=JobForm())
+    return context
+</code></pre>
+
+<p>class IndexView(TemplateView):
+    template_name = ‘jobs/index.html’
+```</p>
+
+<p>``` python /jobs/urls.py
+from django.conf.urls import url
+from django.conf.urls import patterns</p>
+
+<p>from .views import JobFormView, IndexView</p>
+
+<p>urlpatterns = patterns(‘’,</p>
+
+<pre><code>url(r'^job-form/$', login_required(JobFormView.as_view()), name='job_form'),
+url(r'^/$', IndexView.as_view(), name='index_job'),
+</code></pre>
+
+<p>)
+```
+Теперь отправьте ваш браузер по адресу <a href="http://127.0.0.1:8000/job/#new">http://127.0.0.1:8000/job/#new</a> и вы должны увидеть форму для добавления работы в вашем новом одностраничном приложении.</p>
+
+<p>Последний шаг - сделать возможным отправку POST-данных при нажатии на кнопку с <code>ng-click="submitJob()"</code>. Измените контроллер как показано ниже, используя <a href="https://github.com/mgonto/restangular">restangular</a>.</p>
+
+<blockquote>
+  <p>RestAngular - это модуль для AngularJS упрощает работу с GET, DELETE и UPDATE запросами, используя минимум клентского кода. Он идеально подходит для любого веб приложения, которое получает данные через REST API.</p>
+</blockquote>
+
+<p>``` javascript
+app.controller(“JobFormCtrl”, [‘$scope’, ‘Restangular’, ‘CbgenRestangular’, ‘$q’,
+function ($scope, Restangular, CbgenRestangular, $q) {</p>
+
+<pre><code>$scope.submitJob = function () {
+var post_update_data = create_resource($scope, CbgenRestangular);
+    $q.when(post_update_data.then(
+        function (object) {
+            // success!
+        },
+    
+        function (object){
+            // error!
+            console.log(object.data)
+        }
+    
+    ))
+}
+</code></pre>
+
+<p>}])// end controller</p>
+
+<p>app.factory(‘CbgenRestangular’, function (Restangular) {
+    return Restangular.withConfig(function (RestangularConfigurer) {
+        RestangularConfigurer.setBaseUrl(‘/api/v1’);
+    });
+})</p>
+
+<p>populate_scope_values = function ($scope) {
+    return {name: $scope.name, description: $scope.description };
+},</p>
+
+<p>create_resource = function ($scope, CbgenRestangular) {
+var post_data = populate_scope_values($scope)
+    return CbgenRestangular.all(‘job/’).post(post_data)
+}
+```</p>
+
+<h2 id="section-2">Что дальше</h2>
+
+<p>Материала слишком много для одного поста в блоге. Дальше - практиковаться и изучать <a href="https://egghead.io/lessons">видео уроки по AngularJS</a>.</p>
+
+]]></content>
+  </entry>
+  
+</feed>

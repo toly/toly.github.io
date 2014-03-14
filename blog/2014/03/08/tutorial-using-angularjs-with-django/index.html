@@ -1,0 +1,776 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Руководство: Используем AngularJS с Django - Toly blog</title>
+  <meta name="author" content="Toly">
+
+  
+  <meta name="description" content="Перевод статьи Глена Джексона Tutorial: Using AngularJS with Django ~~Я надеялся написать быстрое руководство, что бы вы начали использовать Angular &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://toly.github.io/blog/2014/03/08/tutorial-using-angularjs-with-django">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Toly blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Toly blog</a></h1>
+  
+    <h2>Python and Django notes</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:toly.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Руководство: Используем AngularJS с Django</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T20:04:27+04:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><blockquote>
+  <p>Перевод статьи Глена Джексона <a href="http://glynjackson.org/weblog/entry/django-angular.html">Tutorial: Using AngularJS with Django</a></p>
+</blockquote>
+
+<p>~~Я надеялся написать быстрое руководство, что бы вы начали использовать Angular с Django~~ которое становилось руководством по поглощению Red Bull. Мои извинения, если оно получится небрежным к концу!</p>
+
+<p>Почитав посты на тему совместного использования Django и AngularJS, я чувтсвовал, что большинство из них были “велосипедными”. Хотя пример кода, который здесь приводится, сырой, он должен показать, как я использую их в проектах.</p>
+
+<!-- more -->
+
+<h2 id="section">Модели</h2>
+
+<p>Давайте начнем с типичной модели</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>/jobs/models.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span><span class="line">    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</span><span class="line">    <span class="n">description</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Ок, пока ничего особенного. Все что вы сделали - это создали простую модель, которая содержит основные сведения о работе.</p>
+
+<h2 id="rest-api-tastypie">REST API (Tastypie)</h2>
+
+<p>AngularJS построен так, что бы использовать веб-сервисы, поэтому вам нужен способ плучать данные только что созданной модели <code>Job</code>.</p>
+
+<p>Для Django есть хороший выбор вариантов для создания RESTful API. <em>TastyPie</em> является отличным REST фреймворком для Django. Он невероятно мощный, но простой в установке и использовании. Однако, по-моему, таких же результатов можно добиться используя <em>Django REST framework</em>, или даже самостоятельно создав ответы на запросы API средствами Django. Выбор остается за вами. В этом уроке мы будем использовать <em>TastyPie</em>.</p>
+
+<p>Если вам не знаком <em>TastyPie</em>, ознакомьтесь с <a href="http://django-tastypie.readthedocs.org/en/latest/">документацией</a>. Я не буду вдаваться в подробности относительно установки. И предполагаю, он уже установлен, добавлен в <code>INSTALLED_APPS</code> и вы готовы продолжить.</p>
+
+<p>Сперва, вам нужно создать ресурс для модели <code>Job</code>. <em>TastyPie</em> использует понятие <em>ресурс</em>. Это описывается как посредник между конечным пользователем и объектом (в данном случае это будет модель <code>Job</code>).</p>
+
+<p>Начните с создания соответствующего ресурса для модели <code>Job</code>:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">from</span> <span class="nn">tastypie.resources</span> <span class="kn">import</span> <span class="n">ModelResource</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">tastypie.authentication</span> <span class="kn">import</span> <span class="n">Authentication</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">tastypie.authorization</span> <span class="kn">import</span> <span class="n">Authorization</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Job</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">JobResource</span><span class="p">(</span><span class="n">ModelResource</span><span class="p">):</span>
+</span><span class="line">    <span class="sd">&quot;&quot;&quot;</span>
+</span><span class="line"><span class="sd">    API Facet</span>
+</span><span class="line"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span class="line">    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+</span><span class="line">        <span class="n">queryset</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class="line">        <span class="n">resource_name</span> <span class="o">=</span> <span class="s">&#39;job&#39;</span>
+</span><span class="line">        <span class="n">allowed_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;post&#39;</span><span class="p">,</span> <span class="s">&#39;get&#39;</span><span class="p">,</span> <span class="s">&#39;patch&#39;</span><span class="p">,</span> <span class="s">&#39;delete&#39;</span><span class="p">]</span>
+</span><span class="line">        <span class="n">authentication</span> <span class="o">=</span> <span class="n">Authentication</span><span class="p">()</span>
+</span><span class="line">        <span class="n">authorization</span> <span class="o">=</span> <span class="n">Authorization</span><span class="p">()</span>
+</span><span class="line">        <span class="n">always_return_data</span> <span class="o">=</span> <span class="bp">True</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Насколько я помню, документация TastyPie предлагает назвать файл ресурсов как <em>api.py</em>. Так же предлагаю и я, но это не обязательно. Вы можете назвать этот файл как угодно, но это хорошо для сохранения постоянства.</p>
+
+<p>Есть несколько вещей, происходящих в <code>JobResource</code>, которые выходят за рамки данного руковосдства. Но, я просто хотел бы обратить внимание на то, как <code>JobResource</code> наследует <code>ModelResource</code>. Вы используете TastyPie с ORM Django (модель <code>Job</code>). Другими словами, многие из основных API ORM вым доступны.</p>
+
+<p>TastyPie так же может обрабатывать данные и без ORM. Расширяя и наследуя ресурс, вы так же можете получить все вкусности TastyPie для API которое захотите предложить, но без привязки к ORM. Это особенно полезно при совершении запросов, не поддерживающих ORM, NoSQL баз как описано в документации.</p>
+
+<p>Пока что вы создали модель данных (<code>Job</code>) и способ взаимодействия с нею (<code>JobResource</code>). Далее, вам нужен способ подключения к ресурсу через определеный URL, что в конечном итоге позволит AnagularJS его использовать. В Django вы можете сделать это используя URL роутер. Просто подключите экземпляр ресурса к определенному URL:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">from</span> <span class="nn">tastypie.api</span> <span class="kn">import</span> <span class="n">Api</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">.apps.your_app.api</span> <span class="kn">import</span> <span class="n">JobResource</span>
+</span><span class="line">
+</span><span class="line"><span class="n">v1_api</span> <span class="o">=</span> <span class="n">Api</span><span class="p">(</span><span class="n">api_name</span><span class="o">=</span><span class="s">&#39;v1&#39;</span><span class="p">)</span>
+</span><span class="line"><span class="n">v1_api</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">JobResource</span><span class="p">())</span>
+</span><span class="line">
+</span><span class="line"><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class="line">
+</span><span class="line">     <span class="p">(</span><span class="s">r&#39;^api/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="n">v1_api</span><span class="o">.</span><span class="n">urls</span><span class="p">)),</span>
+</span><span class="line"><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Аттрибут <code>resource_name</code>, определенный в <code>JobResource</code> - это название ресурса в URL. По нему вы знаете где находится работающее API для ресурса <code>JobResource</code>. Проверьте что все это работает, запустив локальный сервер и посетив адрес <a href="http://127.0.0.1:8000/api/v1/job/?format=json">http://127.0.0.1:8000/api/v1/job/?format=json</a></p>
+
+<p>Теперь у вас есть рабочее API для вашей модели <code>Job</code>. Просто.</p>
+
+<h2 id="section-1">Формы</h2>
+
+<p>Перед тем как начать использовать AngularJS нам нужно сделать форму для <code>Job</code> с использованием Django. Позже, эта форма позволит вам редактировать данные модели <code>Job</code> в одностраничном приложении. Я знаю о чем вы думаете: “Почему в Django”?</p>
+
+<p>Одним из приципов в Django является прицип “на повторяйся” (DRY). Так что не имеет смысла создавать формы с помощью HTML для AngularJS, а затем делать то же для Django. К тому же Django хорошо справляется с соданием форм. Возможно у вас есть несколько форм, которые нужно преобразовать, так почему бы не сделать это автоматическим? Посмотрите в сторону <a href="http://django-angular.readthedocs.org/en/latest/">django-angular</a>. Это один классный пакет, познакомившись с которым вы будете рады (я знаю о чем говорю).</p>
+
+<blockquote>
+  <p><em>django-angular</em> - это набор утилит, которые помогают упростить интеграцию Django и AngularJS с помощью повторно используемых компонентов</p>
+</blockquote>
+
+<p>Опять же, здесь я не буду вдаваться в подробности относительно установки и настройки. Я предлагаю вам ознакомиться с документацией и начать использовать django-angular прямо сейчас! Достаточно сказать, что один из его многочисленных компонентов позволит вам использовать формы Django для валидации в AngularJS. Объединив его с пакетом <code>crispy forms</code> вы получите мощное решение “все-в-одном” - вот за что я люблю Django и его сообщество.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">djangular.forms</span> <span class="kn">import</span> <span class="n">NgFormValidationMixin</span><span class="p">,</span> <span class="n">NgModelFormMixin</span><span class="p">,</span> <span class="n">AddPlaceholderFormMixin</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">crispy_forms.helper</span> <span class="kn">import</span> <span class="n">FormHelper</span>
+</span><span class="line">
+</span><span class="line"><span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Job</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">JobForm</span><span class="p">(</span><span class="n">NgModelFormMixin</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+</span><span class="line">    <span class="sd">&quot;&quot;&quot;</span>
+</span><span class="line"><span class="sd">    Job Form with a little crispy forms added!</span>
+</span><span class="line"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span class="line">    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span class="line">        <span class="nb">super</span><span class="p">(</span><span class="n">JobForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span class="line">        <span class="n">setup_bootstrap_helpers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+</span><span class="line">        <span class="n">model</span> <span class="o">=</span> <span class="n">Job</span>
+</span><span class="line">        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">,)</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">setup_bootstrap_helpers</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+</span><span class="line">    <span class="nb">object</span><span class="o">.</span><span class="n">helper</span> <span class="o">=</span> <span class="n">FormHelper</span><span class="p">()</span>
+</span><span class="line">    <span class="nb">object</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="s">&#39;form-horizontal&#39;</span>
+</span><span class="line">    <span class="nb">object</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">label_class</span> <span class="o">=</span> <span class="s">&#39;col-lg-3&#39;</span>
+</span><span class="line">    <span class="nb">object</span><span class="o">.</span><span class="n">helper</span><span class="o">.</span><span class="n">field_class</span> <span class="o">=</span> <span class="s">&#39;col-lg-8&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="angularjs">AngularJS</h2>
+
+<p>Для простоты сделайте 3 новых шаблона, расположенных так:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="n">templates</span>
+</span><span class="line">    <span class="n">jobs</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+</span><span class="line">    <span class="n">jobs</span><span class="o">/</span><span class="n">new</span><span class="o">.</span><span class="n">html</span>
+</span><span class="line"><span class="n">base</span><span class="o">.</span><span class="n">html</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Это предполагает, что приложение <code>jobs</code> установлено и настроено. Базовый шаблон будет выглядеть примерно так:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>/jobs/base.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</pre></td><td class="code"><pre><code class="django"><span class="line"><span class="x">&lt;!DOCTYPE html&gt;</span>
+</span><span class="line"><span class="x">&lt;html&gt;</span>
+</span><span class="line"><span class="x">&lt;head&gt;</span>
+</span><span class="line"><span class="x">    &lt;meta charset=&quot;utf-8&quot;&gt;</span>
+</span><span class="line"><span class="x">    &lt;link href=&quot;//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.2/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="x">    &lt;script src=&quot;//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class="line"><span class="x">    &lt;script src=&quot;/angular-ui-router.min.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class="line"><span class="x">    &lt;script type=&quot;text/javascript&quot; src=&quot;http://cdn.jsdelivr.net/restangular/latest/restangular.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="x">&lt;/head&gt;</span>
+</span><span class="line"><span class="x">&lt;body&gt;</span>
+</span><span class="line"><span class="x">    </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="nv">content</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="x">    </span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">extra_javascript</span> <span class="cp">%}{%</span> <span class="k">endblock</span> <span class="nv">extra_javascript</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="x">&lt;/body&gt;</span>
+</span><span class="line"><span class="x">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Django-angular предлагает полезные шаблонные теги, которые включат необходимый для вас JavaScript. Я рекомендую использовать CDN и загрузить туда файлы, какие можно. Это дает географические и пропускные преимущества.</p>
+
+<p>Теперь создадим шаблон страницы, который будет рендерится нашим проектом. <em>index.html</em> будет служить главной страницей нашего одностраничного приложения, и позже может быть использован для всех CRUD (Create Read Update Delete) представлений.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>/jobs/index.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="django"><span class="line"><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;base.html&quot;</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="cp">{%</span> <span class="k">load</span> <span class="nv">i18n</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">content</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="x">&lt;div class=&quot;container content&quot; ng-app=&quot;JobApp&quot;&gt;</span>
+</span><span class="line"><span class="x">    &lt;div ui-view &gt;Loading...&lt;/div&gt;</span>
+</span><span class="line"><span class="x">&lt;/div&gt;</span>
+</span><span class="line"><span class="cp">{%</span> <span class="k">endblock</span> <span class="nv">content</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="cp">{%</span> <span class="k">block</span> <span class="nv">extra_javascript</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="x">&lt;script src=&quot;</span><span class="cp">{{</span> <span class="nv">STATIC_URL</span> <span class="cp">}}</span><span class="x">/javascript/app.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class="line"><span class="cp">{%</span> <span class="k">endblock</span> <span class="nv">extra_javascript</span> <span class="cp">%}</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>/javascript/app.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;JobApp&#39;</span><span class="p">,</span> <span class="p">[</span>
+</span><span class="line">    <span class="s1">&#39;ui.router&#39;</span><span class="p">,</span>
+</span><span class="line">    <span class="s1">&#39;restangular&#39;</span>
+</span><span class="line"><span class="p">])</span>
+</span><span class="line">
+</span><span class="line"><span class="nx">app</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">$stateProvider</span><span class="p">,</span> <span class="nx">$urlRouterProvider</span><span class="p">,</span> <span class="nx">RestangularProvider</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="c1">// For any unmatched url, send to /route1</span>
+</span><span class="line">    <span class="nx">$urlRouterProvider</span><span class="p">.</span><span class="nx">otherwise</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="nx">$stateProvider</span>
+</span><span class="line">        <span class="p">.</span><span class="nx">state</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">            <span class="nx">url</span><span class="o">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+</span><span class="line">            <span class="nx">templateUrl</span><span class="o">:</span> <span class="s2">&quot;/static/html/partials/_job_list.html&quot;</span><span class="p">,</span>
+</span><span class="line">            <span class="nx">controller</span><span class="o">:</span> <span class="s2">&quot;JobList&quot;</span>
+</span><span class="line">        <span class="p">})</span>
+</span><span class="line">
+</span><span class="line">       <span class="p">.</span><span class="nx">state</span><span class="p">(</span><span class="s1">&#39;new&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">            <span class="nx">url</span><span class="o">:</span> <span class="s2">&quot;/new&quot;</span><span class="p">,</span>
+</span><span class="line">            <span class="nx">templateUrl</span><span class="o">:</span> <span class="s2">&quot;/jobs/job-form&quot;</span><span class="p">,</span>
+</span><span class="line">            <span class="nx">controller</span><span class="o">:</span> <span class="s2">&quot;JobFormCtrl&quot;</span>
+</span><span class="line">        <span class="p">})</span>
+</span><span class="line"><span class="p">})</span>
+</span><span class="line">
+</span><span class="line"><span class="nx">app</span><span class="p">.</span><span class="nx">controller</span><span class="p">(</span><span class="s2">&quot;JobFormCtrl&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;$scope&#39;</span><span class="p">,</span> <span class="s1">&#39;Restangular&#39;</span><span class="p">,</span> <span class="s1">&#39;CbgenRestangular&#39;</span><span class="p">,</span> <span class="s1">&#39;$q&#39;</span><span class="p">,</span>
+</span><span class="line"><span class="kd">function</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">Restangular</span><span class="p">,</span> <span class="nx">CbgenRestangular</span><span class="p">,</span> <span class="nx">$q</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">}])</span><span class="c1">// end controller</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Шаблон и JS код выше очень простые, наследуется от базового шаблона. Есть несколько аттрибутов, которые вы возможно не видели прежде и в которых нужно будет разобраться.</p>
+
+<p>Первый из них: <code>ng-app="JobApp"</code>. Без этого тега процесс AngularJS не запустится. Эта директива говорит фреймворку AngularJS какой элемент является корневым в приложении. Все, что вы добавите внутрь этого элемента будет частью шаблона под управлением AngularJS.</p>
+
+<p>Далее, посмотрите на скрипт, который вы включили в <code>index.html</code>. Это скрипт <code>app.js</code>, который является модулем AngularJS. Модуль AngularJS представляет собой набор функций, которые выполняются когда приложение загружено.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;JobApp&#39;</span><span class="p">,</span> <span class="p">[</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Строка, расположенная выше, создает модуль <code>JobApp</code>. В index.html вы уже создали его экземпляр с помощью директивы <code>ng-app="JobApp"</code>. Основное, что здесь делается: сообщается AngularJS, что модуль <code>app.js</code> управляет содержимым этого тега.</p>
+
+<p>Фактически, вы можете установить аттрибут <code>ng-app</code> для любого элемента в DOM. Например, если вы хотите, что бы часть шаблона не управлялась через Angular, вы можете сделать так:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="html"><span class="line"><span class="nt">&lt;h2&gt;</span>I am not inside an AngularJS app<span class="nt">&lt;/h2&gt;</span>
+</span><span class="line"><span class="nt">&lt;div</span> <span class="na">ng-app=</span><span class="s">&quot;embeddedApp&quot;</span><span class="nt">&gt;</span>
+</span><span class="line">  <span class="nt">&lt;h3&gt;</span>Inside an AngularJS app<span class="nt">&lt;/h3&gt;</span>
+</span><span class="line"><span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>app.config</code> в app.js также показывает начало вашей URL-маршрутизации. AngularJS поддерживает URL-маршрутизацию по умолчанию через сервис <code>$route</code> в ядре Angular, но этого недостаточно и это имеет некоторые ограничения.</p>
+
+<p>Один из модулей, которые вы включили, это AngularUI роутер <code>ui.route</code>. AngularUI роутер - это дополнительный модуль URL-маршрутизации для Angular, организованный в контексте состояний, которые опционально могуть иметь прикрепленные реакции на определенные URL’ы.</p>
+
+<p>В этом руководстве предусмотрено одно состояние, которое назыаается <code>new</code>, но вы можете определять много различных состояний для вашего приложения. Вы даже можете добавить поведение для того случая, когда ни одного состояния не обнаружено:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="nx">$urlRouterProvider</span><span class="p">.</span><span class="nx">otherwise</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="nx">$stateProvider</span>
+</span><span class="line">   <span class="p">.</span><span class="nx">state</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">       <span class="nx">url</span><span class="o">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+</span><span class="line">       <span class="nx">templateUrl</span><span class="o">:</span> <span class="s2">&quot;static/html/somepage.html&quot;</span><span class="p">,</span>
+</span><span class="line">       <span class="nx">controller</span><span class="o">:</span> <span class="s2">&quot;SomeController&quot;</span>
+</span><span class="line">   <span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Если вы не знакомы с этим, то я предлагаю почитать о <a href="https://github.com/angular-ui/ui-router">AngularUI Router</a> после того как закончите с этим руководством.</p>
+
+<p>Последний элемент в index.html, с которым вам нужно разобраться - это <code>ui-view</code>. Это тоже относится к AngularUI Router. Директива <code>ui-view</code> определяет куда разместь ваш шаблон.</p>
+
+<p>Последний шаблон, который нужно создать - <em>/jobs/new.html</em>. Он будет содержать простую форму, которую вы сделали ранее с использованием django-angular.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>/jobs/new.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="django"><span class="line"><span class="cp">{%</span> <span class="k">load</span> <span class="nv">crispy_forms_tags</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="cp">{%</span> <span class="k">crispy</span> <span class="nv">JobForm</span> <span class="cp">%}</span><span class="x"></span>
+</span><span class="line"><span class="x">&lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot;  ng-click=&quot;submitJob()&quot;&gt;Create&lt;/button&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Теперь вам нужно всего лишь представление и URL для подключения формы.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>/jobs/views.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">from</span> <span class="nn">.forms</span> <span class="kn">import</span> <span class="n">JobForm</span>
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">JobFormView</span><span class="p">(</span><span class="n">TemplateView</span><span class="p">):</span>
+</span><span class="line">    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&quot;jobs/new.html&quot;</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span class="line">        <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">JobFormView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span class="line">        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">JobForm</span><span class="o">=</span><span class="n">JobForm</span><span class="p">())</span>
+</span><span class="line">        <span class="k">return</span> <span class="n">context</span>
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">IndexView</span><span class="p">(</span><span class="n">TemplateView</span><span class="p">):</span>
+</span><span class="line">    <span class="n">template_name</span> <span class="o">=</span> <span class="s">&#39;jobs/index.html&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>/jobs/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">url</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">patterns</span>
+</span><span class="line">
+</span><span class="line"><span class="kn">from</span> <span class="nn">.views</span> <span class="kn">import</span> <span class="n">JobFormView</span><span class="p">,</span> <span class="n">IndexView</span>
+</span><span class="line">
+</span><span class="line"><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^job-form/$&#39;</span><span class="p">,</span> <span class="n">login_required</span><span class="p">(</span><span class="n">JobFormView</span><span class="o">.</span><span class="n">as_view</span><span class="p">()),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;job_form&#39;</span><span class="p">),</span>
+</span><span class="line">    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^/$&#39;</span><span class="p">,</span> <span class="n">IndexView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;index_job&#39;</span><span class="p">),</span>
+</span><span class="line">
+</span><span class="line"><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>Теперь отправьте ваш браузер по адресу <a href="http://127.0.0.1:8000/job/#new">http://127.0.0.1:8000/job/#new</a> и вы должны увидеть форму для добавления работы в вашем новом одностраничном приложении.</p>
+
+<p>Последний шаг - сделать возможным отправку POST-данных при нажатии на кнопку с <code>ng-click="submitJob()"</code>. Измените контроллер как показано ниже, используя <a href="https://github.com/mgonto/restangular">restangular</a>.</p>
+
+<blockquote>
+  <p>RestAngular - это модуль для AngularJS упрощает работу с GET, DELETE и UPDATE запросами, используя минимум клентского кода. Он идеально подходит для любого веб приложения, которое получает данные через REST API.</p>
+</blockquote>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="nx">app</span><span class="p">.</span><span class="nx">controller</span><span class="p">(</span><span class="s2">&quot;JobFormCtrl&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;$scope&#39;</span><span class="p">,</span> <span class="s1">&#39;Restangular&#39;</span><span class="p">,</span> <span class="s1">&#39;CbgenRestangular&#39;</span><span class="p">,</span> <span class="s1">&#39;$q&#39;</span><span class="p">,</span>
+</span><span class="line"><span class="kd">function</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">Restangular</span><span class="p">,</span> <span class="nx">CbgenRestangular</span><span class="p">,</span> <span class="nx">$q</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="nx">$scope</span><span class="p">.</span><span class="nx">submitJob</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class="line">    <span class="kd">var</span> <span class="nx">post_update_data</span> <span class="o">=</span> <span class="nx">create_resource</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">CbgenRestangular</span><span class="p">);</span>
+</span><span class="line">        <span class="nx">$q</span><span class="p">.</span><span class="nx">when</span><span class="p">(</span><span class="nx">post_update_data</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span>
+</span><span class="line">            <span class="kd">function</span> <span class="p">(</span><span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">                <span class="c1">// success!</span>
+</span><span class="line">            <span class="p">},</span>
+</span><span class="line">
+</span><span class="line">            <span class="kd">function</span> <span class="p">(</span><span class="nx">object</span><span class="p">){</span>
+</span><span class="line">                <span class="c1">// error!</span>
+</span><span class="line">                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">object</span><span class="p">.</span><span class="nx">data</span><span class="p">)</span>
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">))</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="p">}])</span><span class="c1">// end controller</span>
+</span><span class="line">
+</span><span class="line"><span class="nx">app</span><span class="p">.</span><span class="nx">factory</span><span class="p">(</span><span class="s1">&#39;CbgenRestangular&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">Restangular</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">return</span> <span class="nx">Restangular</span><span class="p">.</span><span class="nx">withConfig</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">RestangularConfigurer</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="nx">RestangularConfigurer</span><span class="p">.</span><span class="nx">setBaseUrl</span><span class="p">(</span><span class="s1">&#39;/api/v1&#39;</span><span class="p">);</span>
+</span><span class="line">    <span class="p">});</span>
+</span><span class="line"><span class="p">})</span>
+</span><span class="line">
+</span><span class="line"><span class="nx">populate_scope_values</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">return</span> <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">description</span><span class="o">:</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">description</span> <span class="p">};</span>
+</span><span class="line"><span class="p">},</span>
+</span><span class="line">
+</span><span class="line"><span class="nx">create_resource</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">CbgenRestangular</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line"><span class="kd">var</span> <span class="nx">post_data</span> <span class="o">=</span> <span class="nx">populate_scope_values</span><span class="p">(</span><span class="nx">$scope</span><span class="p">)</span>
+</span><span class="line">    <span class="k">return</span> <span class="nx">CbgenRestangular</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="s1">&#39;job/&#39;</span><span class="p">).</span><span class="nx">post</span><span class="p">(</span><span class="nx">post_data</span><span class="p">)</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-2">Что дальше</h2>
+
+<p>Материала слишком много для одного поста в блоге. Дальше - практиковаться и изучать <a href="https://egghead.io/lessons">видео уроки по AngularJS</a>.</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Toly</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T20:04:27+04:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/angularjs/'>AngularJS</a>, <a class='category' href='/blog/categories/django/'>Django</a>, <a class='category' href='/blog/categories/python/'>python</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://toly.github.io/blog/2014/03/08/tutorial-using-angularjs-with-django/" data-via="" data-counturl="http://toly.github.io/blog/2014/03/08/tutorial-using-angularjs-with-django/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/05/advanced-design-patterns-in-python/" title="Previous Post: Передовые паттерны проектирования в Python">&laquo; Передовые паттерны проектирования в Python</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/08/tutorial-using-angularjs-with-django/">Руководство: Используем AngularJS с Django</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/05/advanced-design-patterns-in-python/">Передовые паттерны проектирования в Python</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/13/parallelism-in-one-line/">Многопоточность в одну строку</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/09/starting-a-python-project-the-right-way/">Начиная Python-проект: The Right Way</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/toly">@toly</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'toly',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Toly -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'tolyblog';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://toly.github.io/blog/2014/03/08/tutorial-using-angularjs-with-django/';
+        var disqus_url = 'http://toly.github.io/blog/2014/03/08/tutorial-using-angularjs-with-django/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

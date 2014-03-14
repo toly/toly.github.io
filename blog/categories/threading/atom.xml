@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Threading | Toly blog]]></title>
   <link href="http://toly.github.io/blog/categories/threading/atom.xml" rel="self"/>
   <link href="http://toly.github.io/"/>
-  <updated>2014-03-08T18:34:27+04:00</updated>
+  <updated>2014-03-14T10:18:55+04:00</updated>
   <id>http://toly.github.io/</id>
   <author>
     <name><![CDATA[Toly]]></name>
@@ -18,60 +18,57 @@
     <link href="http://toly.github.io/blog/2014/02/13/parallelism-in-one-line/"/>
     <updated>2014-02-13T13:53:13+04:00</updated>
     <id>http://toly.github.io/blog/2014/02/13/parallelism-in-one-line</id>
-    <content type="html"><![CDATA[<blockquote><p>Перевод статьи Криса Кила <a href="https://medium.com/p/40e9b2b36148">Parallelism in one line</a></p></blockquote>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Перевод статьи Криса Кила <a href="https://medium.com/p/40e9b2b36148">Parallelism in one line</a></p>
+</blockquote>
 
 <p>Python имеет ужасную репутацию, когда речь идет о возможности параллельных вычислений. Не обращая внимания на типичные рассуждения о его потоках и GIL (который обычно нормально работает), по-моему реальная проблема многопоточности Python не техническая, а педагогическая. Распространенные руководства о библиотеках <strong>threading</strong> и <strong>multiprocessing</strong> в целом неплохие, но тяжеловаты для понимания. Они начинаются с глубоких вещей, и заканчиваются до просто применяемых практик.</p>
 
 <!-- more -->
 
+<h2 id="section">Традиционный пример</h2>
 
-<h2>Традиционный пример</h2>
-
-<p>Беглое ознакомление с первыми результатами поискового запроса на тему &ldquo;Python threading tutorial&rdquo; показывает, что почти каждый из них основан на  использовании какого-либо вспомогательного класса в связке с модулем <strong>Queue</strong>.</p>
+<p>Беглое ознакомление с первыми результатами поискового запроса на тему “Python threading tutorial” показывает, что почти каждый из них основан на  использовании какого-либо вспомогательного класса в связке с модулем <strong>Queue</strong>.</p>
 
 <p>Типичный пример многопоточности вида поставщик-потребитель:</p>
 
-<p>``` python</p>
-
-<h1>Example.py</h1>
-
-<p>&lsquo;&rsquo;&lsquo;
+<p>``` python
+#Example.py
+‘’’
 Standard Producer/Consumer Threading Pattern
-&rsquo;&lsquo;&rsquo;</p>
+‘’’</p>
 
-<p>import time
-import threading
-import Queue</p>
+<p>import time 
+import threading 
+import Queue </p>
 
-<p>class Consumer(threading.Thread):</p>
+<p>class Consumer(threading.Thread): 
+	def <strong>init</strong>(self, queue): 
+		threading.Thread.<strong>init</strong>(self)
+		self._queue = queue </p>
 
-<pre><code>def __init__(self, queue): 
-    threading.Thread.__init__(self)
-    self._queue = queue 
-
-def run(self):
-    while True: 
-        # queue.get() blocks the current thread until 
-        # an item is retrieved. 
-        msg = self._queue.get() 
-        # Checks if the current message is 
-        # the "Poison Pill"
-        if isinstance(msg, str) and msg == 'quit':
-            # if so, exists the loop
-            break
-        # "Processes" (or in our case, prints) the queue item   
-        print "I'm a thread, and I received %s!!" % msg
-    # Always be friendly! 
-    print 'Bye byes!'
+<pre><code>def run(self):
+	while True: 
+		# queue.get() blocks the current thread until 
+		# an item is retrieved. 
+		msg = self._queue.get() 
+		# Checks if the current message is 
+		# the "Poison Pill"
+		if isinstance(msg, str) and msg == 'quit':
+			# if so, exists the loop
+			break
+		# "Processes" (or in our case, prints) the queue item	
+		print "I'm a thread, and I received %s!!" % msg
+	# Always be friendly! 
+	print 'Bye byes!'
 </code></pre>
 
-<p>def Producer():</p>
+<p>def Producer():
+	# Queue is used to share items between
+	# the threads.
+	queue = Queue.Queue()</p>
 
-<pre><code># Queue is used to share items between
-# the threads.
-queue = Queue.Queue()
-
-# Create an instance of the worker
+<pre><code># Create an instance of the worker
 worker = Consumer(queue)
 # start calls the internal run() method to 
 # kick off the thread
@@ -81,11 +78,11 @@ worker.start()
 start_time = time.time() 
 # While under 5 seconds.. 
 while time.time() - start_time &lt; 5: 
-    # "Produce" a piece of work and stick it in 
-    # the queue for the Consumer to process
-    queue.put('something at %s' % time.time())
-    # Sleep a bit just to avoid an absurd number of messages
-    time.sleep(1)
+	# "Produce" a piece of work and stick it in 
+	# the queue for the Consumer to process
+	queue.put('something at %s' % time.time())
+	# Sleep a bit just to avoid an absurd number of messages
+	time.sleep(1)
 
 # This the "poison pill" method of killing a thread. 
 queue.put('quit')
@@ -93,100 +90,88 @@ queue.put('quit')
 worker.join()
 </code></pre>
 
-<p>if <strong>name</strong> == &lsquo;<strong>main</strong>&rsquo;:</p>
+<p>if <strong>name</strong> == ‘<strong>main</strong>’:
+	Producer()
+```</p>
 
-<pre><code>Producer()
-</code></pre>
+<p>Мда… Просматриваются Java’вские корни.</p>
 
-<p>```</p>
+<p>Что ж, я не хочу, что бы у вас создалось впечатление, будто схема поставщик-потребитель плоха для многопоточной разработки - это определенно не так. На самом деле такой способ хорошо подходит для решения множества задач. Однако, я думаю, что это не подходит для ежедневного применения.</p>
 
-<p>Мда&hellip; Просматриваются Java'вские корни.</p>
-
-<p>Что ж, я не хочу, что бы у вас создалось впечатление, будто схема поставщик-потребитель плоха для многопоточной разработки &ndash; это определенно не так. На самом деле такой способ хорошо подходит для решения множества задач. Однако, я думаю, что это не подходит для ежедневного применения.</p>
-
-<h2>Проблемы (на мой взгляд)</h2>
+<h2 id="section-1">Проблемы (на мой взгляд)</h2>
 
 <p>Во-первых, вам нужен шаблонный класс, который делает то, что нужно. Во-вторых, вам нужно организовать очередь, согласно которой будут обрабатываться объекты; и наконец, вам нужны методы для входа в очередь и выхода из очереди что бы делать реальную работу (скорее всего, с участием другой очереди, если вы хотите получать обратную связь или сохранять результаты работы).</p>
 
-<h3>Больше воркеров, больше задач</h3>
+<h3 id="section-2">Больше воркеров, больше задач</h3>
 
 <p>Следующее, что вы вероятно сделаете, это пулл воркеров, что бы выжать из Python больше производительности. Ниже приводится измененный код примера из превосходного <a href="http://www.ibm.com/developerworks/aix/library/au-threadingpython/">руководства</a> по многопоточности от IBM. Это достаточно распространенный сценарий, когда вы распределяете задачи получения веб-страниц на несколько потоков.</p>
 
-<p>``` python</p>
+<p>``` python
+#Example2.py
+‘’’
+A more realistic thread pool example 
+‘’’</p>
 
-<h1>Example2.py</h1>
+<p>import time 
+import threading 
+import Queue 
+import urllib2 </p>
 
-<p>&lsquo;&rsquo;&lsquo;
-A more realistic thread pool example
-&rsquo;&lsquo;&rsquo;</p>
+<p>class Consumer(threading.Thread): 
+	def <strong>init</strong>(self, queue): 
+		threading.Thread.<strong>init</strong>(self)
+		self._queue = queue </p>
 
-<p>import time
-import threading
-import Queue
-import urllib2</p>
-
-<p>class Consumer(threading.Thread):</p>
-
-<pre><code>def __init__(self, queue): 
-    threading.Thread.__init__(self)
-    self._queue = queue 
-
-def run(self):
-    while True: 
-        content = self._queue.get() 
-        if isinstance(content, str) and content == 'quit':
-            break
-        response = urllib2.urlopen(content)
-    print 'Bye byes!'
+<pre><code>def run(self):
+	while True: 
+		content = self._queue.get() 
+		if isinstance(content, str) and content == 'quit':
+			break
+		response = urllib2.urlopen(content)
+	print 'Bye byes!'
 </code></pre>
 
-<p>def Producer():</p>
+<p>def Producer():
+	urls = [
+		‘http://www.python.org’, ‘http://www.yahoo.com’
+		‘http://www.scala.org’, ‘http://www.google.com’
+		# etc.. 
+	]
+	queue = Queue.Queue()
+	worker_threads = build_worker_pool(queue, 4)
+	start_time = time.time()</p>
 
-<pre><code>urls = [
-    'http://www.python.org', 'http://www.yahoo.com'
-    'http://www.scala.org', 'http://www.google.com'
-    # etc.. 
-]
-queue = Queue.Queue()
-worker_threads = build_worker_pool(queue, 4)
-start_time = time.time()
-
-# Add the urls to process
+<pre><code># Add the urls to process
 for url in urls: 
-    queue.put(url)  
+	queue.put(url)	
 # Add the poison pillv
 for worker in worker_threads:
-    queue.put('quit')
+	queue.put('quit')
 for worker in worker_threads:
-    worker.join()
+	worker.join()
 
 print 'Done! Time taken: {}'.format(time.time() - start_time)
 </code></pre>
 
-<p>def build_worker_pool(queue, size):</p>
+<p>def build_worker_pool(queue, size):
+	workers = []
+	for _ in range(size):
+		worker = Consumer(queue)
+		worker.start() 
+		workers.append(worker)
+	return workers</p>
 
-<pre><code>workers = []
-for _ in range(size):
-    worker = Consumer(queue)
-    worker.start() 
-    workers.append(worker)
-return workers
-</code></pre>
-
-<p>if <strong>name</strong> == &lsquo;<strong>main</strong>&rsquo;:</p>
-
-<pre><code>Producer()
-</code></pre>
-
-<p>```</p>
+<p>if <strong>name</strong> == ‘<strong>main</strong>’:
+	Producer()
+```</p>
 
 <p>Работает отлично, но посмотрите на весь этот код! Здесь методы инициализации, списки потоков для отслеживания работы, и что хуже всего, если вы склонны к обработке блокировок как и я, куча вызовов метода <strong>join</strong>. А впоследствии будет еще сложнее!</p>
 
 <p>А что было сделано? Да практически ничего. Вышеприведенный код представляет собой хрупкую конструкцию. Это внимательное следование шаблону, это высокая вероятность ошибок (я даже забыл вызвать метод <em>task_done()</em> в объекте очереди пока писал это), и это писать много кода и получать мало функционала. К счастью, есть гораздо лучший способ.</p>
 
-<h2>Знакомьтесь: <strong>Map</strong></h2>
+<h2 id="map">Знакомьтесь: <strong>Map</strong></h2>
 
-<p><em>Map</em> &ndash; это класная маленькая функция, а главное, проста для распараллеливания вашего Python кода. Для тех, кто не вкурсе, <em>map</em> заимствована из функциональных языков, вроде Lisp'а. Это функция, которая применяет другую функцию к последовательности, например:</p>
+<p><em>Map</em> - это класная маленькая функция, а главное, проста для распараллеливания вашего Python кода. Для тех, кто не вкурсе, <em>map</em> заимствована из функциональных языков, вроде Lisp’а. Это функция, которая применяет другую функцию к последовательности, например:</p>
 
 <p><code>python
 urls = ['http://www.yahoo.com', 'http://www.reddit.com']
@@ -195,32 +180,29 @@ results = map(urllib2.urlopen, urls)
 
 <p>Этот код применяет метод <em>urlopen</em> к каждому элементу переданной последовательности и сохраняет полученные результаты в список. Это более-менее эквивалентно следующему коду:</p>
 
-<p>``` python
+<p><code>python
 results = []
-for url in urls:</p>
+for url in urls: 
+    results.append(urllib2.urlopen(url))
+</code></p>
 
-<pre><code>results.append(urllib2.urlopen(url))
-</code></pre>
+<p>Функция <em>map</em> управляет итерацией последовательности, применяет нужную функцию, и в конце сохраняет все получившиеся результаты в список.</p>
 
-<p>```</p>
+<p>Почему это имеет значение? Потому, что используя определенные библиотеки, <em>map</em> делает использование многопоточности тривиальным!</p>
 
-<p> Функция <em>map</em> управляет итерацией последовательности, применяет нужную функцию, и в конце сохраняет все получившиеся результаты в список.</p>
+<p>Функция <em>map</em> с поддержкой многопоточности присутствует в двух библиотеках: <strong>multiprocessing</strong>, а так же малоизвестная, но неменее замечательная - <strong>multiprocessing.dummy</strong>.</p>
 
-<p> Почему это имеет значение? Потому, что используя определенные библиотеки, <em>map</em> делает использование многопоточности тривиальным!</p>
-
-<p> Функция <em>map</em> с поддержкой многопоточности присутствует в двух библиотеках: <strong>multiprocessing</strong>, а так же малоизвестная, но неменее замечательная &ndash; <strong>multiprocessing.dummy</strong>.</p>
-
-<p><em>Отступление:</em> Что это? Никогда не слышал о многопоточном клоне библиотеки <strong>multiprocessing</strong> под названием <em>dummy</em>? Я тоже не слышал до недавнего времени. Есть всего одно предложение на странице официальной документации библиотеки <strong>multiprocessing</strong>. И это предложение сводится к &ldquo;Ах да, эта вещь существует&rdquo;. Это печально, скажуя вам!</p>
+<p><em>Отступление:</em> Что это? Никогда не слышал о многопоточном клоне библиотеки <strong>multiprocessing</strong> под названием <em>dummy</em>? Я тоже не слышал до недавнего времени. Есть всего одно предложение на странице официальной документации библиотеки <strong>multiprocessing</strong>. И это предложение сводится к “Ах да, эта вещь существует”. Это печально, скажуя вам!</p>
 
 <p><strong>multiprocessing.dummy</strong> представляет собой точный аналог модуля <strong>multiprocessing</strong>. Разница лишь в том, что <strong>multiprocessing</strong> работает с процессами, а <strong>multiprocessing.dummy</strong> использует треды (со всеми присущими им ограничениями). Поэтому, все что относится к одной библиотеке, относится и к другой. Это делает переключение между ними довольно простым.</p>
 
-<h2>Приступим</h2>
+<h2 id="section-3">Приступим</h2>
 
 <p>Для доступа к map-параллельной функции, сперва нужно импортировать модули в которых она содержится и создать пулл:</p>
 
 <p>``` python
 from multiprocessing import Pool
-from multiprocessing.dummy import Pool as ThreadPool</p>
+from multiprocessing.dummy import Pool as ThreadPool </p>
 
 <p>pool = ThreadPool()
 ```</p>
@@ -240,129 +222,107 @@ pool = ThreadPool(4) # Sets the pool size to 4
 <p>Итак, теперь, когда созданы воркеры и простой способ распараллеливания в наших руках, давайте перепишем загрузку веб-страниц из предыдущего примера.</p>
 
 <p>``` python
-import urllib2
-from multiprocessing.dummy import Pool as ThreadPool</p>
+import urllib2 
+from multiprocessing.dummy import Pool as ThreadPool </p>
 
-<p>urls = [</p>
+<p>urls = [
+	‘http://www.python.org’, 
+	‘http://www.python.org/about/’,
+	‘http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html’,
+	‘http://www.python.org/doc/’,
+	‘http://www.python.org/download/’,
+	‘http://www.python.org/getit/’,
+	‘http://www.python.org/community/’,
+	‘https://wiki.python.org/moin/’,
+	‘http://planet.python.org/’,
+	‘https://wiki.python.org/moin/LocalUserGroups’,
+	‘http://www.python.org/psf/’,
+	‘http://docs.python.org/devguide/’,
+	‘http://www.python.org/community/awards/’
+	# etc.. 
+	]</p>
 
-<pre><code>'http://www.python.org', 
-'http://www.python.org/about/',
-'http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html',
-'http://www.python.org/doc/',
-'http://www.python.org/download/',
-'http://www.python.org/getit/',
-'http://www.python.org/community/',
-'https://wiki.python.org/moin/',
-'http://planet.python.org/',
-'https://wiki.python.org/moin/LocalUserGroups',
-'http://www.python.org/psf/',
-'http://docs.python.org/devguide/',
-'http://www.python.org/community/awards/'
-# etc.. 
-]
-</code></pre>
+<h1 id="make-the-pool-of-workers">Make the Pool of workers</h1>
+<p>pool = ThreadPool(4) </p>
 
-<h1>Make the Pool of workers</h1>
+<h1 id="open-the-urls-in-their-own-threads">Open the urls in their own threads</h1>
+<p># and return the results
+results = pool.map(urllib2.urlopen, urls)</p>
 
-<p>pool = ThreadPool(4)</p>
-
-<h1>Open the urls in their own threads</h1>
-
-<h1>and return the results</h1>
-
-<p>results = pool.map(urllib2.urlopen, urls)</p>
-
-<h1>close the pool and wait for the work to finish</h1>
-
-<p>pool.close()
-pool.join()
+<h1 id="close-the-pool-and-wait-for-the-work-to-finish">close the pool and wait for the work to finish</h1>
+<p>pool.close() 
+pool.join() 
 ```</p>
 
 <p>Посмотрите на это! Код который на самом деле работает занимает 4 строки, 3 из которых формальны. Функция <strong>map</strong> сделала то же, что и предыдущий код в 40 строк с такой легкостью! Для проверки я испробовал оба подхода и попробовал различные размеры пула.</p>
 
 <p>``` python
-results = []
-for url in urls:</p>
+results = [] 
+for url in urls:
+	result = urllib2.urlopen(url)
+	results.append(result)</p>
 
-<pre><code>result = urllib2.urlopen(url)
-results.append(result)
-</code></pre>
+<h1 id="versus--------">——- VERSUS ——-</h1>
 
-<h1>&mdash;&mdash;&mdash;&ndash; VERSUS &mdash;&mdash;&mdash;&ndash; #</h1>
-
-<h1>&mdash;&mdash;&mdash;&ndash; 4 Pool &mdash;&mdash;&mdash;&ndash; #</h1>
-
-<p>pool = ThreadPool(4)
+<h1 id="pool--------">——- 4 Pool ——-</h1>
+<p>pool = ThreadPool(4) 
 results = pool.map(urllib2.urlopen, urls)</p>
 
-<h1>&mdash;&mdash;&mdash;&ndash; 8 Pool &mdash;&mdash;&mdash;&ndash; #</h1>
-
-<p>pool = ThreadPool(8)
+<h1 id="pool---------1">——- 8 Pool ——-</h1>
+<p>pool = ThreadPool(8) 
 results = pool.map(urllib2.urlopen, urls)</p>
 
-<h1>&mdash;&mdash;&mdash;&ndash; 13 Pool &mdash;&mdash;&mdash;&ndash; #</h1>
-
-<p>pool = ThreadPool(13)
+<h1 id="pool---------2">——- 13 Pool ——-</h1>
+<p>pool = ThreadPool(13) 
 results = pool.map(urllib2.urlopen, urls)
 ```</p>
 
-<h2>Результаты:</h2>
+<h2 id="section-4">Результаты:</h2>
 
-<p>```</p>
-
-<pre><code>                    Single thread:  14.4 Seconds 
-                           4 Pool:   3.1 Seconds
-                           8 Pool:   1.4 Seconds
-                          13 Pool:   1.3 Seconds
-</code></pre>
-
-<p>```</p>
+<p><code>
+ 						Single thread:  14.4 Seconds 
+ 						       4 Pool:   3.1 Seconds
+ 						       8 Pool:   1.4 Seconds
+ 						      13 Pool:   1.3 Seconds
+</code></p>
 
 <p>Потрясающе! Это так же показывает, почему полезно поэкспериментировать с размером пула. Любой пулл с более чем 9 воркерами быстро приводит в падению прироста скорости (на этом компе).</p>
 
-<h1>Реальный пример №2</h1>
-
+<h1 id="section-5">Реальный пример №2</h1>
 <p>Создание миниатюр для тысяч изображений</p>
 
-<p>Теперь давайте сделаем что-нибудь процесорно-раздельное! Довольно распространенная задача у меня на работе &ndash; это обработка больших коллекций картинок. Одна из таких задач &ndash; создание миниатюр. И это можно распараллелить.</p>
+<p>Теперь давайте сделаем что-нибудь процесорно-раздельное! Довольно распространенная задача у меня на работе - это обработка больших коллекций картинок. Одна из таких задач - создание миниатюр. И это можно распараллелить.</p>
 
-<h2>Простая однопроцессная реализация</h2>
+<h2 id="section-6">Простая однопроцессная реализация</h2>
 
 <p>``` python
 import os
 from PIL import Image</p>
 
 <p>SIZE = (75, 75)
-SAVE_DIRECTORY = &lsquo;thumbs&rsquo;</p>
+SAVE_DIRECTORY = ‘thumbs’</p>
 
-<p>def get_image_paths(folder):</p>
+<p>def get_image_paths(folder):
+    return (os.path.join(folder, f)
+            for f in os.listdir(folder)
+            if ‘jpeg’ in f)</p>
 
-<pre><code>return (os.path.join(folder, f)
-        for f in os.listdir(folder)
-        if 'jpeg' in f)
-</code></pre>
+<p>def create_thumbnail(filename):
+    im = Image.open(filename)
+    im.thumbnail(SIZE, Image.ANTIALIAS)
+    base, fname = os.path.split(filename)
+    save_path = os.path.join(base, SAVE_DIRECTORY, fname)
+    im.save(save_path)</p>
 
-<p>def create_thumbnail(filename):</p>
+<p>if <strong>name</strong> == ‘<strong>main</strong>’:
+    folder = os.path.abspath(‘images_path’)
+    os.mkdir(os.path.join(folder, SAVE_DIRECTORY))</p>
 
-<pre><code>im = Image.open(filename)
-im.thumbnail(SIZE, Image.ANTIALIAS)
-base, fname = os.path.split(filename)
-save_path = os.path.join(base, SAVE_DIRECTORY, fname)
-im.save(save_path)
-</code></pre>
-
-<p>if <strong>name</strong> == &lsquo;<strong>main</strong>&rsquo;:</p>
-
-<pre><code>folder = os.path.abspath('images_path')
-os.mkdir(os.path.join(folder, SAVE_DIRECTORY))
-
-images = get_image_paths(folder)
+<pre><code>images = get_image_paths(folder)
 
 for image in images:
-    create_thumbnail(image)
+    create_thumbnail(image) ```
 </code></pre>
-
-<p>```</p>
 
 <p>Пример несколько адаптирован, но по сути происходит следующее: каталог с изображениями передается в программу, потом из каталога выбираются все картинки, и наконец создаются миниатюры и сохраняются в отдельный каталог.</p>
 
@@ -376,44 +336,38 @@ from PIL import Image
 from multiprocessing import Pool</p>
 
 <p>SIZE = (75, 75)
-SAVE_DIRECTORY = &lsquo;thumbs&rsquo;</p>
+SAVE_DIRECTORY = ‘thumbs’</p>
 
-<p>def get_image_paths(folder):</p>
+<p>def get_image_paths(folder):
+    return (os.path.join(folder, f)
+            for f in os.listdir(folder)
+            if ‘jpeg’ in f)</p>
 
-<pre><code>return (os.path.join(folder, f)
-        for f in os.listdir(folder)
-        if 'jpeg' in f)
-</code></pre>
+<p>def create_thumbnail(filename):
+    im = Image.open(filename)
+    im.thumbnail(SIZE, Image.ANTIALIAS)
+    base, fname = os.path.split(filename)
+    save_path = os.path.join(base, SAVE_DIRECTORY, fname)
+    im.save(save_path)</p>
 
-<p>def create_thumbnail(filename):</p>
+<p>if <strong>name</strong> == ‘<strong>main</strong>’:
+    folder = os.path.abspath(‘images_path’)
+    os.mkdir(os.path.join(folder, SAVE_DIRECTORY))</p>
 
-<pre><code>im = Image.open(filename)
-im.thumbnail(SIZE, Image.ANTIALIAS)
-base, fname = os.path.split(filename)
-save_path = os.path.join(base, SAVE_DIRECTORY, fname)
-im.save(save_path)
-</code></pre>
-
-<p>if <strong>name</strong> == &lsquo;<strong>main</strong>&rsquo;:</p>
-
-<pre><code>folder = os.path.abspath('images_path')
-os.mkdir(os.path.join(folder, SAVE_DIRECTORY))
-
-images = get_image_paths(folder)
+<pre><code>images = get_image_paths(folder)
 
 pool = Pool()
 pool.map(create_thumbnail, images)
 pool.close()
-pool.join()
+pool.join() ```
 </code></pre>
-
-<p>```</p>
 
 <p><strong>5.6 секунд!</strong></p>
 
-<p>Это серъезный прирост для изменения всего лишь нескольких строчек кода. Продакшен версия еще быстрее, так как в ней разделены процессорные задачи и задачи ввода-вывода на отдельные процессы и потоки &ndash; обычный рецепт для кода с учетом блокировок.</p>
+<p>Это серъезный прирост для изменения всего лишь нескольких строчек кода. Продакшен версия еще быстрее, так как в ней разделены процессорные задачи и задачи ввода-вывода на отдельные процессы и потоки - обычный рецепт для кода с учетом блокировок.</p>
 
 <p>Так что, так. Распараллеливание в одну (почти) строку.</p>
+
 ]]></content>
   </entry>
   

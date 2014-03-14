@@ -9,7 +9,7 @@
   <meta name="author" content="Toly">
 
   
-  <meta name="description" content="Перевод статьи Advanced Design Patterns in Python Цель данной статьи &ndash; показать передовые паттерны в Python и лучший способ их использовать. В &hellip;">
+  <meta name="description" content="Перевод статьи Advanced Design Patterns in Python Цель данной статьи - показать передовые паттерны в Python и лучший способ их использовать. В &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -92,662 +92,643 @@
   </header>
 
 
-<div class="entry-content"><blockquote><p>Перевод статьи <a href="http://pypix.com/python/advanced-data-structures/">Advanced Design Patterns in Python</a></p></blockquote>
+<div class="entry-content"><blockquote>
+  <p>Перевод статьи <a href="http://pypix.com/python/advanced-data-structures/">Advanced Design Patterns in Python</a></p>
+</blockquote>
 
-<p>Цель данной статьи &ndash; показать передовые паттерны в Python и лучший способ их использовать. В зависимости от того, что вам нужно от структуры кода, будь то быстрый поиск, постоянство, индексация и т.д., вы можете выбрать оптимальную структуру для работы, и большую часть времени вы будете смешивать их вместе что бы получить логичную и простую для понимания модель данных. Паттерны в Python очень интуитивны с точки зрения синтаксиса и они предлагают большой выбор операций. Это руководство пытается собрать наиболее распространенную и полезную информацию о каждом паттерне, а так же советы о том когда лучше всего использовать тот или иной паттерн.</p>
+<p>Цель данной статьи - показать передовые паттерны в Python и лучший способ их использовать. В зависимости от того, что вам нужно от структуры кода, будь то быстрый поиск, постоянство, индексация и т.д., вы можете выбрать оптимальную структуру для работы, и большую часть времени вы будете смешивать их вместе что бы получить логичную и простую для понимания модель данных. Паттерны в Python очень интуитивны с точки зрения синтаксиса и они предлагают большой выбор операций. Это руководство пытается собрать наиболее распространенную и полезную информацию о каждом паттерне, а так же советы о том когда лучше всего использовать тот или иной паттерн.</p>
 
 <!-- more -->
 
-
-<h2>Генераторы</h2>
+<h2 id="section">Генераторы</h2>
 
 <p>Если вы очень долго используете Python, скорее всего вы слышали о генераторах списков. Они подходят для цикла, блока <strong>if</strong> и способны уместить  все это в одну строку. Другими словами, вы можете отобразить (<strong>map</strong>) и отфильтровать (<strong>filter</strong>) список одним выражением.</p>
 
 <p>Генератор списка состоит из следующих частей:</p>
 
 <ul>
-<li>входная последовательность</li>
-<li>переменная, представляющая элементы входной последовательности</li>
-<li>условие (опционально)</li>
-<li>выходное выражение, полученное из элементов входного списка, которые удовлетворяют условию</li>
+  <li>входная последовательность</li>
+  <li>переменная, представляющая элементы входной последовательности</li>
+  <li>условие (опционально)</li>
+  <li>выходное выражение, полученное из элементов входного списка, которые удовлетворяют условию</li>
 </ul>
-
 
 <p>Допустим, нам нужно получить список всех квадратов целых чисел, которые больше нуля:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span class='line'><span class="n">filtered_and_squared</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">num</span><span class="p">:</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">number</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span class='line'>        <span class="n">filtered_and_squared</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">number</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-</span><span class='line'><span class="k">print</span> <span class="n">filtered_and_squared</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># [1, 16, 100, 4, 9]</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="line"><span class="n">filtered_and_squared</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span class="line">
+</span><span class="line"><span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">num</span><span class="p">:</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">number</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span class="line">        <span class="n">filtered_and_squared</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">number</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class="line"><span class="k">print</span> <span class="n">filtered_and_squared</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># [1, 16, 100, 4, 9]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Согласитесь, довольно просто? Но это занимает 4-е строчки, 2-у уровня вложенности, и вдобавок мы делаем довольно тривиальную вещь. Вы можете уменьшить количество кода с помощью функций <strong>filter</strong>, <strong>lambda</strong> и <strong>map</strong>:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span class='line'><span class="n">filtered_and_squared</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="p">))</span>
-</span><span class='line'><span class="k">print</span> <span class="n">filtered_and_squared</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># [1, 16, 100, 4, 9]</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="line"><span class="n">filtered_and_squared</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="p">))</span>
+</span><span class="line"><span class="k">print</span> <span class="n">filtered_and_squared</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># [1, 16, 100, 4, 9]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Теперь код расширяется горизонтально! Что можно сделать, что бы упростить код? Применить генераторы списков.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span class='line'><span class="n">filtered_and_squared</span> <span class="o">=</span> <span class="p">[</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">num</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
-</span><span class='line'><span class="k">print</span> <span class="n">filtered_and_squared</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># [1, 16, 100, 4, 9]</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="line"><span class="n">filtered_and_squared</span> <span class="o">=</span> <span class="p">[</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">num</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+</span><span class="line"><span class="k">print</span> <span class="n">filtered_and_squared</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># [1, 16, 100, 4, 9]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-
-<p>Генератор списков заключен в квадратные скобки, таким образом, видно что список производится сразу. В этом генераторе списка только один вызов функции и нет вызовов загадочной <strong>lambda</strong> &ndash; используется обычный итератор, выходное выражение и опциональное условие.</p>
+<p>Генератор списков заключен в квадратные скобки, таким образом, видно что список производится сразу. В этом генераторе списка только один вызов функции и нет вызовов загадочной <strong>lambda</strong> - используется обычный итератор, выходное выражение и опциональное условие.</p>
 
 <p>Но, есть и минусы: результирующий списов вычисляется и сохраняется в память сразу. Это не проблема для небольших списков, наподобие приведенных выше, или даже списков на порядок больших. Но иногда это может быть неэффективно.</p>
 
 <p><strong>Генераторы</strong> выручат и сейчас. Выражение-генератор не загружает весь список в память сразу, а вместо этого создает объект генератора, поэтому за один раз можно получить только один элемент.</p>
 
-<p>Выражения-генераторы имеют синтаксис, похожий на синтаксис генераторов списков, только вместо квадратных скобок &ndash; круглые:</p>
+<p>Выражения-генераторы имеют синтаксис, похожий на синтаксис генераторов списков, только вместо квадратных скобок - круглые:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span class='line'><span class="n">filtered_and_squared</span> <span class="o">=</span> <span class="p">(</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">num</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">)</span>
-</span><span class='line'><span class="k">print</span> <span class="n">filtered_and_squared</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># &lt;generator object &lt;genexpr&gt; at 0x00583E18&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">filtered_and_squared</span><span class="p">:</span>
-</span><span class='line'>    <span class="k">print</span> <span class="n">item</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># 1, 16, 100 4,9</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="line"><span class="n">filtered_and_squared</span> <span class="o">=</span> <span class="p">(</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">num</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">)</span>
+</span><span class="line"><span class="k">print</span> <span class="n">filtered_and_squared</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># &lt;generator object &lt;genexpr&gt; at 0x00583E18&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">filtered_and_squared</span><span class="p">:</span>
+</span><span class="line">    <span class="k">print</span> <span class="n">item</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># 1, 16, 100 4,9</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Это даже немного эффективнее использования генераторов списков. Заменим пример более эффективным кодом:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">square_generator</span><span class="p">(</span><span class="n">optional_parameter</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">num</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">optional_parameter</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">print</span> <span class="n">square_generator</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span class='line'><span class="c"># &lt;generator object &lt;genexpr&gt; at 0x004E6418&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Option I</span>
-</span><span class='line'><span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">square_generator</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">print</span> <span class="n">k</span>
-</span><span class='line'><span class="c"># 1, 16, 100, 4, 9</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Option II</span>
-</span><span class='line'><span class="n">g</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">square_generator</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-</span><span class='line'><span class="k">print</span> <span class="n">g</span>
-</span><span class='line'><span class="c"># [1, 16, 100, 4, 9]</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">square_generator</span><span class="p">(</span><span class="n">optional_parameter</span><span class="p">):</span>
+</span><span class="line">    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">num</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">optional_parameter</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">print</span> <span class="n">square_generator</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class="line"><span class="c"># &lt;generator object &lt;genexpr&gt; at 0x004E6418&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Option I</span>
+</span><span class="line"><span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">square_generator</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+</span><span class="line">    <span class="k">print</span> <span class="n">k</span>
+</span><span class="line"><span class="c"># 1, 16, 100, 4, 9</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Option II</span>
+</span><span class="line"><span class="n">g</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">square_generator</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</span><span class="line"><span class="k">print</span> <span class="n">g</span>
+</span><span class="line"><span class="c"># [1, 16, 100, 4, 9]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Использование выражения-генератора вероятно более хорошая практика, но вы не увидите разницы в эффективности, если список не очень велик.</p>
 
 <p>Так же, вы можете использовать функцию <strong>zip</strong> для работы с двумя и более элементами за раз:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">alist</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;a1&#39;</span><span class="p">,</span> <span class="s">&#39;a2&#39;</span><span class="p">,</span> <span class="s">&#39;a3&#39;</span><span class="p">]</span>
-</span><span class='line'><span class="n">blist</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">alist</span><span class="p">,</span> <span class="n">blist</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">print</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># a1 1</span>
-</span><span class='line'><span class="c"># a2 2</span>
-</span><span class='line'><span class="c"># a3 3</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="n">alist</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;a1&#39;</span><span class="p">,</span> <span class="s">&#39;a2&#39;</span><span class="p">,</span> <span class="s">&#39;a3&#39;</span><span class="p">]</span>
+</span><span class="line"><span class="n">blist</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">]</span>
+</span><span class="line">
+</span><span class="line"><span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">alist</span><span class="p">,</span> <span class="n">blist</span><span class="p">):</span>
+</span><span class="line">    <span class="k">print</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># a1 1</span>
+</span><span class="line"><span class="c"># a2 2</span>
+</span><span class="line"><span class="c"># a3 3</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Пример двухуровневого генератора с использованием <strong>os.walk()</strong>:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">os</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="n">top</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">fnames</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">top</span><span class="p">):</span>
-</span><span class='line'>        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
-</span><span class='line'>            <span class="k">yield</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">(</span><span class="s">&#39;C:\Users\XXX\Downloads\Test&#39;</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">print</span> <span class="n">name</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">import</span> <span class="nn">os</span>
+</span><span class="line"><span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="n">top</span><span class="p">):</span>
+</span><span class="line">    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">fnames</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">top</span><span class="p">):</span>
+</span><span class="line">        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+</span><span class="line">            <span class="k">yield</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">(</span><span class="s">&#39;C:\Users\XXX\Downloads\Test&#39;</span><span class="p">):</span>
+</span><span class="line">    <span class="k">print</span> <span class="n">name</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<h2 id="section-1">Декораторы</h2>
 
-<h2>Декораторы</h2>
+<p>Декораторы предоставляют очень удобный метод для добавления функциональности для существующих функций и классов. Похоже на АОП (аспектно-ориентированное программирование) в Java, не так ли? Кроме того, что это проще, а значит мощнее. Например, предположим вам нужно что-либо сделать на точках входа и выхода их функции (защиту, отслеживание, блокирование и др. - стандартные элементы АОП).</p>
 
-<p>Декораторы предоставляют очень удобный метод для добавления функциональности для существующих функций и классов. Похоже на АОП (аспектно-ориентированное программирование) в Java, не так ли? Кроме того, что это проще, а значит мощнее. Например, предположим вам нужно что-либо сделать на точках входа и выхода их функции (защиту, отслеживание, блокирование и др. &ndash; стандартные элементы АОП).</p>
+<p>Декоратор - это функция, которая обертывает другую функцию: вызывается основная функция и ее результат передается в декоратор. Затем декоратор возвращает функцию, которая заменяет оборачиваемую функцию так как нужно.</p>
 
-<p>Декоратор &ndash; это функция, которая обертывает другую функцию: вызывается основная функция и ее результат передается в декоратор. Затем декоратор возвращает функцию, которая заменяет оборачиваемую функцию так как нужно.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&#39;&#39;&#39;</span>
-</span><span class='line'><span class="sd">    Decorator that reports the execution time.</span>
-</span><span class='line'><span class="sd">    &#39;&#39;&#39;</span>
-</span><span class='line'>    <span class="k">pass</span>
-</span><span class='line'>
-</span><span class='line'><span class="nd">@timethis</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span class='line'>        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">def</span> <span class="nf">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+</span><span class="line">    <span class="sd">&#39;&#39;&#39;</span>
+</span><span class="line"><span class="sd">    Decorator that reports the execution time.</span>
+</span><span class="line"><span class="sd">    &#39;&#39;&#39;</span>
+</span><span class="line">    <span class="k">pass</span>
+</span><span class="line">
+</span><span class="line"><span class="nd">@timethis</span>
+</span><span class="line"><span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span><span class="line">    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span class="line">        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Символ <strong>@</strong> указывает на применение декоратора.</p>
 
 <p>Теперь давайте реализуем код декоратора. Здесь мы фактически используем код декорируемой функции:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">time</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-</span><span class='line'>    <span class="sd">&#39;&#39;&#39;</span>
-</span><span class='line'><span class="sd">    Decorator that reports the execution time.</span>
-</span><span class='line'><span class="sd">    &#39;&#39;&#39;</span>
-</span><span class='line'>    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span class='line'>        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span class='line'>        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">result</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">wrapper</span>
-</span><span class='line'>
-</span><span class='line'><span class="nd">@timethis</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span class='line'>        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">countdown</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># (&#39;countdown&#39;, 0.006999969482421875)</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">import</span> <span class="nn">time</span>
+</span><span class="line"><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+</span><span class="line">    <span class="sd">&#39;&#39;&#39;</span>
+</span><span class="line"><span class="sd">    Decorator that reports the execution time.</span>
+</span><span class="line"><span class="sd">    &#39;&#39;&#39;</span>
+</span><span class="line">    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span class="line">    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span class="line">        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span class="line">        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">        <span class="k">print</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">)</span>
+</span><span class="line">        <span class="k">return</span> <span class="n">result</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">wrapper</span>
+</span><span class="line">
+</span><span class="line"><span class="nd">@timethis</span>
+</span><span class="line"><span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span><span class="line">    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span class="line">        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="n">countdown</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># (&#39;countdown&#39;, 0.006999969482421875)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Когда вы пишете код вроде этого:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nd">@timethis</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="nd">@timethis</span>
+</span><span class="line"><span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>это то же самое, как если бы выполнялось следующее</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-</span><span class='line'>  <span class="o">...</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">countdown</span> <span class="o">=</span> <span class="n">timethis</span><span class="p">(</span><span class="n">countdown</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">def</span> <span class="nf">countdown</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span><span class="line">	<span class="o">...</span>
+</span><span class="line">
+</span><span class="line"><span class="n">countdown</span> <span class="o">=</span> <span class="n">timethis</span><span class="p">(</span><span class="n">countdown</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Код внитри декоратора обычно включает в себя создание новой функции, которая принимает любые аргументы (с использованием *args и **kwargs) как показано в случае с функцией wrapper в этом примере. Внутри этой функции вы принимает входные аргументы оригинальной функции и возвращаете результат. Однако, вы так же можете разместить там дополнительный код (например, замер времени и т.д.). Таким образов созданная функция-обертка возвращает результат, как если бы это была оригинальная функция.</p>
 
 <p>Давайте рассмотрим другой пример:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="nd">@decorator</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
-</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;inside function&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="nd">@decorator</span>
+</span><span class="line"><span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
+</span><span class="line">    <span class="k">print</span><span class="p">(</span><span class="s">&quot;inside function&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Когда компилятор проходит этот код, <code>function()</code> компилируется и получившийся объект-функция передается в код декоратора <code>decorator</code>, который создает из нее другой объект-функцию, что бы заменить первоначальную функцию <code>function()</code>.</p>
 
 <p>Как выглядит код декоратора? В основном в примерах показывают его как функцию, но я обнаружил, что легче разобраться в декораторах с помощью классов. Кроме того, классы дают больше возможностей.</p>
 
-<p>Единственное ограничение на результат возвращаемый декоратором, это то, что он может быть вызван как функция &ndash; т.е. что его можно вызвать. Таким образом, любые классы, которые мы используем в качестве декораторов должны быть с методом <code>__call__</code>.</p>
+<p>Единственное ограничение на результат возвращаемый декоратором, это то, что он может быть вызван как функция - т.е. что его можно вызвать. Таким образом, любые классы, которые мы используем в качестве декораторов должны быть с методом <code>__call__</code>.</p>
 
 <p>Что должен делать декоратор после вызова? Вообще-то, все что угодно, но обычно ожидается, что будет использован код оригинальной функции. Однако, это не обязательно:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">decorator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
-</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="s">&quot;inside decorator.__init__()&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">f</span><span class="p">()</span> <span class="c"># Prove that function definition has completed</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="s">&quot;inside decorator.__call__()&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="nd">@decorator</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
-</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;inside function()&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">print</span><span class="p">(</span><span class="s">&quot;Finished decorating function()&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">function</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># inside decorator.__init__()</span>
-</span><span class='line'><span class="c"># inside function()</span>
-</span><span class='line'><span class="c"># Finished decorating function()</span>
-</span><span class='line'><span class="c"># inside decorator.__call__()</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">class</span> <span class="nc">decorator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+</span><span class="line">        <span class="k">print</span><span class="p">(</span><span class="s">&quot;inside decorator.__init__()&quot;</span><span class="p">)</span>
+</span><span class="line">        <span class="n">f</span><span class="p">()</span> <span class="c"># Prove that function definition has completed</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class="line">        <span class="k">print</span><span class="p">(</span><span class="s">&quot;inside decorator.__call__()&quot;</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nd">@decorator</span>
+</span><span class="line"><span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
+</span><span class="line">    <span class="k">print</span><span class="p">(</span><span class="s">&quot;inside function()&quot;</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="k">print</span><span class="p">(</span><span class="s">&quot;Finished decorating function()&quot;</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="n">function</span><span class="p">()</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># inside decorator.__init__()</span>
+</span><span class="line"><span class="c"># inside function()</span>
+</span><span class="line"><span class="c"># Finished decorating function()</span>
+</span><span class="line"><span class="c"># inside decorator.__call__()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Практический пример:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span class='line'>        <span class="n">variable</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;variable&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">print</span> <span class="n">variable</span>
-</span><span class='line'>        <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">modify</span>
-</span><span class='line'>
-</span><span class='line'><span class="nd">@decorator</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">print</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s">&quot;hi&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># hi</span>
-</span><span class='line'><span class="c"># 16 25</span>
-</span><span class='line'><span class="c"># None</span>
-</span><span class='line'><span class="c"># 16 25</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+</span><span class="line">    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span class="line">        <span class="n">variable</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;variable&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+</span><span class="line">        <span class="k">print</span> <span class="n">variable</span>
+</span><span class="line">        <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span class="line">        <span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">modify</span>
+</span><span class="line">
+</span><span class="line"><span class="nd">@decorator</span>
+</span><span class="line"><span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+</span><span class="line">    <span class="k">print</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span>
+</span><span class="line">
+</span><span class="line"><span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s">&quot;hi&quot;</span><span class="p">)</span>
+</span><span class="line"><span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># hi</span>
+</span><span class="line"><span class="c"># 16 25</span>
+</span><span class="line"><span class="c"># None</span>
+</span><span class="line"><span class="c"># 16 25</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-
-<h2>ContextLib (менеджеры контекста)</h2>
+<h2 id="contextlib--">ContextLib (менеджеры контекста)</h2>
 
 <p>Модуль <strong>contextlib</strong> содержит средства для работы с менеджерами контекста и оператором <strong>with</strong>. Обычно, что бы написать менеджер контекста, вы определяете класс с методами <code>__enter__()</code> и <code>__exit__()</code>. Например:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">time</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">demo</span><span class="p">:</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_ty</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
-</span><span class='line'>        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">import</span> <span class="nn">time</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">demo</span><span class="p">:</span>
+</span><span class="line">    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+</span><span class="line">        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class="line">        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_ty</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+</span><span class="line">        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Полный пример:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">time</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">demo</span><span class="p">:</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_ty</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
-</span><span class='line'>        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">with</span> <span class="n">demo</span><span class="p">(</span><span class="s">&#39;counting&#39;</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">n</span> <span class="o">=</span> <span class="mi">10000000</span>
-</span><span class='line'>    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span class='line'>        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># counting: 1.36000013351</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">import</span> <span class="nn">time</span>
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">demo</span><span class="p">:</span>
+</span><span class="line">    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+</span><span class="line">        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class="line">        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_ty</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+</span><span class="line">        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="k">with</span> <span class="n">demo</span><span class="p">(</span><span class="s">&#39;counting&#39;</span><span class="p">):</span>
+</span><span class="line">    <span class="n">n</span> <span class="o">=</span> <span class="mi">10000000</span>
+</span><span class="line">    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span class="line">        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># counting: 1.36000013351</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-
-<p>Менеджер контекста &ldquo;включается&rdquo; оператором <strong>with</strong>. Возвращаемый объект будет использоваться в контексте. Метод <code>__enter__()</code> выполняется, когда поток управления входит в блок кода внутри оператора <strong>with</strong>. Когда поток управления покидает блок кода внутри <strong>with</strong>, вызывается метод <code>__exit__()</code>, что бы очистить используемые ресурсы.</p>
+<p>Менеджер контекста “включается” оператором <strong>with</strong>. Возвращаемый объект будет использоваться в контексте. Метод <code>__enter__()</code> выполняется, когда поток управления входит в блок кода внутри оператора <strong>with</strong>. Когда поток управления покидает блок кода внутри <strong>with</strong>, вызывается метод <code>__exit__()</code>, что бы очистить используемые ресурсы.</p>
 
 <p>Заново напишем исходный пример, используя декоратор <code>@contextmanager</code> из модуля <strong>contextlib</strong>:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">time</span>
-</span><span class='line'>
-</span><span class='line'><span class="nd">@contextmanager</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">demo</span><span class="p">(</span><span class="n">label</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span class='line'>    <span class="k">try</span><span class="p">:</span>
-</span><span class='line'>        <span class="k">yield</span>
-</span><span class='line'>    <span class="k">finally</span><span class="p">:</span>
-</span><span class='line'>        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-</span><span class='line'>        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">with</span> <span class="n">demo</span><span class="p">(</span><span class="s">&#39;counting&#39;</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">n</span> <span class="o">=</span> <span class="mi">10000000</span>
-</span><span class='line'>    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span class='line'>        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># counting: 1.32399988174</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+</span><span class="line"><span class="kn">import</span> <span class="nn">time</span>
+</span><span class="line">
+</span><span class="line"><span class="nd">@contextmanager</span>
+</span><span class="line"><span class="k">def</span> <span class="nf">demo</span><span class="p">(</span><span class="n">label</span><span class="p">):</span>
+</span><span class="line">    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">    <span class="k">try</span><span class="p">:</span>
+</span><span class="line">        <span class="k">yield</span>
+</span><span class="line">    <span class="k">finally</span><span class="p">:</span>
+</span><span class="line">        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span><span class="line">        <span class="k">print</span><span class="p">(</span><span class="s">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="k">with</span> <span class="n">demo</span><span class="p">(</span><span class="s">&#39;counting&#39;</span><span class="p">):</span>
+</span><span class="line">    <span class="n">n</span> <span class="o">=</span> <span class="mi">10000000</span>
+</span><span class="line">    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span class="line">        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># counting: 1.32399988174</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>В функции <code>demo(label)</code> весь код до оператора <strong>yield</strong> исполняется как метод менеджера контекста <code>__enter__()</code>. Весь код после оператора <strong>yield</strong> выполняется как метод <code>__exit__()</code>. Если в блоке внутри <strong>with</strong> возникнет исключение, оно “объявится” на месте оператора <strong>yield</strong>.</p>
 
-<p>В функции <code>demo(label)</code> весь код до оператора <strong>yield</strong> исполняется как метод менеджера контекста <code>__enter__()</code>. Весь код после оператора <strong>yield</strong> выполняется как метод <code>__exit__()</code>. Если в блоке внутри <strong>with</strong> возникнет исключение, оно &ldquo;объявится&rdquo; на месте оператора <strong>yield</strong>.</p>
-
-<h2>Дескрипторы</h2>
+<h2 id="section-2">Дескрипторы</h2>
 
 <p>Дескрипторы определяют как осуществляется доступ к аттрибутам объекта. Дескриптор является способом изменить то, что происходит, когда вы обращаетесть к аттрибуту объекта.</p>
 
-<p>Что бы создать дескриптор, нужно определить хотя бы один из следующих трех методов. Обратите внимание, что <code>instance</code> &ndash; это объект, к аттрибуту которого меняется доступ, а <code>owner</code> &ndash; класс, для которого дескриптор является аттрибутом.</p>
+<p>Что бы создать дескриптор, нужно определить хотя бы один из следующих трех методов. Обратите внимание, что <code>instance</code> - это объект, к аттрибуту которого меняется доступ, а <code>owner</code> - класс, для которого дескриптор является аттрибутом.</p>
 
-<p><code>__get__(self, instance, owner)</code> &ndash; вызывается, когда запрашивается аттрибут (value = obj.attr); то что возвращается будет передано коду, запрашивающему аттрибут.</p>
+<p><code>__get__(self, instance, owner)</code> - вызывается, когда запрашивается аттрибут (value = obj.attr); то что возвращается будет передано коду, запрашивающему аттрибут.</p>
 
-<p><code>__set__(self, instance, value)</code> &ndash; вызывается, когда аттрибуту устанавливается значение (obj.attr = value); ничего не возвращает.</p>
+<p><code>__set__(self, instance, value)</code> - вызывается, когда аттрибуту устанавливается значение (obj.attr = value); ничего не возвращает.</p>
 
-<p><code>__delete__(self, instance)</code> &ndash; вызывается, когда аттрибут объекта удалаяется (del obj.attr)</p>
+<p><code>__delete__(self, instance)</code> - вызывается, когда аттрибут объекта удалаяется (del obj.attr)</p>
 
 <p>Ленивые аттрибуты:</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">weakref</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">lazyattribute</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
-</span><span class='line'>        <span class="k">if</span> <span class="n">obj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-</span><span class='line'>            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-</span><span class='line'>    <span class="nd">@lazyattribute</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="k">print</span> <span class="s">&quot;Being lazy&quot;</span>
-</span><span class='line'>        <span class="k">return</span> <span class="mi">42</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">f</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">print</span> <span class="n">f</span><span class="o">.</span><span class="n">bar</span>
-</span><span class='line'><span class="c"># Being lazy</span>
-</span><span class='line'><span class="c"># 42</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">print</span> <span class="n">f</span><span class="o">.</span><span class="n">bar</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="kn">import</span> <span class="nn">weakref</span>
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">lazyattribute</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+</span><span class="line">    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+</span><span class="line">        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+</span><span class="line">        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+</span><span class="line">    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+</span><span class="line">        <span class="k">if</span> <span class="n">obj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+</span><span class="line">            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</span><span class="line">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+</span><span class="line">    <span class="nd">@lazyattribute</span>
+</span><span class="line">    <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class="line">        <span class="k">print</span> <span class="s">&quot;Being lazy&quot;</span>
+</span><span class="line">        <span class="k">return</span> <span class="mi">42</span>
+</span><span class="line">
+</span><span class="line"><span class="n">f</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span>
+</span><span class="line">
+</span><span class="line"><span class="k">print</span> <span class="n">f</span><span class="o">.</span><span class="n">bar</span>
+</span><span class="line"><span class="c"># Being lazy</span>
+</span><span class="line"><span class="c"># 42</span>
+</span><span class="line">
+</span><span class="line"><span class="k">print</span> <span class="n">f</span><span class="o">.</span><span class="n">bar</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-
-<blockquote><p>Дескрипторы &ndash; это обобщение концепции связанных методов, лежащих в основе реализации классических классов. В классических классах, когда аттрибут экзампляра не найден в словаре экземпляра, поиск продолжается в словаре класса, а затем рекурсивно в словарях базовых классов. Когда аттрибут найден в словаре класса (не в словаре экземпляра), интерпретатор проверяет, является ли найденный объект функцией. Если это так, то возвращается не найденный объект, а обернутый объект, который действует как каррированая функция. Когда вызывается обернутый объект, он вызывает оригинальную функцию с экземпляром в качестве одного из аргументов.</p></blockquote>
+<blockquote>
+  <p>Дескрипторы - это обобщение концепции связанных методов, лежащих в основе реализации классических классов. В классических классах, когда аттрибут экзампляра не найден в словаре экземпляра, поиск продолжается в словаре класса, а затем рекурсивно в словарях базовых классов. Когда аттрибут найден в словаре класса (не в словаре экземпляра), интерпретатор проверяет, является ли найденный объект функцией. Если это так, то возвращается не найденный объект, а обернутый объект, который действует как каррированая функция. Когда вызывается обернутый объект, он вызывает оригинальную функцию с экземпляром в качестве одного из аргументов.</p>
+</blockquote>
 
 <p>Как отмечено выше, дескрипторы закрепляются за классом, и когда осуществляется доступ к аттрибуту, автоматически вызываются специальные методы, причем используемый метод зависит от того, какой типа доступа осуществляется.</p>
 
-<h2>Метаклассы</h2>
+<h2 id="section-3">Метаклассы</h2>
 
 <p>Метаклассы предлагают мощный способ изменить поведение классов в Python.</p>
 
-<p>Метакласс определяется как &ldquo;класса класса&rdquo;. Любой класс, экземпляры которого являются сами классы, является метаклассом.</p>
+<p>Метакласс определяется как “класса класса”. Любой класс, экземпляры которого являются сами классы, является метаклассом.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">demo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">pass</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">obj</span> <span class="o">=</span> <span class="n">demo</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">print</span> <span class="s">&quot;Class of obj is {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
-</span><span class='line'><span class="k">print</span> <span class="s">&quot;Class of obj is {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">demo</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Class of obj is &lt;class &#39;__main__.demo&#39;&gt;</span>
-</span><span class='line'><span class="c"># Class of obj is &lt;type &#39;type&#39;&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="python"><span class="line"><span class="k">class</span> <span class="nc">demo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+</span><span class="line">    <span class="k">pass</span>
+</span><span class="line">
+</span><span class="line"><span class="n">obj</span> <span class="o">=</span> <span class="n">demo</span><span class="p">()</span>
+</span><span class="line">
+</span><span class="line"><span class="k">print</span> <span class="s">&quot;Class of obj is {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
+</span><span class="line"><span class="k">print</span> <span class="s">&quot;Class of obj is {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">demo</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="c"># Class of obj is &lt;class &#39;__main__.demo&#39;&gt;</span>
+</span><span class="line"><span class="c"># Class of obj is &lt;type &#39;type&#39;&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>Мы создали класс и объект этого класса. Запросив у экземпляра аттрибут <code>__class__</code>, мы увидели, что это <code>demo</code>. Дальше интереснее. Что такое класс <code>demo</code>? У него мы тоже можем посмотреть аттрибут <code>__class__</code> - это <code>type</code>.</p>
 
-<p>Мы создали класс и объект этого класса. Запросив у экземпляра аттрибут <code>__class__</code>, мы увидели, что это <code>demo</code>. Дальше интереснее. Что такое класс <code>demo</code>? У него мы тоже можем посмотреть аттрибут <code>__class__</code> &ndash; это <code>type</code>.</p>
+<p>Итак, <code>type</code> - это класс классов в Python. Другими словами, в приведенном выше примере <code>obj</code> - это объект класса <code>demo</code>, сам класс <code>demo</code> является объектом <code>type</code>.</p>
 
-<p>Итак, <code>type</code> &ndash; это класс классов в Python. Другими словами, в приведенном выше примере <code>obj</code> &ndash; это объект класса <code>demo</code>, сам класс <code>demo</code> является объектом <code>type</code>.</p>
+<p>Таким образом это делает <code>type</code> метаклассом - в действительности наиболее часто используемый метакласс в Python, т.к. это дефолтный метакласс для всех классов.</p>
 
-<p>Таким образом это делает <code>type</code> метаклассом &ndash; в действительности наиболее часто используемый метакласс в Python, т.к. это дефолтный метакласс для всех классов.</p>
-
-<p>Т.к. метакласс &ndash; это класс классов, он используется для создания классов (тех, что создают объекты). Но подождите, не мы ли создаем классы, когда определяем их стандартным способом? Все верно, но то что делает Python &ldquo;под капотом&rdquo; выглядит так:</p>
-
-<ul>
-<li>когда встречается определение класса, Python собирает аттрибуты (включая методы) в словарь</li>
-<li>когда определение класса закончилось, Python определяет для него метакласс; давайте назовем его <em>Meta</em></li>
-<li>после Python выполняет <code>Meta(name, bases, dct)</code>, где:
+<p>Т.к. метакласс - это класс классов, он используется для создания классов (тех, что создают объекты). Но подождите, не мы ли создаем классы, когда определяем их стандартным способом? Все верно, но то что делает Python “под капотом” выглядит так:</p>
 
 <ul>
-<li><code>Meta</code> &ndash; это метакласс, поэтому этот вызов создает его экземпляр</li>
-<li><code>name</code> &ndash; это имя только что созданного класса</li>
-<li><code>bases</code> &ndash; это кортеж базовых классов</li>
-<li><code>dct</code> &ndash; словарь, связывающий названия аттрибутов с объектами; в нем перечислены все аттрибуты класса</li>
+  <li>когда встречается определение класса, Python собирает аттрибуты (включая методы) в словарь</li>
+  <li>когда определение класса закончилось, Python определяет для него метакласс; давайте назовем его <em>Meta</em></li>
+  <li>после Python выполняет <code>Meta(name, bases, dct)</code>, где:
+    <ul>
+      <li><code>Meta</code> - это метакласс, поэтому этот вызов создает его экземпляр</li>
+      <li><code>name</code> - это имя только что созданного класса</li>
+      <li><code>bases</code> - это кортеж базовых классов</li>
+      <li><code>dct</code> - словарь, связывающий названия аттрибутов с объектами; в нем перечислены все аттрибуты класса</li>
+    </ul>
+  </li>
 </ul>
-</li>
-</ul>
-
 
 <p>Как определить какой метакласс у класса? Если у класса (или один из его базовых классов) имеет аттрибут <code>__metaclass__</code>, то он считается метаклассом. В противном случае, метаклассом является <strong>type</strong>.</p>
 
-<h2>Паттерны</h2>
+<h2 id="section-4">Паттерны</h2>
 
-<p><strong>&ldquo;Проще просить прощения, чем разрешения&rdquo;</strong></p>
+<p><strong>“Проще просить прощения, чем разрешения”</strong></p>
 
-<p>Один из принципов Python &ndash; &ldquo;Проще просить прощения, чем разрешения&rdquo;. В отличие от подхода &ldquo;семь раз отмерь&rdquo;, этот принцип заключается в том, что сначала вы должны попытаться выполнить действие и если возникает ошибка &ndash; реагировать соответствующим образом. Продвинутая обработка исключений в Python поддерживает этот принцип и помогает разрабатывать надежные и устойчивые программы.</p>
+<p>Один из принципов Python - “Проще просить прощения, чем разрешения”. В отличие от подхода “семь раз отмерь”, этот принцип заключается в том, что сначала вы должны попытаться выполнить действие и если возникает ошибка - реагировать соответствующим образом. Продвинутая обработка исключений в Python поддерживает этот принцип и помогает разрабатывать надежные и устойчивые программы.</p>
 
 <p><strong>Синглтон (одиночка)</strong></p>
 
-<p>Синглтон &ndash; это объекты, предполагающие наличие только одного экземпляра. Python предоставляет несколько путей для реализации синглтонов.</p>
+<p>Синглтон - это объекты, предполагающие наличие только одного экземпляра. Python предоставляет несколько путей для реализации синглтонов.</p>
 
 <p><strong>Null object</strong></p>
 
@@ -761,9 +742,10 @@
 
 <p>Параметры конструктора часто назначаются переменным экземпляра. Этот паттерн может заменить много строк ручного присваивания одной строчкой.</p>
 
-<h2>Заключение</h2>
+<h2 id="section-5">Заключение</h2>
 
 <p>Спасибо за чтение. Оставляйте свои ​​комментарии для дальнейшего обсуждения.</p>
+
 </div>
 
 
@@ -814,6 +796,8 @@
         <a class="basic-alignment left" href="/blog/2014/02/13/parallelism-in-one-line/" title="Previous Post: Многопоточность в одну строку">&laquo; Многопоточность в одну строку</a>
       
       
+        <a class="basic-alignment right" href="/blog/2014/03/08/tutorial-using-angularjs-with-django/" title="Next Post: Руководство: Используем AngularJS с Django">Руководство: Используем AngularJS с Django &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -831,6 +815,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/08/tutorial-using-angularjs-with-django/">Руководство: Используем AngularJS с Django</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/03/05/advanced-design-patterns-in-python/">Передовые паттерны проектирования в Python</a>
