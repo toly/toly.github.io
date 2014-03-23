@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Python | Toly blog]]></title>
   <link href="http://toly.github.io/blog/categories/python/atom.xml" rel="self"/>
   <link href="http://toly.github.io/"/>
-  <updated>2014-03-14T10:18:55+04:00</updated>
+  <updated>2014-03-23T19:50:56+04:00</updated>
   <id>http://toly.github.io/</id>
   <author>
     <name><![CDATA[Toly]]></name>
@@ -12,6 +12,682 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Проект на Django Rest Framework и AngularJS]]></title>
+    <link href="http://toly.github.io/blog/2014/03/14/getting-started-with-django-rest-framework-and-angularjs/"/>
+    <updated>2014-03-14T22:13:12+04:00</updated>
+    <id>http://toly.github.io/blog/2014/03/14/getting-started-with-django-rest-framework-and-angularjs</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Перевод статьи Кевина Стоуна <a href="http://blog.kevinastone.com/getting-started-with-django-rest-framework-and-angularjs.html">Getting Started with Django Rest Framework and AngularJS</a></p>
+</blockquote>
+
+<p>RESTful API становится стандартным компонентом любого современного веб-приложения. <em>Django Rest Framework</em> является мощным фреймворком для разработки REST API на основе вашего Django проекта. <em>AngularJS</em> - современный JavaScript фреймворк для создания сложных клиентских веб-приложений. Он фокусируется на сильном разделении функциональных частей (MVC) и использовании зависимостей для поощрения создания поддерживаемых (и тестируемых) модулей, которые будучи интегрированными предоставляли богатую функциональность на стороне клиента.</p>
+
+<p>В этом посте я покажу создание проекта для примера, который преоставляет REST API, используемый фреймворком AngularJS на клиенте, что бы продемонстрировать как совместно использовать бекенд и фронтенд для упрощения создания сложных приложений.</p>
+
+<!-- more -->
+
+<h2 id="django-">Давайте сделаем тестовый Django проект</h2>
+
+<p>Для примера, давайте создадим простое приложение для обмена фотографиями (что-то типа примитивного Instagram) и выдачи ленты для отдельного пользователя, что бы смотреть фотографии размещенные на сайте.</p>
+
+<p>Все примеры кода для этого проекта доступны в <a href="https://github.com/kevinastone/django-api-rest-and-angular">репозитории на github</a>. Что бы установить тестовый проект локально, ознакомьтесь с <a href="https://github.com/kevinastone/django-api-rest-and-angular/blob/master/Readme.markdown">инструкцией по установке</a>, включенной в репозиторий. Там же описана установка AngularJS (и других javascript библиотек) через <a href="http://yeoman.io/"><strong>bower</strong> и <strong>grunt</strong></a>.</p>
+
+<p>Наконец, есть тестовые данные, доступные в виде фикстур, для демонстрации API. У нас есть несколько пользователей ([‘Bob’, ‘Sally’, ‘Joe’, ‘Rachel’]), два поста ([‘This is a great post’, ‘Another thing I wanted to share’]) и также несколько тестовых фотографий. Прилагаемый <em>Makefile</em> строит для вас тестовые данные.</p>
+
+<p>Несколько замечаний о примерах кода:</p>
+
+<ul>
+  <li>Я пропущу подробности конфигурирования, сборки и запуска приложения. В инструкции, размещенной в репозитории, описаны многие из этих деталей. Если что - сообщайте о любых приблемах на github.</li>
+  <li>Я написал код клиентской части на <strong>Coffee-Script</strong>, так как считаю его более понятным и более эффективным (и немного питоничным). В репозитории находится Grun-файл, который собирает все Coffee-Script файлы объединяет их в один файл - script.js для использования на клиенте.</li>
+</ul>
+
+<h2 id="section">Уровень данных проекта (модели)</h2>
+
+<p>Наша модель данных такая же простая, как и в водном уроке для Django. У вас есть три модели: User (пользователь), Post (пост) и Photo (фотография). Пользователь может быть автором множества постов (а также иметь много фолловеров), пост может содержать много фотографий (что-то вроде альбома или галлереи) вместе с названием и необязательным описанием.</p>
+
+<p>``` python
+from django.db import models</p>
+
+<p>from django.contrib.auth.models import AbstractUser</p>
+
+<p>class User(AbstractUser):
+    followers = models.ManyToManyField(‘self’, related_name=’followees’, symmetrical=False)</p>
+
+<p>class Post(models.Model):
+    author = models.ForeignKey(User, related_name=’posts’)
+    title = models.CharField(max_length=255)
+    body = models.TextField(blank=True, null=True)</p>
+
+<p>class Photo(models.Model):
+    post = models.ForeignKey(Post, related_name=’photos’)
+    image = models.ImageField(upload_to=”%Y/%m/%d”)
+```</p>
+
+<h2 id="api--django-rest-framework">API на Django Rest Framework</h2>
+
+<p>Django Rest Framework предоставляет готовую архитектуру для разработки как простых RESTful API, так и более сложных конструкций. Его ключевая особенность, это четкое разделение на сериализаторы, которые описывают соответствие между моделью и ее форматом представления (будь то JSON, XML или любой другой формат), и на отдельный набор универсальных представлениях на основе классов (Class-Based-Views), которые могут быть по необходимости расширены. Вы так же можете определить свою ссылочную структуру, вместо использования дефолтной. Это то, что отличает Django Rest Framework от других фреймворков, таких как Tastypie и Piston, которые автоматизируют формировнаие API на основе моделей, но это происходит за счет снижения гибкости и применимости к различным нестандартным требованиям (особенно, если речь идет о доступах и вложенных ресурсах).</p>
+
+<h2 id="section-1">Сериализаторы моделей</h2>
+
+<p>Сериализаторы в Django Rest Framework предназначены для преобразования экземпляров django-модели в API представление. Это дает нам возможность конвертировать любые типы данных, или предоставлять дополнительную информацию о данной модели. Например, для пользователя, мы только откроем некоторые поля, скрывая некоторые аттрибуты, такие как пароль и адрес електронной почты. Для фото, мы сконвертируем ImageField так, что бы возвращалась ссылка на изображение (а не путь во внутреннем медиа каталоге).</p>
+
+<p>Для сериализатора <code>PostSerializer</code>, мы выбрали вставку данных автора прямо в пост (до этого в поле <code>author</code> была ссылка на данные автора). Это делает информацию доступнее для клиентской части, и не требует дополнительных запросов к API для дублирующихся авторов каждого поста. Альтернативный вариант сс сылкой на автора предоставлен закомментированной строкой для сравнения. Сильной стороной сериализаторов является то, что их можно расширить для создания дополнительных версий, которые используют ссылки на данные автора вместо вложенных данных (например, для вывода списка постов одного пользователя).</p>
+
+<p>Что бы привязать данные автора к <code>PostSerializer</code>, нам придется сделать так, что бы эти данные поддерживались API представлением. Поэтому мы сделаем поле автора необязательным (<code>required=False</code>) в сериализаторе поста и добавим его в исключения валидации.</p>
+
+<p>``` python
+from rest_framework import serializers</p>
+
+<p>from .models import User, Post, Photo</p>
+
+<p>class UserSerializer(serializers.ModelSerializer):
+    posts = serializers.HyperlinkedIdentityField(‘posts’, view_name=’userpost-list’, lookup_field=’username’)</p>
+
+<pre><code>class Meta:
+    model = User
+    fields = ('id', 'username', 'first_name', 'last_name', 'posts', )
+</code></pre>
+
+<p>class PostSerializer(serializers.ModelSerializer):
+    author = UserSerializer(required=False)
+    photos = serializers.HyperlinkedIdentityField(‘photos’, view_name=’postphoto-list’)
+    # author = serializers.HyperlinkedRelatedField(view_name=’user-detail’, lookup_field=’username’)</p>
+
+<pre><code>def get_validation_exclusions(self):
+    # Need to exclude `author` since we'll add that later based off the request
+    exclusions = super(PostSerializer, self).get_validation_exclusions()
+    return exclusions + ['author']
+
+class Meta:
+    model = Post
+</code></pre>
+
+<p>class PhotoSerializer(serializers.ModelSerializer):
+    image = serializers.Field(‘image.url’)</p>
+
+<pre><code>class Meta:
+    model = Photo ```
+</code></pre>
+
+<p>Хорошо, загрузив тестовые данные, давайте попробуем поработать с этими сериализаторами. Возможно вы увидите предупреджающие сообщения <code>DeprecationWarning</code> из-за использования <code>HyperlinkedIdentityField</code> без предоставления объекта запроса для построения ссылки. В настоящих представлениях объект запроса присутствует, так что вы можете спокойно игнорировать эти сообщения.</p>
+
+<p><code>python
+&gt;&gt;&gt; from example.api.models import User
+&gt;&gt;&gt; user = User.objects.get(username='bob')
+&gt;&gt;&gt; from example.api.serializers import *
+&gt;&gt;&gt; serializer = UserSerializer(user)
+&gt;&gt;&gt; serializer.data
+{'id': 2, 'username': u'bob', 'first_name': u'Bob', 'last_name': u'', 'posts': '/api/users/bob/posts'}
+&gt;&gt;&gt; post = user.posts.all()[0]
+&gt;&gt;&gt; PostSerializer(post).data
+{'author': {'id': 2, 'username': u'bob', 'first_name': u'Bob', 'last_name': u'', 'posts': '/api/users/bob/posts'}, 'photos': '/api/posts/2/photos', u'id': 2, 'title': u'Title #2', 'body': u'Another thing I wanted to share'}
+&gt;&gt;&gt; serializer = PostSerializer(user.posts.all(), many=True)
+&gt;&gt;&gt; serializer.data
+[{'author': {'id': 2, 'username': u'bob', 'first_name': u'Bob', 'last_name': u'', 'posts': '/api/users/bob/posts'}, 'photos': '/api/posts/2/photos', u'id': 2, 'title': u'Title #2', 'body': u'Another thing I wanted to share'}]
+</code></p>
+
+<h2 id="api">Ссылочная структура API</h2>
+
+<p>Для нашего API, мы хотим использовать относительно плоскую структуру, что бы попытаться определить типичные сущности для данного API,  но так же и обеспечить некоторые вспомогательные вложенные данные для фильтрации (например, посты определенного пользователя или фотографии определенного поста). Обратите внимание, что мы используем первичные ключи (primary key) моделей в качестве идентификатора, но для пользователей мы используем его имя, так как он так же является уникальным (позже мы увидим это в предствалениях).</p>
+
+<p>``` python
+from django.conf.urls import patterns, url, include</p>
+
+<p>from .api import UserList, UserDetail
+from .api import PostList, PostDetail, UserPostList
+from .api import PhotoList, PhotoDetail, PostPhotoList</p>
+
+<p>user_urls = patterns(‘’,
+    url(r’^/(?P<username>[0-9a-zA-Z_-]+)/posts$', UserPostList.as_view(), name='userpost-list'),
+    url(r'^/(?P<username>[0-9a-zA-Z_-]+)$', UserDetail.as_view(), name='user-detail'),
+    url(r'^$', UserList.as_view(), name='user-list')
+)</username></username></p>
+
+<p>post_urls = patterns(‘’,
+    url(r’^/(?P<pk>\d+)/photos$', PostPhotoList.as_view(), name='postphoto-list'),
+    url(r'^/(?P<pk>\d+)$', PostDetail.as_view(), name='post-detail'),
+    url(r'^$', PostList.as_view(), name='post-list')
+)</pk></pk></p>
+
+<p>photo_urls = patterns(‘’,
+    url(r’^/(?P<pk>\d+)$', PhotoDetail.as_view(), name='photo-detail'),
+    url(r'^$', PhotoList.as_view(), name='photo-list')
+)</pk></p>
+
+<p>urlpatterns = patterns(‘’,
+    url(r’^users’, include(user_urls)),
+    url(r’^posts’, include(post_urls)),
+    url(r’^photos’, include(photo_urls)),
+)
+```</p>
+
+<h2 id="api-1">Представления API</h2>
+
+<p>Сильной стороной Django Rest Framework является набор базовых представлений, которые позволяют легко решать распространенные задачи связанные с CRUD практически без изменений. Для простейших представлений, вы предоставляете <code>model</code> и <code>serializer_class</code>, и расширяете одним из встроенных представлений (таким как <code>ListAPIView</code> или <code>RetrieveAPIView</code>).</p>
+
+<p>В нашем случае мы имее пару настроек. Во-первых, для пользователей в качестве поля поиска мы будем использовать поле <code>username</code>, вместо <code>pk</code>. Поэтому мы устанавливаем поле <code>lookup_field</code>.</p>
+
+<p>Мы так же хотели создать вложенные данные представлений для постов пользователей и фотографий поста. Для этого просто переопределим метод представления <code>get_queryset</code> так, что бы он фильтровал результаты по вложенным параметрам (<code>username</code> и <code>pk</code>, соответственно).</p>
+
+<p>``` python
+from rest_framework import generics, permissions</p>
+
+<p>from .serializers import UserSerializer, PostSerializer, PhotoSerializer
+from .models import User, Post, Photo</p>
+
+<p>class UserList(generics.ListCreateAPIView):
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]</p>
+
+<p>class UserDetail(generics.RetrieveAPIView):
+    model = User
+    serializer_class = UserSerializer
+    lookup_field = ‘username’</p>
+
+<p>class PostList(generics.ListCreateAPIView):
+    model = Post
+    serializer_class = PostSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]</p>
+
+<p>class PostDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = Post
+    serializer_class = PostSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]</p>
+
+<p>class UserPostList(generics.ListAPIView):
+    model = Post
+    serializer_class = PostSerializer</p>
+
+<pre><code>def get_queryset(self):
+    queryset = super(UserPostList, self).get_queryset()
+    return queryset.filter(author__username=self.kwargs.get('username'))
+</code></pre>
+
+<p>class PhotoList(generics.ListCreateAPIView):
+    model = Photo
+    serializer_class = PhotoSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]</p>
+
+<p>class PhotoDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = Photo
+    serializer_class = PhotoSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]</p>
+
+<p>class PostPhotoList(generics.ListAPIView):
+    model = Photo
+    serializer_class = PhotoSerializer</p>
+
+<pre><code>def get_queryset(self):
+    queryset = super(PostPhotoList, self).get_queryset()
+    return queryset.filter(post__pk=self.kwargs.get('pk')) ```
+</code></pre>
+
+<h1 id="api-2">Лирическое отступление: встроенный браузер API</h1>
+
+<p>Одним из преимуществ Django Rest Framework является то, что он поставляется со встроенным браузером API для тестирования вашего API. Очень похожий на Django админку, он может помочь в начале разработки.</p>
+
+<p>Просто загрузив одну из ваших API сущностей в браузер, Django Rest Framework предоставит вам удобный клиентсткий интерфейс для взаимодействия с API.</p>
+
+<p><img class="left" src="/images/DRF_Angular/browser_user_posts.png" width="300"> <img class="left" src="/images/DRF_Angular/browser_users.png" width="300"></p>
+
+<h2 id="api-3">Добавление прав доступа и принадлежности в API</h2>
+
+<p>Как написано выше, наши представления API позволяют любому создавать что-либо на нашем сайте. Одним из преимуществ использования Django Rest Framework является наличие типичных представлений, делающих простым управление доступом в представлении без влияния на основную модель и сериализаторы. Что бы включить контроль над тем, кому разрешено редактировать наши API ресурсы, мы можем создать несколько классов, которые обеспечивают управление авторизацией для ограничения доступа. Они должны возвращать логическое значение для каждого запроса. Это дает нам доступ к полному запросу, в том числе куки, аутентифицированного пользователя и многое другое.</p>
+
+<p>``` python
+from rest_framework import permissions</p>
+
+<p>class SafeMethodsOnlyPermission(permissions.BasePermission):
+    “"”Only can access non-destructive methods (like GET and HEAD)”””
+    def has_permission(self, request, view):
+        return self.has_object_permission(request, view)</p>
+
+<pre><code>def has_object_permission(self, request, view, obj=None):
+    return request.method in permissions.SAFE_METHODS
+</code></pre>
+
+<p>class PostAuthorCanEditPermission(SafeMethodsOnlyPermission):
+    “"”Allow everyone to list or view, but only the other can modify existing instances”””
+    def has_object_permission(self, request, view, obj=None):
+        if obj is None:
+            # Either a list or a create, so no author
+            can_edit = True
+        else:
+            can_edit = request.user == obj.author
+        return can_edit or super(PostAuthorCanEditPermission, self).has_object_permission(request, view, obj)
+```</p>
+
+<p>Кроме использования элементарной авторизации, мы также хотим, что бы предварительно заполнялись значения при сохранении в зависимости от того, кто делает запрос. Когда кто-то создает новый пост, мы хотим, что бы он автоматически назначался автором этого поста. Что бы устранить дублирование между <code>PostList</code> и <code>PostDetail</code> мы можем создать миксин, который будет содержать общую конфигурацию.</p>
+
+<p>``` python
+class PostMixin(object):
+    model = Post
+    serializer_class = PostSerializer
+    permission_classes = [
+        PostAuthorCanEditPermission
+    ]</p>
+
+<pre><code>def pre_save(self, obj):
+    """Force author to the current user on save"""
+    obj.author = self.request.user
+    return super(PostMixin, self).pre_save(obj)
+</code></pre>
+
+<p>class PostList(PostMixin, generics.ListCreateAPIView):
+    pass</p>
+
+<p>class PostDetail(PostMixin, generics.RetrieveUpdateDestroyAPIView):
+    pass
+```</p>
+
+<h2 id="api--angularjs">Использование API через AngularJS</h2>
+
+<p>С появлением более интерактивных веб-приложений, RESTful API могут быть использованы в сложных клиентских интерфейсах, что бы получать и взаимодействовать с моделью данных приложения. AngularJS может здорово помочь в этом, из-за его сильного разделения элементов управления. Модульная архитектура AngularJS является настраиваемой. Ваше приложение состоит из модулей, которые определяют сервисы, директивы и контроллеры, и таким образом функционал оказывается разложенным по полочкам.</p>
+
+<p>Преимуществом AngularJS является то, что он предоставляет возможность <a href="http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%BD%D0%BE%D0%B5_%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5">реактивного программирования</a> используя свой язык JavaScript-подобных выражений. Мы можем просто определить шаблон, который ссылается на переменные и наша страница будет автоматически обновлена при изменении этих переменных.</p>
+
+<p>Для простейшего примера, мы просто выведем список постов в нашем приложении. Ниже приведен минимальный шаблон для AngularJS. Во-первых, на самом верхнем теге (<code>body</code>) мы укажем, какое приложение Angular используется для запуска этой страницы (<code>example.app.basic</code>), которое мы определим как корневой модуль. Во-вторых, нам нужен специальный контроллер, который будет управлять нашим шаблоном (<code>AppController</code>). Контроллер, в терминологии AbgularJS, больше соответствует связке модели и контроллера в традиционном MVC (c объектом $scope, содержащим состояние модели). Контроллеры определяют области видимости, которые содержат экземпляры модели, и они могут быть вложенными, чтобы ограничить область видимости по мере спускания по дереву DOM. И, наконец, мы используем директиву Angular (<code>ng-repeat</code>), которая является управляющей структурой для перебора наших моделей постов, хранящихся в <code>$state</code>. Внутри блока этой итерации, мы определяем несколько тегов и используем Angular-выражения (похожие на шаблонные теги Django), чтобы вывести имя пользователя автора, заголовок и содержание поста.</p>
+
+<blockquote>
+  <p>Используйте тег <code>verbatim</code> для включения Angular-выражений, что бы Django не пытался их отрендерить.</p>
+</blockquote>
+
+<blockquote>
+  <p>Я заключил некоторые части шаблона в джанговсий тег <code>{% block %}</code>, чтобы потом наследовать этот шаблон для каждого из примеров.</p>
+</blockquote>
+
+<p>
+``` django
+{% load staticfiles %}</p>
+
+<html>
+<head>
+&lt;link rel="stylesheet" type="text/css" href="{% static "bootstrap/dist/css/bootstrap.css" %}"&gt;
+</head>
+<body ng-app="{% block ng_app %}example.app.static{% endblock %}">
+<div class="content" ng-controller="{% block ng_controller %}AppController{% endblock %}">{% block content %}
+{% verbatim %}
+    <div class="panel" ng-repeat="post in posts">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title">{{ post.title }}</h3>
+            <author class="pull-right">{{ post.author.username }}</author>
+        </div>
+        <p class="well">{{ post.body }}</p>
+    </div>
+{% endverbatim %}
+{% endblock %}</div>
+&lt;script src="{% static "underscore/underscore.js" %}"&gt;
+&lt;script src="{% static "angular/angular.js" %}"&gt;
+&lt;script src="{% static "angular-resource/angular-resource.js" %}"&gt;
+&lt;script src="{% static "js/script.js" %}"&gt;
+</body>
+</html>
+<p>```
+</p>
+
+<p>Теперь, давайте дополним шаблон простым контроллером, который будет возвращать список постов. Сейчас мы жестко пропишем посты, а потом будем получать их через AJAX.</p>
+
+<p>``` coffeescript
+app = angular.module ‘example.app.static’, []</p>
+
+<p>app.controller ‘AppController’, [‘$scope’, ‘$http’, ($scope, $http) -&gt;
+    $scope.posts = [
+        author:
+            username: ‘Joe’
+        title: ‘Sample Post #1’
+        body: ‘This is the first sample post’
+    ,
+        author:
+            username: ‘Karen’
+        title: ‘Sample Post #2’
+        body: ‘This is another sample post’
+    ]
+]
+```</p>
+
+<p>Если вы установили все зависимости и запустили <code>grunt</code>, что бы скомпилить CoffeScript в JavaScript, то вы должны увидеть наш шаблон с прописанными в коде данными вроде этого:</p>
+
+<p><img class="center" src="/images/DRF_Angular/example_static.png"></p>
+
+<h2 id="xhr-----api">Используем XHR для получения постов из API</h2>
+
+<p>Теперь, давайте продолжим и обновим контроллер, чтобы получать список постов из нашего API. Сервис <code>$http</code> в AngularJS похож на <code>$.ajax</code> из jQuery или иную реализацию XHR. Обратите внимание, что с AngularJS мы просто обновили нашу модель (<code>$scope.posts</code>) результатом AJAX-запроса и наше представление автоматически обновляется по завершении AJAX-запроса. Нет необходимости изменять DOM. Такой реактивный подход позволяет нам разрабатывать сложные пользовательские интерфейсы с использованием взаимозависимостей данных нашей модели и компонентами пользовательского интерфейса, которые реагируют соответствующим образом без необходимости прямого управления этими связями, что позволяет сделать представления и модель данных слабосвязанными между собой.</p>
+
+<p>``` coffeescript
+app = angular.module ‘example.app.basic’, []</p>
+
+<p>app.controller ‘AppController’, [‘$scope’, ‘$http’, ($scope, $http) -&gt;
+    $scope.posts = []
+    $http.get(‘/api/posts’).then (result) -&gt;
+        angular.forEach result.data, (item) -&gt;
+            $scope.posts.push item
+]
+```</p>
+
+<p>С сервисом <code>$http</code>, получающим список постов из нашего API, наша тестовая страница покажет список постов прямо с сервера.</p>
+
+<p><img class="center" src="/images/DRF_Angular/example_basic.png"></p>
+
+<h2 id="angular-resource--api">Используем Angular-Resource для API</h2>
+
+<p>Хотя <code>$http</code> и позволяет с помощью XHR-запросов получать данные API для нашего приложения, это вынуждает нас дублировать код с учетом деталей нашего API, в том числе формирование URL’ов, осуществление запросов и другие вещи, которые можно реализовать на более высоком уровне абстракции. Используйте Angular-Resource, который предоставляет механизм для определения вашего API через сервисы Angular, управляющие большей частью низкоуровневых процессов, тем самым упрощая взаимодействие с API.</p>
+
+<p>Для работы с Angular-Resource (ngResource), вы просто определяете связь между сущностями вашего API и параметрами в шаблоне URL-адреса (так же как и джанговсие urlpatterns). К сожелению, не так уж просто связать Django и определения ngResource, поэтому прицип DRY здесь неприменим.</p>
+
+<p>При определении ваших ресурсов (используя $resource), вы просто предоставляете шаблон URL-адреса, список фигурируемых параметров по умолчанию и, при необходимости, некоторые HTTP методы. В нашем случае, нам нужен ресурс для модели <code>User</code>, который бы связывал имя пользователя (<code>:username</code>) в качестве параметра в URL-запросе и поле <code>username</code> из экземпляра ресурса. Сущности <code>Post</code> и <code>Photo</code> используют поле <code>id</code> экземпляра, т.к. оно является первичным ключом (идентификатором).</p>
+
+<p>``` coffeescript
+app = angular.module ‘example.api’, [‘ngResource’]</p>
+
+<p>app.factory ‘User’, [‘$resource’, ($resource) -&gt;
+    $resource ‘/api/users/:username’, username: ‘@username’
+]</p>
+
+<p>app.factory ‘Post’, [‘$resource’, ($resource) -&gt;
+    $resource ‘/api/posts/:id’, id: ‘@id’
+]</p>
+
+<p>app.factory ‘Photo’, [‘$resource’, ($resource) -&gt;
+    $resource ‘/api/photos/:id’, id: ‘@id’
+]
+```</p>
+
+<p>Теперь, когда мы определили наш модуль с API, мы можем использовать его в качестве зависимости в нашем модуле контроллера и применить его как сервис, который наш контроллер сможет использовать для доступа к API. Добавим <code>example.api</code> как зависимый модуль и список любых ресурсов API в качестве зависимостей в нашем поределении контроллера. По умолчанию, ваши ресурсы имеют множество основных CRUD методов, включая <code>query()</code> (для получения набора/списка объектов), <code>get()</code> (для получения отдельных объектов), <code>save()</code>, <code>delete()</code> и другие.</p>
+
+<p>``` coffeescript
+app = angular.module ‘example.app.resource’, [‘example.api’]</p>
+
+<p>app.controller ‘AppController’, [‘$scope’, ‘Post’, ($scope, Post) -&gt;
+    $scope.posts = Post.query()
+]
+```</p>
+
+<p>В результате получим такой же список постов, как и в примере выше.</p>
+
+<p><img class="center" src="/images/DRF_Angular/example_resource.png"></p>
+
+<h2 id="section-2">Добавляем фотографии в список постов</h2>
+
+<p>Теперь у нас есть список постов, показываемый с помощью вызовов ngResource API, но мы выполняем только получение данных. В реальных приложениях, ваши данные редко хранятся лишь в одной сущности API и может потребоваться несколько скоординированных запросов для построения актуальных данных модели. Давайте улучшим наше приложения, чтобы получать также фоторгафии каждого поста и выводить их.</p>
+
+<p>Сначала давайте добавим два дополнительных ресурсы для вложенных вызовов API:</p>
+
+<p>``` coffeescript
+app.factory ‘UserPost’, [‘$resource’, ($resource) -&gt;
+    $resource ‘/api/users/:username/posts/:id’
+]</p>
+
+<p>app.factory ‘PostPhoto’, [‘$resource’, ($resource) -&gt;
+    $resource ‘/api/posts/:post_id/photos/:id’
+]
+```</p>
+
+<p>Это создаст два дополнительных сервиса (<code>UserPost</code> и <code>UserPhoto</code>) которые мы можем использовать для получения ресурсов связанных с определенным пользователем и определенным постом соответственно. Так как это вложенные ресурсы, нам нужно что бы они загружались после основного ресурса (другой вариант заключается в использовании механизма <code>$watch</code> в Angular в ответ на изменения и выполнять дополнительные запросы к API). Для этого мы будем использовать сервис <code>$q</code> в Angular, который обеспечивает обещано-отложенную реализацию, позволяющую создавать цепочки вызовов. Начиная с версии 1.1 ngResource предоставляет аттрибут $promise, который вы можете применить для создания цепочки вызовов. Мы используем этот интерфейс, что бы после запроса к API следовало получение фотографий для полученного поста.</p>
+
+<p>У вас есть несколько вариантов, как работать с вложенными ресурсами. Для этого случая, мы просто создадим еще один контейнер в <code>$scope</code> для фотографий и используем <code>post_id</code> в качестве идентификатора. Выражения в Angular и в его языке шаблонов игорируют отсутствующие ключи, поэтому мы просто проитерируем <code>photos[post.id]</code> чтобы получить фотографии в шаблоне. Обратите внимание, что нам не нужно что-либо делать, чтобы обновить представление или шаблон. Ангуляровский процесс <code>$digest</code> самостоятельно обноруживает обновления.</p>
+
+<p>``` coffeescript
+app = angular.module ‘example.app.photos’, [‘example.api’]</p>
+
+<p>app.controller ‘AppController’, [‘$scope’, ‘Post’, ‘PostPhoto’, ($scope, Post, PostPhoto) -&gt;
+    $scope.photos = {}
+    $scope.posts = Post.query()
+    $scope.posts.$promise.then (results) -&gt;
+        # Load the photos
+        angular.forEach results, (post) -&gt;
+            $scope.photos[post.id] = PostPhoto.query(post_id: post.id)
+]
+```</p>
+
+<p>Также обновим наш шаблон чтобы итерировать каждую модель поста для отображения фотографий каждого поста. Обратите внимание, как AngularJS повторно обновляет представление по мере того, как данные загружаются из API. В этом случае, мы итерируем фотографии объекта, ссылающиеся на идентификаторы постов, которые в свою очередь итерируются директивой <code>ng-repeat</code>. Мы также используем директиву <code>ng-src</code> вместо аттрибута <code>src</code>, так как это не позволяет браузеру загружать картинку до того как выражение Angular было прекомпилировано (тогда бы вы увидели ошибку 404 в ваших логах о невозможности показа ’/media/{{ photo.image }}’).</p>
+
+<p>
+<code>html
+&lt;div class="panel" ng-repeat="post in posts"&gt;
+    &lt;div class="panel-heading clearfix"&gt;
+        &lt;h3 class="pull-left panel-title"&gt;{{ post.title }}&lt;/h3&gt;
+        &lt;author class="pull-right"&gt;{{ post.author.username }}&lt;/author&gt;
+    &lt;/div&gt;
+    &lt;p class="well"&gt;{{ post.body }}&lt;/p&gt;
+    &lt;span class="photo" ng-repeat="photo in photos[post.id]"&gt;
+        &lt;img class="img-thumbnail" ng-src="{{ photo.image }}"&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code>
+</p>
+
+<p>И в итоге, обновив страницу <a href="http://localhost:8000/photos">http://localhost:8000/photos</a>, получим отрендеренные фотографии:</p>
+
+<p><img class="center" src="/images/DRF_Angular/example_photos.png"></p>
+
+<h2 id="angularjs----csrf">Лирическое отступление: AngularJS и защита от CSRF</h2>
+
+<p>Django Rest Framework расширяет джанговскую защиту от <a href="http://ru.wikipedia.org/wiki/%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D0%BB%D0%BA%D0%B0_%D0%BC%D0%B5%D0%B6%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2%D1%8B%D1%85_%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%BE%D0%B2">CSRF</a> (Cross Site Request Forgery) используя класс <code>SessionAuthentication</code> (как например в нашем случае: используется таже сессия браузера, что и для веб-приложения). Это способствует тому, что вредоносные сценарии не смогут использовать наших пользователей для выполнения различных запросов к нашему API, заставляя сценарии при каждом запросе отправлять генерируемый сервером токен. Модульная архитектура AngularJS и внедрение зависимостей позволяет сделать это простым конфигурированием запросов к API с помощью включения CSRF-токена в заголовок запроса (по желанию, можно также использовать куки).</p>
+
+<p>В нашем джанговском шаблоне, просто добавьте тег <code>&lt;script&gt;</code> для конфигурирования сервиса <code>$http</code> и настройте джанговское приложение, что бы шаблонная переменная <code>{{ csrf_token }}</code> передавалась в заголовок ответа для всех вызовов API.</p>
+
+<blockquote>
+  <p>Будьте уверены, что этот скрипт загружается <strong>после</strong> определений модуля.</p>
+</blockquote>
+
+<blockquote>
+  <p>Вы можете передавать CSRF токен между Angular и Django через куки или другим способом. Этот явный механизм с использованием заголовков просто обеспечивает генерацию CSRF токена при каждом запросе.</p>
+</blockquote>
+
+<p>
+<code>html
+&lt;script&gt;
+// Add the CSRF Token
+var app = angular.module('example.app'); // Not including a list of dependent modules (2nd parameter to `module`) "re-opens" the module for additional configuration
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token|escapejs }}';
+}]);
+&lt;/script&gt;
+</code>
+</p>
+
+<h2 id="api---angularjs">Создание и модификация ресурсов API с использованием AngularJS</h2>
+
+<p>Теперь давайте сделаем редактор в нашем представлении ленты для публикации новых постов (такой как обновление статуса в Фейсбуке). Хотя большинство руководств по Angular просто добавляют функциональность к уже существующему контроллеру, я хочу показать как сохранить ваши контроллеры компактными и модульными, поэтому для этого редактора постов мы сделаем отдельный контроллер и покажем, как контроллеры используют вложенные области видимости для расширения функциональности. Это также дает возможность расширить существующий можуль <code>example.app.photos</code>, реализующий основной контроллер <code>AppController</code> для ленты постов.</p>
+
+<p>Сперва, нам нужно расшарить наш базовый шаблон, и добавить html шаблон для редактора. Мы также добавим CSRF токен, согласно приведенным выше инструкциям, так как для создания новых постов будут использоваться потенциально уязвимые методы.</p>
+
+<p>
+``` django
+{% extends ‘base.html’ %}</p>
+
+<p>{% block ng_app %}example.app.editor{% endblock %}</p>
+
+<p>{% block content %}
+{% verbatim %}
+&lt;div ng-controller="EditController"&gt;
+    &lt;h5&gt;Create a New Post&lt;/h5&gt;
+    &lt;form class="form-inline"&gt;
+        &lt;div class="form-group block-level"&gt;
+            <input type="text" class="form-control" ng-model="newPost.title" placeholder="Title" />
+        &lt;/div&gt;
+        &lt;div class="form-group"&gt;
+            <input type="text" class="form-control" ng-model="newPost.body" placeholder="Body" />
+        &lt;/div&gt;
+        &lt;div class="form-group"&gt;
+            &lt;button class="btn btn-default" ng-click="save()"&gt;Add Post&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+{% endverbatim %}
+{{ block.super }}
+{% endblock %}</p>
+
+<p>{% block js %}
+{{ block.super }}
+<script>
+// Add the CSRF Token
+var app = angular.module('example.app.editor'); // Not including a list of dependent modules (2nd parameter to `module`) "re-opens" the module for additional configuration
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token|escapejs }}';
+}]);
+</script>
+{% endblock %}
+```
+</p>
+
+<p>Теперь, у нас есть редактор - давайте сделаем контроллер для его подключения. Заметьте, что теперь у нас в зависимостях два модуля: базовый модуль нашей ленты постов и модуль API, содержащий все определения ресурсов API (<code>$resource</code>).</p>
+
+<p>``` coffeescript
+app = angular.module ‘example.app.editor’, [‘example.api’, ‘example.app.photos’]</p>
+
+<p>app.controller ‘EditController’, [‘$scope’, ‘Post’, ($scope, Post) -&gt;</p>
+
+<pre><code>$scope.newPost = new Post()
+$scope.save = -&gt;
+    $scope.newPost.$save().then (result) -&gt;
+        $scope.posts.push result
+    .then -&gt;
+        # Reset our editor to a new blank post
+        $scope.newPost = new Post() ] ```
+</code></pre>
+
+<p>Ранее, в представлениях API, мы добавляли некоторые ограничения прав доступа, чтобы предотвратить изменения пользователями чужих постов. До сих пор это не имело значения, какое отношение имеет пользователь к редактируемому посту. Но теперь, когда мы хотим создать пользователей, мы должны гарантировать, что обрабатываем запрос от пользователя, который имеет право на этот запрос (иначе, запрос на создание нового поста должен быть отклонен). В этом учебном примере, мы использовали хак аутентификации Django, который автоматически авторизует вас как пользователя <code>root</code>. Разумеется, в продакшене или ином недоверенном окружении так делать нельзя. Это сделано для упрощения демонстрации тестового приложения, игнорируя регистрацию и авторизацию пользователя.</p>
+
+<p><img class="center" src="/images/DRF_Angular/example_editor.png"></p>
+
+<h2 id="section-3">Обработка ошибок</h2>
+
+<p>Если вы тестировали получившееся приложение, пробовали ли вы создать пост без заголовка? Мы определили обязательные поля в модели Django, и Django Rest Framework будет проверять их наличие при создании нового поста. Если вы попытаетесь создать пост без заголовка (например, с помощью браузерного API или наше новой формы), вы получите 400-ю ошибку, с описанием причин ошибочности запроса. Давайте использовать этот ответ для информировнаия пользователя.</p>
+
+<p><code>json
+{
+    "title": [
+        "This field is required."
+    ]
+}
+</code></p>
+
+<p>Для информирования пользователя, давайте изменим вызов API. Так как мы используем <code>Promises</code>, мы можем просто добавить коллбек-функцию, вызываемую при ошибке, чтобы получить информацию в ответе и уведомить пользователя, передав ответ в <code>$scope</code>, откуда шаблон сможет вывести ошибку для показа пользователю.</p>
+
+<p>``` coffeescript
+app = angular.module ‘example.app.editor’, [‘example.api’, ‘example.app.photos’]</p>
+
+<p>app.controller ‘EditController’, [‘$scope’, ‘Post’, ($scope, Post) -&gt;</p>
+
+<pre><code>$scope.newPost = new Post()
+$scope.save = -&gt;
+    $scope.newPost.$save().then (result) -&gt;
+        $scope.posts.push result
+    .then -&gt;
+        # Reset our editor to a new blank post
+        $scope.newPost = new Post()
+    .then -&gt;
+        # Clear any errors
+        $scope.errors = null
+    , (rejection) -&gt;
+        $scope.errors = rejection.data ] ```
+</code></pre>
+
+<p>Также обновим шаблон, для вывода информации об ошибках:</p>
+
+<p>
+<code>html
+&lt;p ng-repeat="(name, errs) in errors" class="alert alert-danger"&gt;&lt;strong&gt;{{ name }}&lt;/strong&gt;: {{ errs.join(', ') }}&lt;/p&gt;
+</code>
+</p>
+
+<p>Подобным образом довольно просто к элементам пользовательского интерфейса добавить получение обратной связи о прогрессе (индиваторы загрузки, прогресс-бары) используя цепочечные вызовы. В AngularJS есть достаточно полная обработка ошибок через цепочки вызовов, делающая обработку ошибок простой.</p>
+
+<p>В этом демонстрационном примере, мы просто перечислили ошибки и вывели их в специально оформленных элементах интерфейса. Так как ошибки имеют привязку к имени аттрибута, вы легко можете показать список ошибок возле того элемента формы, которому они соответсвуют.</p>
+
+<p><img class="center" src="/images/DRF_Angular/example_error.png"></p>
+
+<h2 id="section-4">Удаление своих постов</h2>
+
+<p>Чтобы редактор был полным, нам нужен способ удалять любые посты, но только те, которые добавлены текущим пользователем. У нас уже есть API, которое предотвращает попытки удаления/изменения ресурсов пользователями, которые не владеют ими. Если вы только начали изучать AngularJS, то вам сложно понять, как с помощью его модульной архитектуры обеспечить наличие начальных данных в контроллере. В нашем случае, зная текущего пользователя, можно определить какие посты доступны ему для удаления.</p>
+
+<p>Ключ к пониманию этого заключается в попытке разложить функционал контроллеров на несколько служб, выполняющих определенную часть логики. Контроллер (тоже, что и представление в Django) должны только обеспечить слаженную работу различных компонентов. В Django, вы пытаетесь разместить как можно боьше бизнес-логики в модели (паттерн “толстые модели”). В AngularJS, вы похожим образом распределяете бизнес-логику в компонуемых службах.</p>
+
+<p>Чтобы добавить возможность удалять посты, давайте сначала добавим модуль, расширяющий наш редактор, и добавим дополнительный контроллер для обрабтки удаления. В зависимостях нового контроллера будет служба <code>AuthUser</code>, которая через джанговский шаблон будет предоставлять текущего пользователя. В этом случае, служба будет содержать один аттрибут <code>username</code>, в котором будет имя текущего пользователя (или пустая строка, если пользователя нет). Мы добавили две функции в область видимости нового контроллера: <code>canDelete</code>, чтобы определить может ли текущий пользователь удалить пост, и <code>delete</code>, чтобы удалять пост. Обе функции принимают аргумент <code>post</code>, который передается туда через шаблон.</p>
+
+<p>Опять же, мы использовали цепочечный вызов службы <code>$resource</code>, и только успешного подтверждения со стороны сервера об удалении поста, мы обновляем список постов. Так же как и было указано выше, есть возможность обработки ошибок выполнения запроса и обеспечения обратной связи с пользователем, но в нашем простом примере мы это пропустим.</p>
+
+<p>``` coffeescript
+app = angular.module ‘example.app.manage’, [‘example.api’, ‘example.app.editor’]</p>
+
+<p>app.controller ‘DeleteController’, [‘$scope’, ‘AuthUser’, ($scope, AuthUser) -&gt;
+    $scope.canDelete = (post) -&gt;
+        return post.author.username == AuthUser.username</p>
+
+<pre><code>$scope.delete = (post) -&gt;
+    post.$delete()
+    .then -&gt;
+        # Remove it from the list on success
+        idx = $scope.posts.indexOf(post)
+        $scope.posts.splice(idx, 1) ] ```
+</code></pre>
+
+<p>После определения контроллера, давайте обновим наш шаблон поста и добавим кнопку удаления (при условии, что функция <code>canDelete</code> возвращает <code>true</code>).</p>
+
+<p>
+``` django
+{% extends ‘editor.html’ %}</p>
+
+<p>{% block ng_app %}example.app.manage{% endblock %}</p>
+
+<p>{% block post_header %}</p>
+
+<p>&lt;button type="button" class="close" ng-controller="DeleteController" ng-click="delete(post)" ng-show="canDelete(post)"&gt;×&lt;/button&gt;
+{{ block.super }}
+{% endblock %}</p>
+
+<p>{% block js %}
+{{ block.super }}
+<script>
+// Configure the current user
+var app = angular.module('example.app.manage'); // Not including a list of dependent modules (2nd parameter to `module`) "re-opens" the module for </script></p>
+
+<p>app.factory(‘AuthUser’, function() {
+    return {
+        username: “{{ user.username|default:’‘|escapejs }}”
+    }
+});
+&lt;/script&gt;
+{% endblock %}
+```
+</p>
+
+<p>И когда вы загрузите <a href="http://localhost:8000/manage">http://localhost:8000/manage</a>, возле постов с автором <code>root</code> будет кнопка <strong>‘X’</strong>, а возле поста с автором <code>bob</code> - не будет. При нажатии на кнопку <strong>‘X’</strong> наш API удалит пост.</p>
+
+<p><img class="center" src="/images/DRF_Angular/example_managed.png"></p>
+
+<p>Итак, у нас есть простая лента, в которой пользователи могут размещать посты.</p>
+
+<h2 id="section-5">Заключение</h2>
+
+<p>Хорошо, давайте подумаем. Небольшим количеством кода (примерно 100 строк в интерфейсной части, и 200 строк в серверной), используя Django Rest Framework (ну и Django) и AngularJS, мы смогли быстро написать пример приложения для простой публикации постов. Django Rest Framework позволяет легко экспортировать данные наших джанговских моделей через RESTful API с возможностью настройки выводных данных в зависимости от наших нужд. AngularJS облегчает получение данных и взаимодейтсвие с API, причем делает это модульно и структурированно, что помогает нам добавлять новый функционал для наших приложений без спагетти-кода.</p>
+
+<p>Весь код, упоминавшийся в этой статье, доступен на <a href="https://github.com/kevinastone/django-api-rest-and-angular">гитхабе</a>. Я советую скачать этот репозиторий и установить рабочую копию проекта для экспериментов. Если заметите какие-либо ошибки - поставьте таск в гитхабе (или даже пулл-реквест). Если есть какие-либо вопросы - оставьте комментарий (или стукнитесь в твиттер <a href="https://twitter.com/kevinastone">@kevinastone</a>). Я планируюю дополнить эту статью дополнительными случаями, с которыми мне приходилось сталкиваться, а именно:</p>
+
+<ul>
+  <li>пагинация</li>
+  <li>API переключатели (типа подписаться/отписаться)</li>
+  <li>более сложные права доступа</li>
+  <li>расширенная валидация</li>
+  <li>тестирование</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Руководство: Используем AngularJS с Django]]></title>
