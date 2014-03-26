@@ -4,7 +4,7 @@
   <title><![CDATA[Toly blog]]></title>
   <link href="http://toly.github.io/atom.xml" rel="self"/>
   <link href="http://toly.github.io/"/>
-  <updated>2014-03-26T09:59:38+04:00</updated>
+  <updated>2014-03-26T10:01:19+04:00</updated>
   <id>http://toly.github.io/</id>
   <author>
     <name><![CDATA[Toly]]></name>
@@ -387,7 +387,7 @@
 </span><span class="line">        <span class="k">return</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">post__pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pk&#39;</span><span class="p">))</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
-<h1 id="api-2">Лирическое отступление: встроенный браузер API</h1>
+<h2 id="api-2">Лирическое отступление: встроенный браузер API</h2>
 
 <p>Одним из преимуществ Django Rest Framework является то, что он поставляется со встроенным браузером API для тестирования вашего API. Очень похожий на Django админку, он может помочь в начале разработки.</p>
 
