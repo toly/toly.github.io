@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Workflow | Toly blog]]></title>
   <link href="http://toly.github.io/blog/categories/workflow/atom.xml" rel="self"/>
   <link href="http://toly.github.io/"/>
-  <updated>2014-03-28T22:15:06+04:00</updated>
+  <updated>2014-03-28T22:16:41+04:00</updated>
   <id>http://toly.github.io/</id>
   <author>
     <name><![CDATA[Toly]]></name>
@@ -34,6 +34,8 @@
   <li>использование Bower для добавления сторонних плагинов/фреймворков</li>
   <li>выполнение небольших изменений в вашем Angular приложении</li>
 </ul>
+
+<!-- more -->
 
 <h2 id="section-1">Предварительные приготовления</h2>
 
