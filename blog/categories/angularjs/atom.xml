@@ -4,7 +4,7 @@
   <title><![CDATA[Category: AngularJS | Toly blog]]></title>
   <link href="http://toly.github.io/blog/categories/angularjs/atom.xml" rel="self"/>
   <link href="http://toly.github.io/"/>
-  <updated>2014-03-26T10:01:34+04:00</updated>
+  <updated>2014-03-28T22:15:06+04:00</updated>
   <id>http://toly.github.io/</id>
   <author>
     <name><![CDATA[Toly]]></name>
@@ -12,6 +12,455 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ускоряем разработку на AngularJS с помощью Yeoman, Grunt и Bower]]></title>
+    <link href="http://toly.github.io/blog/2014/03/26/kickstart-your-angularjs-development-with-yeoman/"/>
+    <updated>2014-03-26T10:06:59+04:00</updated>
+    <id>http://toly.github.io/blog/2014/03/26/kickstart-your-angularjs-development-with-yeoman</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Перевод статьи Бреда Барроу <a href="http://www.sitepoint.com/kickstart-your-angularjs-development-with-yeoman-grunt-and-bower/">Kickstart Your AngularJS Development with Yeoman, Grunt and Bower</a></p>
+</blockquote>
+
+<p>Любите ли вы или ненавидите его, нет никаких сомнений, что AngularJS является фреймворком о котором говорит каждый разработчик. Он может и не всем подходит, но тем неменее у AngularJS есть много адаптивных, эффективных и мощных возможностей. Добавьте несколько полезных инструментов разработки, таких как Yeoman, Grunt и Bower и вы получите невероятно быстрый процесс разработки прототипов.</p>
+
+<h2 id="section">Что мы рассмотрим</h2>
+
+<p>В этом руководстве мы рассмотрим:</p>
+
+<ul>
+  <li>генерацию каркаса ANgularJS приложения с помощью Yeoman</li>
+  <li>использование Grunt для ускорения разработки и автоматизации повторяющихся задач</li>
+  <li>использование Bower для добавления сторонних плагинов/фреймворков</li>
+  <li>выполнение небольших изменений в вашем Angular приложении</li>
+</ul>
+
+<h2 id="section-1">Предварительные приготовления</h2>
+
+<p>Чтобы получить максимальную отдачу от этого урока мы рекомендуем вам иметь следующие навыки и знания:</p>
+
+<ul>
+  <li>терминал и знание командной строки</li>
+  <li>установленные <a href="http://nodejs.org/">NodeJS</a> и NPM</li>
+  <li>знание основ JS, CSS и HTML</li>
+</ul>
+
+<h2 id="section-2">Исходники</h2>
+
+<p>Репозиторий нашего учебного проекта можно найти <a href="https://github.com/Haizyfox/sp-yeoman">здесь</a>.</p>
+
+<h2 id="section-3">Давай начнем!</h2>
+
+<p>Хорошо, давайте приступим к реализации. Первое, что нам нужно сделать, это установить Yeoman, Grunt и Bower. Используем NPM, что бы установить все сразу. Выполните следующую команду в терминале:</p>
+
+<p><code>
+npm install -g yo grunt-cli bower
+</code></p>
+
+<p>Это было просто, но теперь в нашем распоряжении мощный набор инструментов. Я объясню как использовать каждый из них.</p>
+
+<h2 id="yeoman">Yeoman</h2>
+
+<p>Yeoman используется для генерации каркаса вашего приложения. Он создаст основные каталоги, файлы и настройки проекта, что бы его можно было сразу же запустить. Помимо этого существуют различные особые генераторы, которые можно использовать для создания приложений определенного вида - мы собираемся использовать удобный генератор для AngularJS.</p>
+
+<p>Одной из лучших функций Yeoman является возможность использования самописных генераторов. Мы установим генератор AngularJS, что бы сделать минимально работающее Angular приложение как можно быстрее.</p>
+
+<p>Запустите следующую команду для установки AngularJS генератора:</p>
+
+<p><code>
+npm install -g generator-angular
+</code></p>
+
+<p>Теперь можно сгенерировать новенькое Angular приложение. В новом каталоге проекта запустите:</p>
+
+<p><code>
+yo angular
+</code></p>
+
+<p>Генератор задаст вам пару вопросов. Вы можете ответить утвердительно для установки Twitter Bootstrap. Так же ответьте да для включитьв проект ngResource. Остальное, для текущего проекта, нам не понадобится, поэтому отвечайте - нет.</p>
+
+<p>Теперь расслабьтесь (на несколько секунд) и наблюдайте как генератор делает свою магию. Yeoman создаст файлы и каталоги, а затем он запустит установку Bower (подробности об этом чуть позже) и NPM установит различные зависимости, и наконец он выполнит начальное конфигурирование.</p>
+
+<h2 id="section-4">Что в коробке?</h2>
+
+<p>Давайте взглянем на то, что сделал нам Yeoman:</p>
+
+<p><code>
+.bowerrc
+.editorconfig
+.gitattributes
+.gitignore
+.jshintrc
+Gruntfile.js
+app/
+component.json
+karma-e2e.conf.js
+karma.conf.js
+node_modules/
+package.json
+test/
+</code></p>
+
+<p>Давайте рассмотрим наиболее важные из них:</p>
+
+<p><strong>app/</strong> - Каталог содержит ваше статическое приложение. Он включает ​​HTML, CSS и JavaScript, и здесь вы будете заниматься большую часть времени разработки.</p>
+
+<p><strong>package.json</strong> - Этот файл помогает NPM определить наш проект, а также разрешать его зависимости. Он также может содержать всевозможные метаданные, относящиеся к вашему проекту.</p>
+
+<p><strong>node_modules/</strong> - Название этого каталога говорит само за себя. Здесь хранятся модули node, от которых зависит ваш проект.</p>
+
+<p><strong>Gruntfile.js</strong> - Это яваскриптовый файл который отвечает за конфигурацию вашего проекта, а также различных задач и плагинов, используемых в вашем проекте. Например, здесь можно указать, что в проекте используется <em>Uglify</em> и что вы хотите запускать задачу Uglify в определенном каталоге во время сборки проекта. Подробнее о Grunt чуть позже.</p>
+
+<p><strong>component.json</strong> - Этот файл используется для уведомления менеджера пакетов Bower о зависимостях проекта, а также другие метаданные. В последних версиях Bower этот файл называется bower.json - об этом чуть позже.</p>
+
+<p><strong>.bowerrc</strong> - Используется для передачт опций в Bower.</p>
+
+<p><strong>Karma files</strong> - Karma - фреймворк для тестирования. Мы будем использовать его для запуска нескольких тестов для нашего Angular приложения.</p>
+
+<p>Уф! Это довольно много, что бы запомнить - но как только вы больше познакомитесь с работой генератора Yeoman, вам понравится то, что он делает все это за вас.</p>
+
+<p>Давайте добавим еще несколько вещей в наш проект, прежде чем начать приступить к разработке.</p>
+
+<h2 id="bower-------">Bower - пакетный менеджер для веб разработки</h2>
+
+<p>Перед тем как использовать Bower, небольшую часть конфигурации нужно написать самим. Bower недвано изменил название файла component.json на bower.json, таким образом нам нужно привести код в соответствие с этим.</p>
+
+<p>Первое, что нам нужно сделать, это небольшое изменение в нашей Bower конфигурации в .bowerrc - откройте его и добавьте следующее:</p>
+
+<p><code>json
+{
+	"directory": "app/components",
+	"json": "bower.json" // Add this line
+}
+</code></p>
+
+<p>Это скажет пакетному менеджеру Bower использовать файл bower.json для получения инструкций о том как устанавливать этот пакет.</p>
+
+<p>Так как мы используем Bower для разрешения зависимостей нашего проекта, то также нужно переименовать файл component.json в корне нашего прокета в файл bower.json. Незначительные премудрости при использовании таких передовых технологий.</p>
+
+<p>Bower - это пакетный менеджер. Он поможет нам быстрой найти и установить наши любимые CSS фреймворки, яваскрипт библиотеки и плагины, используя всего лишь несколько просты комманд.</p>
+
+<p>Отлично, давайте дадим ему поработать. Ранее Yeoman воспользовался Bower что бы установить Bootstrap, но то были только CSS файлы. А нам нужны и модные яваскиптовые виджеты.</p>
+
+<p>Так как мы делаем Angular приложение, нам нужны скрипты для Bootstrap которые работают с Angular.</p>
+
+<p>К счастью, команда <a href="http://angular-ui.github.io/bootstrap/">Angular UI</a> портировала скрипты Bootstrap для Angular. Давайте используем Bower чтобы установить их библиотеку!</p>
+
+<p><code>
+bower install angular-bootstrap --save
+</code></p>
+
+<p>Флаг <code>-save</code> указывает макетному менеджеру добавить зависимость в bower.json.</p>
+
+<p>Фантастика! Это было просто, не так ли? Теперь перейдите в каталог вашего приложения (app/) и давайте посмотрим, с чем мы будем работать.</p>
+
+<h2 id="section-5">Наша статическое приложение</h2>
+
+<p>Взгляните на содержание каталога <code>app/</code>:</p>
+
+<p><code>
+favicon.ico
+index.html
+robots.txt
+components/
+scripts/
+styles/
+views/
+</code></p>
+
+<p><strong>index.html</strong> - Это должно быть известно большинству читателей, это главная HTML-страница вашего приложения.</p>
+
+<p><strong>components/</strong> - Это каталог компонентов, такой же как и <code>node_modules/</code>, но для Bower. Здесь хранятся все библиотеки, которые вы установили с помощью Bower. Например, AngularUI Bootstrap находится здесь.</p>
+
+<p><strong>scripts/</strong> - Опять же, знакомый для большинства каталог. Здесь хранятся JavaScript файлы ваших приложений. Обратите внимание, что библиотеки, такие как AngularJ, будут находиться в каталоге для компонентов, так что каталог <code>scripts/</code> только для тех файлов, которые пишете вы сами.</p>
+
+<p><strong>styles/</strong> - Все ваши CSS/Sass, что бы сделать ваше приложение более красивым.</p>
+
+<p><strong>views/</strong> - Это каталог, где будут храниться ваши шаблоны для Angular.</p>
+
+<p>Теперь более внимательно посмотрим на файлы AngularJS.</p>
+
+<h2 id="angularjs">AngularJS</h2>
+
+<p>Angular-генератор в Yeoman сделал для нас самое необходимое: модуль, контроллер и представление. Давайте рассмотрим каждый из них:</p>
+
+<p><strong>Модуль: /app/scripts/app.js</strong></p>
+
+<p>``` javascript
+‘use strict’;
+// Here we set up an angular module. We’ll attach controllers and 
+// other components to this module.
+angular.module(‘testApp’, [])
+  // Angular supports chaining, so here we chain the config function onto
+  // the module we’re configuring.
+  .config(function ($routeProvider) {</p>
+
+<pre><code>// We use AngularJS dependency injection to fetch the route provider.
+// The route provider is used to setup our app's routes. 
+ 
+// The config below simply says when you visit '/' it'll render
+// the views/main.html template controlled by the MainCtrl controller.
+ 
+// The otherwise method specifies what the app should do if it doesn't recognise 
+// the route entered by a user. In this case, redirect to home.
+$routeProvider
+  .when('/', {
+    templateUrl: 'views/main.html',
+    controller: 'MainCtrl'
+  })
+  .otherwise({
+    redirectTo: '/'
+  });   }); ```
+</code></pre>
+
+<p><strong>Контроллер: /app/scripts/controllers/main.js</strong></p>
+
+<p>``` javascript
+‘use strict’;</p>
+
+<p>// Here we attach this controller to our testApp module
+  angular.module(‘testApp’)</p>
+
+<pre><code>// The controller function let's us give our controller a name: MainCtrl
+// We'll then pass an anonymous function to serve as the controller itself.
+.controller('MainCtrl', function ($scope) {
+  
+  // Using AngularJS dependency injection, we've injected the $scope variable
+  // Anything we attach to scope will be available to us in the view.
+  
+  // In this case, we're attaching a collection of Awesome Things to display
+  // in app/views/main.html
+  $scope.awesomeThings = [
+    'HTML5 Boilerplate',
+    'AngularJS',
+    'Karma'
+  ];
+}); ```
+</code></pre>
+
+<p><strong>Представление: app/views/main.html</strong></p>
+
+<p>``` html
+&lt;div class="header"&gt;
+  &lt;ul class="nav nav-pills pull-right"&gt;
+    &lt;li class="active"&gt;<a ng-href="#">Home</a>&lt;/li&gt;
+    &lt;li&gt;<a ng-href="#">About</a>&lt;/li&gt;
+    &lt;li&gt;<a ng-href="#">Contact</a>&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;h3 class="text-muted"&gt;angyeo&lt;/h3&gt;
+&lt;/div&gt;</p>
+
+<div class="jumbotron">
+  <h1>'Allo, 'Allo!</h1>
+  <p class="lead">
+    <img src="images/yeoman.png" alt="I'm Yeoman" /><br />
+    Always a pleasure scaffolding your apps.
+  </p>
+  <p><a class="btn btn-lg btn-success" ng-href="#">Splendid!</a></p>
+</div>
+
+<div class="row marketing">
+  <h4>HTML5 Boilerplate</h4>
+  <p>
+    HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.
+  </p>
+
+  <h4>Angular</h4>
+  <p>
+    AngularJS is a toolset for building the framework most suited to your application development.
+  </p>
+
+  <h4>Karma</h4>
+  <p>Spectacular Test Runner for JavaScript.</p>
+</div>
+
+<div class="footer">
+  <p>♥ from the Yeoman team</p>
+</div>
+<p>```</p>
+
+<h2 id="section-6">Давайте посмотрим его в действии!</h2>
+
+<p>Мы готовы впервые взлянуть на наше приложение. Вернитесь в корневой каталог вашего приложения и выполните команду:</p>
+
+<p><code>
+grunt server
+</code></p>
+
+<p><strong>Grunt</strong></p>
+
+<p>Grunt является мощным, многофункциональным, исполнителем задач на JavaScript. Короче говоря, он позволяет автоматизировать повторяющиеся задачи, такие как компиляция CoffeeScript, минификация CSS, проверка корректности кода и т.д. Мы так же будем делать это, для того что бы подготовить наш код для разработки и развертывания.</p>
+
+<p>Grunt проходится по каталогу нашего проекта и подготавливает его для нас, например компилирует подключенный Bootstrap SASS в CSS.</p>
+
+<p>Через несколько секунд окно браузера должно появиться с вашим работающим приложением.</p>
+
+<p>Что бы быть уверенным в корректной работе, откройте исходный код страницы и посмотрите подключенный <code>main.css</code>. Он должен содержать кучу Bootstrap кода - благодаря магии Bower и Grunt.</p>
+
+<h2 id="section-7">Давайте изменим его</h2>
+
+<p>Пришло время попробовать наши силы в изменении проекта. Так как это Angular проект, начнем с тестов.</p>
+
+<p>Yeoman любезно сгенерировал пример теста, так что давайте начнем с него.</p>
+
+<p>Мы собираемся добавить еще один элемент в список <code>awesomeThings</code>, поэтому откройте <code>test/spec/controllers/main.js</code> и измените ожидаемую длину списка на 4 вместо 3.</p>
+
+<p><strong>test/spec/controllers/main.js</strong></p>
+
+<p>``` javascript
+‘use strict’;</p>
+
+<p>describe(‘Controller: MainCtrl’, function () {</p>
+
+<p>// load the controller’s module
+  beforeEach(module(‘testApp’));</p>
+
+<p>var MainCtrl,
+    scope;</p>
+
+<p>// Initialize the controller and a mock scope
+  beforeEach(inject(function ($controller, $rootScope) {
+    scope = $rootScope.$new();
+    MainCtrl = $controller(‘MainCtrl’, {
+      $scope: scope</p>
+
+<pre><code>});   }));
+</code></pre>
+
+<p>it(‘should attach a list of awesomeThings to the scope’, function () {
+    // Change this line
+    expect(scope.awesomeThings.length).toBe(3);</p>
+
+<pre><code>// To this
+expect(scope.awesomeThings.length).toBe(4);   }); }); ```
+</code></pre>
+
+<p>Теперь мы можем использовать еще одну замечательную возможность в Grunt:</p>
+
+<p><code>
+grunt test
+</code></p>
+
+<p>Эта команда запустит наши Karma-тесты. Они должны выдать ошибку потому, что ожидается 4 элемента в <code>awesomeThings</code>, а у нас по прежнему 3. Давайте исправим это и сделаем так, что бы наши тесты прошли.</p>
+
+<p>Откройте <code>app/scripts/controllers/main.js</code> и добавтье еще один элемент в список:</p>
+
+<p><strong>app/scripts/controllers/main.js</strong></p>
+
+<p><code>javascript
+.controller('MainCtrl', function ($scope) {
+  $scope.awesomeThings = [
+    'HTML5 Boilerplate',
+    'AngularJS',
+    'Karma',
+    'SitePoint'
+  ];
+});
+</code></p>
+
+<p>Сохраните файл и запустите тесты снова:</p>
+
+<p><code>
+grunt test
+</code></p>
+
+<p>На этот раз они должны успешно завершиться. Теперь вы можете запустить приложение в браузере (<code>grunt server</code>) и заметить, что есть дополнительный пункт в списке. Аккуратные да?</p>
+
+<h2 id="bower">Использование пакета, установленного через Bower</h2>
+
+<p>Давайте используем библиотеку AngularUI Bootstrap, которую мы подключили ранее, что бы наш список <code>awesomeThings</code> стал раскрываемым.</p>
+
+<p><strong>Важно:</strong> Bower - просто пакетный менеджер, он не отвечает за добавление файлов в <code>index.html</code>. Нам нужно сделать это самим.</p>
+
+<p>Поэтому откройте <code>app/index.html</code> и добавьте следующую строку:</p>
+
+<p><code>html
+&lt;script src="components/angular-bootstrap/ui-bootstrap.js"&gt;&lt;/script&gt;
+</code></p>
+
+<p>Потом, в соответствии со вступительным руководством по <code>AngularUI Bootstrap</code>, мы должны добавить их модуль в качестве зависимости в наш модуль Angular.</p>
+
+<p>Откройте <code>app/scripts/app.js</code> и добавьте <code>ui.bootstrap</code> как зависимость:</p>
+
+<p><strong>/app/scripts/app.js</strong></p>
+
+<p>``` javascript
+‘use strict’;</p>
+
+<p>angular.module(‘testApp’, [‘ui.bootstrap’])
+…
+```</p>
+
+<p>Хорошо, теперь можно его использовать. Сделайте несколько изменений в нашем представлении:</p>
+
+<p><strong>app/views/main.html</strong></p>
+
+<p>``` html</p>
+<ul>
+  <li class="dropdown">
+    <a class="dropdown-toggle">
+      Click me to see some awesome things!
+    </a>
+    <ul class="dropdown-menu">
+      <li ng-repeat="thing in awesomeThings">
+        <a></a>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>```</p>
+
+<p>Мы использовали несколько CSS классов из Bootstrap и переместили директиву <code>ng-repeat</code> что бы создать пункты меню, а не стандартный список.</p>
+
+<p>Директивы AngularUI Bootstrap работают на классах, так что просто добавив класс <code>dropdown-toggle</code> к тегу, мы получили полностью рабочий выпадающий список!</p>
+
+<p>Еще нужно добавить модуль <code>Bootstrap UI</code> к нашим тестам, иначе они будут валиться до тех пор пока на будут внесены следующие изменения:</p>
+
+<p><strong>test/spec/controllers/main.js</strong></p>
+
+<p>``` javascript
+‘use strict’;</p>
+
+<p>describe(‘Controller: MainCtrl’, function () {</p>
+
+<p>// load the controller’s module
+  beforeEach(module(‘testApp’));
+  // load the BootstrapUI module
+  beforeEach(module(‘ui.bootstrap’)); // Add this line
+ …
+});
+```</p>
+
+<p><strong>/karma.conf.js</strong></p>
+
+<p>``` javascript
+// Karma configuration</p>
+
+<p>// base path, that will be used to resolve files and exclude
+basePath = ‘’;</p>
+
+<p>// list of files / patterns to load in the browser
+files = [
+  JASMINE,
+  JASMINE_ADAPTER,
+  ‘app/components/angular/angular.js’,
+  ‘app/components/angular-mocks/angular-mocks.js’,
+  ‘app/components/angular-bootstrap/ui-bootstrap.js’, // Add this line
+  ‘app/scripts/*.js’,
+  …
+```</p>
+
+<p>Запустите <code>grunt test</code>, что бы убедиться, что тесты успешно пройдены.</p>
+
+<p>Теперь вы можете открыть ваше приложение в браузере (<code>grunt server</code>) еще раз и посмотрите на результат вашей работы.</p>
+
+<h2 id="section-8">Заключение</h2>
+
+<p>Что у вас теперь есть! Простое Angular приложение, подключенная сторонняя библиотека, тесты, минификация и куча других вкусностей с минимальными усилиями!</p>
+
+<p>Мы лишь поверхностно коснулись того, что позволяет Yeoman и его компоненты, но я надеюсь, что это вдохновит вас быстро начать работаь над Angular приложением в следующий раз, когда у вас будет отличная идея!</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Проект на Django Rest Framework и AngularJS]]></title>
@@ -241,7 +690,7 @@ from .models import User, Post, Photo</p>
 
 <p>Просто загрузив одну из ваших API сущностей в браузер, Django Rest Framework предоставит вам удобный клиентсткий интерфейс для взаимодействия с API.</p>
 
-<p>{% img left /images/DRF_Angular/browser_user_posts.png 300 %} {% img left /images/DRF_Angular/browser_users.png 300 %}</p>
+<p><img class="left" src="/images/DRF_Angular/browser_user_posts.png" width="300"> <img class="left" src="/images/DRF_Angular/browser_users.png" width="300"></p>
 
 <h2 id="api-3">Добавление прав доступа и принадлежности в API</h2>
 
@@ -306,10 +755,10 @@ class PostMixin(object):
 </blockquote>
 
 <blockquote>
-  <p>Я заключил некоторые части шаблона в джанговсий тег {% raw %}<code>{% block %}</code>{% endraw %}, чтобы потом наследовать этот шаблон для каждого из примеров.</p>
+  <p>Я заключил некоторые части шаблона в джанговсий тег <code>{% block %}</code>, чтобы потом наследовать этот шаблон для каждого из примеров.</p>
 </blockquote>
 
-<p>{% raw %}
+<p>
 ``` django
 {% load staticfiles %}</p>
 
@@ -336,7 +785,7 @@ class PostMixin(object):
 </body>
 </html>
 <p>```
-{% endraw %}</p>
+</p>
 
 <p>Теперь, давайте дополним шаблон простым контроллером, который будет возвращать список постов. Сейчас мы жестко пропишем посты, а потом будем получать их через AJAX.</p>
 
@@ -360,7 +809,7 @@ app = angular.module ‘example.app.static’, []</p>
 
 <p>Если вы установили все зависимости и запустили <code>grunt</code>, что бы скомпилить CoffeScript в JavaScript, то вы должны увидеть наш шаблон с прописанными в коде данными вроде этого:</p>
 
-<p>{% img center /images/DRF_Angular/example_static.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_static.png"></p>
 
 <h2 id="xhr-----api">Используем XHR для получения постов из API</h2>
 
@@ -379,7 +828,7 @@ app = angular.module ‘example.app.basic’, []</p>
 
 <p>С сервисом <code>$http</code>, получающим список постов из нашего API, наша тестовая страница покажет список постов прямо с сервера.</p>
 
-<p>{% img center /images/DRF_Angular/example_basic.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_basic.png"></p>
 
 <h2 id="angular-resource--api">Используем Angular-Resource для API</h2>
 
@@ -417,7 +866,7 @@ app = angular.module ‘example.app.resource’, [‘example.api’]</p>
 
 <p>В результате получим такой же список постов, как и в примере выше.</p>
 
-<p>{% img center /images/DRF_Angular/example_resource.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_resource.png"></p>
 
 <h2 id="section-2">Добавляем фотографии в список постов</h2>
 
@@ -452,9 +901,9 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
 ]
 ```</p>
 
-<p>Также обновим наш шаблон чтобы итерировать каждую модель поста для отображения фотографий каждого поста. Обратите внимание, как AngularJS повторно обновляет представление по мере того, как данные загружаются из API. В этом случае, мы итерируем фотографии объекта, ссылающиеся на идентификаторы постов, которые в свою очередь итерируются директивой <code>ng-repeat</code>. Мы также используем директиву <code>ng-src</code> вместо аттрибута <code>src</code>, так как это не позволяет браузеру загружать картинку до того как выражение Angular было прекомпилировано (тогда бы вы увидели ошибку 404 в ваших логах о невозможности показа {% raw %}’/media/{{ photo.image }}’{% endraw %}).</p>
+<p>Также обновим наш шаблон чтобы итерировать каждую модель поста для отображения фотографий каждого поста. Обратите внимание, как AngularJS повторно обновляет представление по мере того, как данные загружаются из API. В этом случае, мы итерируем фотографии объекта, ссылающиеся на идентификаторы постов, которые в свою очередь итерируются директивой <code>ng-repeat</code>. Мы также используем директиву <code>ng-src</code> вместо аттрибута <code>src</code>, так как это не позволяет браузеру загружать картинку до того как выражение Angular было прекомпилировано (тогда бы вы увидели ошибку 404 в ваших логах о невозможности показа ’/media/{{ photo.image }}’).</p>
 
-<p>{% raw %}
+<p>
 <code>html
 &lt;div class="panel" ng-repeat="post in posts"&gt;
     &lt;div class="panel-heading clearfix"&gt;
@@ -467,17 +916,17 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
     &lt;/div&gt;
 &lt;/div&gt;
 </code>
-{% endraw %}</p>
+</p>
 
 <p>И в итоге, обновив страницу <a href="http://localhost:8000/photos">http://localhost:8000/photos</a>, получим отрендеренные фотографии:</p>
 
-<p>{% img center /images/DRF_Angular/example_photos.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_photos.png"></p>
 
 <h2 id="angularjs----csrf">Лирическое отступление: AngularJS и защита от CSRF</h2>
 
 <p>Django Rest Framework расширяет джанговскую защиту от <a href="http://ru.wikipedia.org/wiki/%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D0%BB%D0%BA%D0%B0_%D0%BC%D0%B5%D0%B6%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2%D1%8B%D1%85_%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%BE%D0%B2">CSRF</a> (Cross Site Request Forgery) используя класс <code>SessionAuthentication</code> (как например в нашем случае: используется таже сессия браузера, что и для веб-приложения). Это способствует тому, что вредоносные сценарии не смогут использовать наших пользователей для выполнения различных запросов к нашему API, заставляя сценарии при каждом запросе отправлять генерируемый сервером токен. Модульная архитектура AngularJS и внедрение зависимостей позволяет сделать это простым конфигурированием запросов к API с помощью включения CSRF-токена в заголовок запроса (по желанию, можно также использовать куки).</p>
 
-<p>В нашем джанговском шаблоне, просто добавьте тег <code>&lt;script&gt;</code> для конфигурирования сервиса <code>$http</code> и настройте джанговское приложение, что бы шаблонная переменная {% raw %}<code>{{ csrf_token }}</code>{% endraw %} передавалась в заголовок ответа для всех вызовов API.</p>
+<p>В нашем джанговском шаблоне, просто добавьте тег <code>&lt;script&gt;</code> для конфигурирования сервиса <code>$http</code> и настройте джанговское приложение, что бы шаблонная переменная <code>{{ csrf_token }}</code> передавалась в заголовок ответа для всех вызовов API.</p>
 
 <blockquote>
   <p>Будьте уверены, что этот скрипт загружается <strong>после</strong> определений модуля.</p>
@@ -487,7 +936,7 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
   <p>Вы можете передавать CSRF токен между Angular и Django через куки или другим способом. Этот явный механизм с использованием заголовков просто обеспечивает генерацию CSRF токена при каждом запросе.</p>
 </blockquote>
 
-<p>{% raw %}
+<p>
 <code>html
 &lt;script&gt;
 // Add the CSRF Token
@@ -497,7 +946,7 @@ app.config(['$httpProvider', function($httpProvider) {
 }]);
 &lt;/script&gt;
 </code>
-{% endraw %}</p>
+</p>
 
 <h2 id="api---angularjs">Создание и модификация ресурсов API с использованием AngularJS</h2>
 
@@ -505,7 +954,7 @@ app.config(['$httpProvider', function($httpProvider) {
 
 <p>Сперва, нам нужно расшарить наш базовый шаблон, и добавить html шаблон для редактора. Мы также добавим CSRF токен, согласно приведенным выше инструкциям, так как для создания новых постов будут использоваться потенциально уязвимые методы.</p>
 
-<p>{% raw %}
+<p>
 ``` django
 {% extends ‘base.html’ %}</p>
 
@@ -542,7 +991,7 @@ app.config(['$httpProvider', function($httpProvider) {
 </script>
 {% endblock %}
 ```
-{% endraw %}</p>
+</p>
 
 <p>Теперь, у нас есть редактор - давайте сделаем контроллер для его подключения. Заметьте, что теперь у нас в зависимостях два модуля: базовый модуль нашей ленты постов и модуль API, содержащий все определения ресурсов API (<code>$resource</code>).</p>
 
@@ -562,7 +1011,7 @@ $scope.save = -&gt;
 
 <p>Ранее, в представлениях API, мы добавляли некоторые ограничения прав доступа, чтобы предотвратить изменения пользователями чужих постов. До сих пор это не имело значения, какое отношение имеет пользователь к редактируемому посту. Но теперь, когда мы хотим создать пользователей, мы должны гарантировать, что обрабатываем запрос от пользователя, который имеет право на этот запрос (иначе, запрос на создание нового поста должен быть отклонен). В этом учебном примере, мы использовали хак аутентификации Django, который автоматически авторизует вас как пользователя <code>root</code>. Разумеется, в продакшене или ином недоверенном окружении так делать нельзя. Это сделано для упрощения демонстрации тестового приложения, игнорируя регистрацию и авторизацию пользователя.</p>
 
-<p>{% img center /images/DRF_Angular/example_editor.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_editor.png"></p>
 
 <h2 id="section-3">Обработка ошибок</h2>
 
@@ -599,17 +1048,17 @@ $scope.save = -&gt;
 
 <p>Также обновим шаблон, для вывода информации об ошибках:</p>
 
-<p>{% raw %}
+<p>
 <code>html
 &lt;p ng-repeat="(name, errs) in errors" class="alert alert-danger"&gt;&lt;strong&gt;{{ name }}&lt;/strong&gt;: {{ errs.join(', ') }}&lt;/p&gt;
 </code>
-{% endraw %}</p>
+</p>
 
 <p>Подобным образом довольно просто к элементам пользовательского интерфейса добавить получение обратной связи о прогрессе (индиваторы загрузки, прогресс-бары) используя цепочечные вызовы. В AngularJS есть достаточно полная обработка ошибок через цепочки вызовов, делающая обработку ошибок простой.</p>
 
 <p>В этом демонстрационном примере, мы просто перечислили ошибки и вывели их в специально оформленных элементах интерфейса. Так как ошибки имеют привязку к имени аттрибута, вы легко можете показать список ошибок возле того элемента формы, которому они соответсвуют.</p>
 
-<p>{% img center /images/DRF_Angular/example_error.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_error.png"></p>
 
 <h2 id="section-4">Удаление своих постов</h2>
 
@@ -638,7 +1087,7 @@ app = angular.module ‘example.app.manage’, [‘example.api’, ‘example.ap
 
 <p>После определения контроллера, давайте обновим наш шаблон поста и добавим кнопку удаления (при условии, что функция <code>canDelete</code> возвращает <code>true</code>).</p>
 
-<p>{% raw %}
+<p>
 ``` django
 {% extends ‘editor.html’ %}</p>
 
@@ -664,11 +1113,11 @@ var app = angular.module('example.app.manage'); // Not including a list of depen
 &lt;/script&gt;
 {% endblock %}
 ```
-{% endraw %}</p>
+</p>
 
 <p>И когда вы загрузите <a href="http://localhost:8000/manage">http://localhost:8000/manage</a>, возле постов с автором <code>root</code> будет кнопка <strong>‘X’</strong>, а возле поста с автором <code>bob</code> - не будет. При нажатии на кнопку <strong>‘X’</strong> наш API удалит пост.</p>
 
-<p>{% img center /images/DRF_Angular/example_managed.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_managed.png"></p>
 
 <p>Итак, у нас есть простая лента, в которой пользователи могут размещать посты.</p>
 
@@ -823,7 +1272,7 @@ from crispy_forms.helper import FormHelper</p>
 
 <p>Это предполагает, что приложение <code>jobs</code> установлено и настроено. Базовый шаблон будет выглядеть примерно так:</p>
 
-<p>{% raw %}</p>
+<p></p>
 
 <p>``` django /jobs/base.html
 &lt;!DOCTYPE html&gt;</p>
@@ -844,13 +1293,13 @@ from crispy_forms.helper import FormHelper</p>
 </html>
 <p>```</p>
 
-<p>{% endraw %}</p>
+<p></p>
 
 <p>Django-angular предлагает полезные шаблонные теги, которые включат необходимый для вас JavaScript. Я рекомендую использовать CDN и загрузить туда файлы, какие можно. Это дает географические и пропускные преимущества.</p>
 
 <p>Теперь создадим шаблон страницы, который будет рендерится нашим проектом. <em>index.html</em> будет служить главной страницей нашего одностраничного приложения, и позже может быть использован для всех CRUD (Create Read Update Delete) представлений.</p>
 
-<p>{% raw %}</p>
+<p></p>
 
 <p><code>django /jobs/index.html
 {% extends "base.html" %}
@@ -865,9 +1314,9 @@ from crispy_forms.helper import FormHelper</p>
 {% endblock extra_javascript %}
 </code></p>
 
-<p>{% endraw %}</p>
+<p></p>
 
-<p>{% raw %}</p>
+<p></p>
 
 <p>``` javascript /javascript/app.js
 var app = angular.module(‘JobApp’, [
@@ -900,7 +1349,7 @@ function ($scope, Restangular, CbgenRestangular, $q) {</p>
 <p>}])// end controller
 ```</p>
 
-<p>{% endraw %}</p>
+<p></p>
 
 <p>Шаблон и JS код выше очень простые, наследуется от базового шаблона. Есть несколько аттрибутов, которые вы возможно не видели прежде и в которых нужно будет разобраться.</p>
 
@@ -945,13 +1394,13 @@ $stateProvider
 
 <p>Последний шаблон, который нужно создать - <em>/jobs/new.html</em>. Он будет содержать простую форму, которую вы сделали ранее с использованием django-angular.</p>
 
-<p>{% raw %}
+<p>
 <code>django /jobs/new.html
 {% load crispy_forms_tags %}
 {% crispy JobForm %}
 &lt;button type="button" class="btn btn-default"  ng-click="submitJob()"&gt;Create&lt;/button&gt;
 </code>
-{% endraw %}</p>
+</p>
 
 <p>Теперь вам нужно всего лишь представление и URL для подключения формы.</p>
 

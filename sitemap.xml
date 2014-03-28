@@ -23,16 +23,22 @@
         <lastmod>2014-03-26T10:00:54+04:00</lastmod>
     </url>
     <url>
+        <loc>
+            http://toly.github.io/blog/2014/03/26/kickstart-your-angularjs-development-with-yeoman/
+        </loc>
+        <lastmod>2014-03-28T22:14:41+04:00</lastmod>
+    </url>
+    <url>
         <loc>http://toly.github.io/about/</loc>
         <lastmod>2014-02-10T12:37:37+04:00</lastmod>
     </url>
     <url>
         <loc>http://toly.github.io/blog/archives/</loc>
-        <lastmod>2014-03-26T10:00:54+04:00</lastmod>
+        <lastmod>2014-03-28T22:14:41+04:00</lastmod>
     </url>
     <url>
         <loc>http://toly.github.io/</loc>
-        <lastmod>2014-03-26T10:00:54+04:00</lastmod>
+        <lastmod>2014-03-28T22:14:41+04:00</lastmod>
     </url>
     <url>
         <loc>http://toly.github.io/robots.txt</loc>

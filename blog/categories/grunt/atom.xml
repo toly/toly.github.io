@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Grunt | Toly blog]]></title>
+  <link href="http://toly.github.io/blog/categories/grunt/atom.xml" rel="self"/>
+  <link href="http://toly.github.io/"/>
+  <updated>2014-03-28T22:15:06+04:00</updated>
+  <id>http://toly.github.io/</id>
+  <author>
+    <name><![CDATA[Toly]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ускоряем разработку на AngularJS с помощью Yeoman, Grunt и Bower]]></title>
+    <link href="http://toly.github.io/blog/2014/03/26/kickstart-your-angularjs-development-with-yeoman/"/>
+    <updated>2014-03-26T10:06:59+04:00</updated>
+    <id>http://toly.github.io/blog/2014/03/26/kickstart-your-angularjs-development-with-yeoman</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Перевод статьи Бреда Барроу <a href="http://www.sitepoint.com/kickstart-your-angularjs-development-with-yeoman-grunt-and-bower/">Kickstart Your AngularJS Development with Yeoman, Grunt and Bower</a></p>
+</blockquote>
+
+<p>Любите ли вы или ненавидите его, нет никаких сомнений, что AngularJS является фреймворком о котором говорит каждый разработчик. Он может и не всем подходит, но тем неменее у AngularJS есть много адаптивных, эффективных и мощных возможностей. Добавьте несколько полезных инструментов разработки, таких как Yeoman, Grunt и Bower и вы получите невероятно быстрый процесс разработки прототипов.</p>
+
+<h2 id="section">Что мы рассмотрим</h2>
+
+<p>В этом руководстве мы рассмотрим:</p>
+
+<ul>
+  <li>генерацию каркаса ANgularJS приложения с помощью Yeoman</li>
+  <li>использование Grunt для ускорения разработки и автоматизации повторяющихся задач</li>
+  <li>использование Bower для добавления сторонних плагинов/фреймворков</li>
+  <li>выполнение небольших изменений в вашем Angular приложении</li>
+</ul>
+
+<h2 id="section-1">Предварительные приготовления</h2>
+
+<p>Чтобы получить максимальную отдачу от этого урока мы рекомендуем вам иметь следующие навыки и знания:</p>
+
+<ul>
+  <li>терминал и знание командной строки</li>
+  <li>установленные <a href="http://nodejs.org/">NodeJS</a> и NPM</li>
+  <li>знание основ JS, CSS и HTML</li>
+</ul>
+
+<h2 id="section-2">Исходники</h2>
+
+<p>Репозиторий нашего учебного проекта можно найти <a href="https://github.com/Haizyfox/sp-yeoman">здесь</a>.</p>
+
+<h2 id="section-3">Давай начнем!</h2>
+
+<p>Хорошо, давайте приступим к реализации. Первое, что нам нужно сделать, это установить Yeoman, Grunt и Bower. Используем NPM, что бы установить все сразу. Выполните следующую команду в терминале:</p>
+
+<p><code>
+npm install -g yo grunt-cli bower
+</code></p>
+
+<p>Это было просто, но теперь в нашем распоряжении мощный набор инструментов. Я объясню как использовать каждый из них.</p>
+
+<h2 id="yeoman">Yeoman</h2>
+
+<p>Yeoman используется для генерации каркаса вашего приложения. Он создаст основные каталоги, файлы и настройки проекта, что бы его можно было сразу же запустить. Помимо этого существуют различные особые генераторы, которые можно использовать для создания приложений определенного вида - мы собираемся использовать удобный генератор для AngularJS.</p>
+
+<p>Одной из лучших функций Yeoman является возможность использования самописных генераторов. Мы установим генератор AngularJS, что бы сделать минимально работающее Angular приложение как можно быстрее.</p>
+
+<p>Запустите следующую команду для установки AngularJS генератора:</p>
+
+<p><code>
+npm install -g generator-angular
+</code></p>
+
+<p>Теперь можно сгенерировать новенькое Angular приложение. В новом каталоге проекта запустите:</p>
+
+<p><code>
+yo angular
+</code></p>
+
+<p>Генератор задаст вам пару вопросов. Вы можете ответить утвердительно для установки Twitter Bootstrap. Так же ответьте да для включитьв проект ngResource. Остальное, для текущего проекта, нам не понадобится, поэтому отвечайте - нет.</p>
+
+<p>Теперь расслабьтесь (на несколько секунд) и наблюдайте как генератор делает свою магию. Yeoman создаст файлы и каталоги, а затем он запустит установку Bower (подробности об этом чуть позже) и NPM установит различные зависимости, и наконец он выполнит начальное конфигурирование.</p>
+
+<h2 id="section-4">Что в коробке?</h2>
+
+<p>Давайте взглянем на то, что сделал нам Yeoman:</p>
+
+<p><code>
+.bowerrc
+.editorconfig
+.gitattributes
+.gitignore
+.jshintrc
+Gruntfile.js
+app/
+component.json
+karma-e2e.conf.js
+karma.conf.js
+node_modules/
+package.json
+test/
+</code></p>
+
+<p>Давайте рассмотрим наиболее важные из них:</p>
+
+<p><strong>app/</strong> - Каталог содержит ваше статическое приложение. Он включает ​​HTML, CSS и JavaScript, и здесь вы будете заниматься большую часть времени разработки.</p>
+
+<p><strong>package.json</strong> - Этот файл помогает NPM определить наш проект, а также разрешать его зависимости. Он также может содержать всевозможные метаданные, относящиеся к вашему проекту.</p>
+
+<p><strong>node_modules/</strong> - Название этого каталога говорит само за себя. Здесь хранятся модули node, от которых зависит ваш проект.</p>
+
+<p><strong>Gruntfile.js</strong> - Это яваскриптовый файл который отвечает за конфигурацию вашего проекта, а также различных задач и плагинов, используемых в вашем проекте. Например, здесь можно указать, что в проекте используется <em>Uglify</em> и что вы хотите запускать задачу Uglify в определенном каталоге во время сборки проекта. Подробнее о Grunt чуть позже.</p>
+
+<p><strong>component.json</strong> - Этот файл используется для уведомления менеджера пакетов Bower о зависимостях проекта, а также другие метаданные. В последних версиях Bower этот файл называется bower.json - об этом чуть позже.</p>
+
+<p><strong>.bowerrc</strong> - Используется для передачт опций в Bower.</p>
+
+<p><strong>Karma files</strong> - Karma - фреймворк для тестирования. Мы будем использовать его для запуска нескольких тестов для нашего Angular приложения.</p>
+
+<p>Уф! Это довольно много, что бы запомнить - но как только вы больше познакомитесь с работой генератора Yeoman, вам понравится то, что он делает все это за вас.</p>
+
+<p>Давайте добавим еще несколько вещей в наш проект, прежде чем начать приступить к разработке.</p>
+
+<h2 id="bower-------">Bower - пакетный менеджер для веб разработки</h2>
+
+<p>Перед тем как использовать Bower, небольшую часть конфигурации нужно написать самим. Bower недвано изменил название файла component.json на bower.json, таким образом нам нужно привести код в соответствие с этим.</p>
+
+<p>Первое, что нам нужно сделать, это небольшое изменение в нашей Bower конфигурации в .bowerrc - откройте его и добавьте следующее:</p>
+
+<p><code>json
+{
+	"directory": "app/components",
+	"json": "bower.json" // Add this line
+}
+</code></p>
+
+<p>Это скажет пакетному менеджеру Bower использовать файл bower.json для получения инструкций о том как устанавливать этот пакет.</p>
+
+<p>Так как мы используем Bower для разрешения зависимостей нашего проекта, то также нужно переименовать файл component.json в корне нашего прокета в файл bower.json. Незначительные премудрости при использовании таких передовых технологий.</p>
+
+<p>Bower - это пакетный менеджер. Он поможет нам быстрой найти и установить наши любимые CSS фреймворки, яваскрипт библиотеки и плагины, используя всего лишь несколько просты комманд.</p>
+
+<p>Отлично, давайте дадим ему поработать. Ранее Yeoman воспользовался Bower что бы установить Bootstrap, но то были только CSS файлы. А нам нужны и модные яваскиптовые виджеты.</p>
+
+<p>Так как мы делаем Angular приложение, нам нужны скрипты для Bootstrap которые работают с Angular.</p>
+
+<p>К счастью, команда <a href="http://angular-ui.github.io/bootstrap/">Angular UI</a> портировала скрипты Bootstrap для Angular. Давайте используем Bower чтобы установить их библиотеку!</p>
+
+<p><code>
+bower install angular-bootstrap --save
+</code></p>
+
+<p>Флаг <code>-save</code> указывает макетному менеджеру добавить зависимость в bower.json.</p>
+
+<p>Фантастика! Это было просто, не так ли? Теперь перейдите в каталог вашего приложения (app/) и давайте посмотрим, с чем мы будем работать.</p>
+
+<h2 id="section-5">Наша статическое приложение</h2>
+
+<p>Взгляните на содержание каталога <code>app/</code>:</p>
+
+<p><code>
+favicon.ico
+index.html
+robots.txt
+components/
+scripts/
+styles/
+views/
+</code></p>
+
+<p><strong>index.html</strong> - Это должно быть известно большинству читателей, это главная HTML-страница вашего приложения.</p>
+
+<p><strong>components/</strong> - Это каталог компонентов, такой же как и <code>node_modules/</code>, но для Bower. Здесь хранятся все библиотеки, которые вы установили с помощью Bower. Например, AngularUI Bootstrap находится здесь.</p>
+
+<p><strong>scripts/</strong> - Опять же, знакомый для большинства каталог. Здесь хранятся JavaScript файлы ваших приложений. Обратите внимание, что библиотеки, такие как AngularJ, будут находиться в каталоге для компонентов, так что каталог <code>scripts/</code> только для тех файлов, которые пишете вы сами.</p>
+
+<p><strong>styles/</strong> - Все ваши CSS/Sass, что бы сделать ваше приложение более красивым.</p>
+
+<p><strong>views/</strong> - Это каталог, где будут храниться ваши шаблоны для Angular.</p>
+
+<p>Теперь более внимательно посмотрим на файлы AngularJS.</p>
+
+<h2 id="angularjs">AngularJS</h2>
+
+<p>Angular-генератор в Yeoman сделал для нас самое необходимое: модуль, контроллер и представление. Давайте рассмотрим каждый из них:</p>
+
+<p><strong>Модуль: /app/scripts/app.js</strong></p>
+
+<p>``` javascript
+‘use strict’;
+// Here we set up an angular module. We’ll attach controllers and 
+// other components to this module.
+angular.module(‘testApp’, [])
+  // Angular supports chaining, so here we chain the config function onto
+  // the module we’re configuring.
+  .config(function ($routeProvider) {</p>
+
+<pre><code>// We use AngularJS dependency injection to fetch the route provider.
+// The route provider is used to setup our app's routes. 
+ 
+// The config below simply says when you visit '/' it'll render
+// the views/main.html template controlled by the MainCtrl controller.
+ 
+// The otherwise method specifies what the app should do if it doesn't recognise 
+// the route entered by a user. In this case, redirect to home.
+$routeProvider
+  .when('/', {
+    templateUrl: 'views/main.html',
+    controller: 'MainCtrl'
+  })
+  .otherwise({
+    redirectTo: '/'
+  });   }); ```
+</code></pre>
+
+<p><strong>Контроллер: /app/scripts/controllers/main.js</strong></p>
+
+<p>``` javascript
+‘use strict’;</p>
+
+<p>// Here we attach this controller to our testApp module
+  angular.module(‘testApp’)</p>
+
+<pre><code>// The controller function let's us give our controller a name: MainCtrl
+// We'll then pass an anonymous function to serve as the controller itself.
+.controller('MainCtrl', function ($scope) {
+  
+  // Using AngularJS dependency injection, we've injected the $scope variable
+  // Anything we attach to scope will be available to us in the view.
+  
+  // In this case, we're attaching a collection of Awesome Things to display
+  // in app/views/main.html
+  $scope.awesomeThings = [
+    'HTML5 Boilerplate',
+    'AngularJS',
+    'Karma'
+  ];
+}); ```
+</code></pre>
+
+<p><strong>Представление: app/views/main.html</strong></p>
+
+<p>``` html
+&lt;div class="header"&gt;
+  &lt;ul class="nav nav-pills pull-right"&gt;
+    &lt;li class="active"&gt;<a ng-href="#">Home</a>&lt;/li&gt;
+    &lt;li&gt;<a ng-href="#">About</a>&lt;/li&gt;
+    &lt;li&gt;<a ng-href="#">Contact</a>&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;h3 class="text-muted"&gt;angyeo&lt;/h3&gt;
+&lt;/div&gt;</p>
+
+<div class="jumbotron">
+  <h1>'Allo, 'Allo!</h1>
+  <p class="lead">
+    <img src="images/yeoman.png" alt="I'm Yeoman" /><br />
+    Always a pleasure scaffolding your apps.
+  </p>
+  <p><a class="btn btn-lg btn-success" ng-href="#">Splendid!</a></p>
+</div>
+
+<div class="row marketing">
+  <h4>HTML5 Boilerplate</h4>
+  <p>
+    HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.
+  </p>
+
+  <h4>Angular</h4>
+  <p>
+    AngularJS is a toolset for building the framework most suited to your application development.
+  </p>
+
+  <h4>Karma</h4>
+  <p>Spectacular Test Runner for JavaScript.</p>
+</div>
+
+<div class="footer">
+  <p>♥ from the Yeoman team</p>
+</div>
+<p>```</p>
+
+<h2 id="section-6">Давайте посмотрим его в действии!</h2>
+
+<p>Мы готовы впервые взлянуть на наше приложение. Вернитесь в корневой каталог вашего приложения и выполните команду:</p>
+
+<p><code>
+grunt server
+</code></p>
+
+<p><strong>Grunt</strong></p>
+
+<p>Grunt является мощным, многофункциональным, исполнителем задач на JavaScript. Короче говоря, он позволяет автоматизировать повторяющиеся задачи, такие как компиляция CoffeeScript, минификация CSS, проверка корректности кода и т.д. Мы так же будем делать это, для того что бы подготовить наш код для разработки и развертывания.</p>
+
+<p>Grunt проходится по каталогу нашего проекта и подготавливает его для нас, например компилирует подключенный Bootstrap SASS в CSS.</p>
+
+<p>Через несколько секунд окно браузера должно появиться с вашим работающим приложением.</p>
+
+<p>Что бы быть уверенным в корректной работе, откройте исходный код страницы и посмотрите подключенный <code>main.css</code>. Он должен содержать кучу Bootstrap кода - благодаря магии Bower и Grunt.</p>
+
+<h2 id="section-7">Давайте изменим его</h2>
+
+<p>Пришло время попробовать наши силы в изменении проекта. Так как это Angular проект, начнем с тестов.</p>
+
+<p>Yeoman любезно сгенерировал пример теста, так что давайте начнем с него.</p>
+
+<p>Мы собираемся добавить еще один элемент в список <code>awesomeThings</code>, поэтому откройте <code>test/spec/controllers/main.js</code> и измените ожидаемую длину списка на 4 вместо 3.</p>
+
+<p><strong>test/spec/controllers/main.js</strong></p>
+
+<p>``` javascript
+‘use strict’;</p>
+
+<p>describe(‘Controller: MainCtrl’, function () {</p>
+
+<p>// load the controller’s module
+  beforeEach(module(‘testApp’));</p>
+
+<p>var MainCtrl,
+    scope;</p>
+
+<p>// Initialize the controller and a mock scope
+  beforeEach(inject(function ($controller, $rootScope) {
+    scope = $rootScope.$new();
+    MainCtrl = $controller(‘MainCtrl’, {
+      $scope: scope</p>
+
+<pre><code>});   }));
+</code></pre>
+
+<p>it(‘should attach a list of awesomeThings to the scope’, function () {
+    // Change this line
+    expect(scope.awesomeThings.length).toBe(3);</p>
+
+<pre><code>// To this
+expect(scope.awesomeThings.length).toBe(4);   }); }); ```
+</code></pre>
+
+<p>Теперь мы можем использовать еще одну замечательную возможность в Grunt:</p>
+
+<p><code>
+grunt test
+</code></p>
+
+<p>Эта команда запустит наши Karma-тесты. Они должны выдать ошибку потому, что ожидается 4 элемента в <code>awesomeThings</code>, а у нас по прежнему 3. Давайте исправим это и сделаем так, что бы наши тесты прошли.</p>
+
+<p>Откройте <code>app/scripts/controllers/main.js</code> и добавтье еще один элемент в список:</p>
+
+<p><strong>app/scripts/controllers/main.js</strong></p>
+
+<p><code>javascript
+.controller('MainCtrl', function ($scope) {
+  $scope.awesomeThings = [
+    'HTML5 Boilerplate',
+    'AngularJS',
+    'Karma',
+    'SitePoint'
+  ];
+});
+</code></p>
+
+<p>Сохраните файл и запустите тесты снова:</p>
+
+<p><code>
+grunt test
+</code></p>
+
+<p>На этот раз они должны успешно завершиться. Теперь вы можете запустить приложение в браузере (<code>grunt server</code>) и заметить, что есть дополнительный пункт в списке. Аккуратные да?</p>
+
+<h2 id="bower">Использование пакета, установленного через Bower</h2>
+
+<p>Давайте используем библиотеку AngularUI Bootstrap, которую мы подключили ранее, что бы наш список <code>awesomeThings</code> стал раскрываемым.</p>
+
+<p><strong>Важно:</strong> Bower - просто пакетный менеджер, он не отвечает за добавление файлов в <code>index.html</code>. Нам нужно сделать это самим.</p>
+
+<p>Поэтому откройте <code>app/index.html</code> и добавьте следующую строку:</p>
+
+<p><code>html
+&lt;script src="components/angular-bootstrap/ui-bootstrap.js"&gt;&lt;/script&gt;
+</code></p>
+
+<p>Потом, в соответствии со вступительным руководством по <code>AngularUI Bootstrap</code>, мы должны добавить их модуль в качестве зависимости в наш модуль Angular.</p>
+
+<p>Откройте <code>app/scripts/app.js</code> и добавьте <code>ui.bootstrap</code> как зависимость:</p>
+
+<p><strong>/app/scripts/app.js</strong></p>
+
+<p>``` javascript
+‘use strict’;</p>
+
+<p>angular.module(‘testApp’, [‘ui.bootstrap’])
+…
+```</p>
+
+<p>Хорошо, теперь можно его использовать. Сделайте несколько изменений в нашем представлении:</p>
+
+<p><strong>app/views/main.html</strong></p>
+
+<p>``` html</p>
+<ul>
+  <li class="dropdown">
+    <a class="dropdown-toggle">
+      Click me to see some awesome things!
+    </a>
+    <ul class="dropdown-menu">
+      <li ng-repeat="thing in awesomeThings">
+        <a></a>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>```</p>
+
+<p>Мы использовали несколько CSS классов из Bootstrap и переместили директиву <code>ng-repeat</code> что бы создать пункты меню, а не стандартный список.</p>
+
+<p>Директивы AngularUI Bootstrap работают на классах, так что просто добавив класс <code>dropdown-toggle</code> к тегу, мы получили полностью рабочий выпадающий список!</p>
+
+<p>Еще нужно добавить модуль <code>Bootstrap UI</code> к нашим тестам, иначе они будут валиться до тех пор пока на будут внесены следующие изменения:</p>
+
+<p><strong>test/spec/controllers/main.js</strong></p>
+
+<p>``` javascript
+‘use strict’;</p>
+
+<p>describe(‘Controller: MainCtrl’, function () {</p>
+
+<p>// load the controller’s module
+  beforeEach(module(‘testApp’));
+  // load the BootstrapUI module
+  beforeEach(module(‘ui.bootstrap’)); // Add this line
+ …
+});
+```</p>
+
+<p><strong>/karma.conf.js</strong></p>
+
+<p>``` javascript
+// Karma configuration</p>
+
+<p>// base path, that will be used to resolve files and exclude
+basePath = ‘’;</p>
+
+<p>// list of files / patterns to load in the browser
+files = [
+  JASMINE,
+  JASMINE_ADAPTER,
+  ‘app/components/angular/angular.js’,
+  ‘app/components/angular-mocks/angular-mocks.js’,
+  ‘app/components/angular-bootstrap/ui-bootstrap.js’, // Add this line
+  ‘app/scripts/*.js’,
+  …
+```</p>
+
+<p>Запустите <code>grunt test</code>, что бы убедиться, что тесты успешно пройдены.</p>
+
+<p>Теперь вы можете открыть ваше приложение в браузере (<code>grunt server</code>) еще раз и посмотрите на результат вашей работы.</p>
+
+<h2 id="section-8">Заключение</h2>
+
+<p>Что у вас теперь есть! Простое Angular приложение, подключенная сторонняя библиотека, тесты, минификация и куча других вкусностей с минимальными усилиями!</p>
+
+<p>Мы лишь поверхностно коснулись того, что позволяет Yeoman и его компоненты, но я надеюсь, что это вдохновит вас быстро начать работаь над Angular приложением в следующий раз, когда у вас будет отличная идея!</p>
+]]></content>
+  </entry>
+  
+</feed>
