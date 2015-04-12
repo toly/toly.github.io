@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Django | Toly blog]]></title>
   <link href="http://toly.github.io/blog/categories/django/atom.xml" rel="self"/>
   <link href="http://toly.github.io/"/>
-  <updated>2015-04-11T20:02:03+03:00</updated>
+  <updated>2015-04-12T14:48:22+03:00</updated>
   <id>http://toly.github.io/</id>
   <author>
     <name><![CDATA[Toly]]></name>
@@ -241,7 +241,7 @@ from .models import User, Post, Photo</p>
 
 <p>Просто загрузив одну из ваших API сущностей в браузер, Django Rest Framework предоставит вам удобный клиентсткий интерфейс для взаимодействия с API.</p>
 
-<p><img class="left" src="/images/DRF_Angular/browser_user_posts.png" width="300"> <img class="left" src="/images/DRF_Angular/browser_users.png" width="300"></p>
+<p>{% img left /images/DRF_Angular/browser_user_posts.png 300 %} {% img left /images/DRF_Angular/browser_users.png 300 %}</p>
 
 <h2 id="api-3">Добавление прав доступа и принадлежности в API</h2>
 
@@ -306,10 +306,10 @@ class PostMixin(object):
 </blockquote>
 
 <blockquote>
-  <p>Я заключил некоторые части шаблона в джанговсий тег <code>{% block %}</code>, чтобы потом наследовать этот шаблон для каждого из примеров.</p>
+  <p>Я заключил некоторые части шаблона в джанговсий тег {% raw %}<code>{% block %}</code>{% endraw %}, чтобы потом наследовать этот шаблон для каждого из примеров.</p>
 </blockquote>
 
-<p>
+<p>{% raw %}
 ``` django
 {% load staticfiles %}</p>
 
@@ -336,7 +336,7 @@ class PostMixin(object):
 </body>
 </html>
 <p>```
-</p>
+{% endraw %}</p>
 
 <p>Теперь, давайте дополним шаблон простым контроллером, который будет возвращать список постов. Сейчас мы жестко пропишем посты, а потом будем получать их через AJAX.</p>
 
@@ -360,7 +360,7 @@ app = angular.module ‘example.app.static’, []</p>
 
 <p>Если вы установили все зависимости и запустили <code>grunt</code>, что бы скомпилить CoffeScript в JavaScript, то вы должны увидеть наш шаблон с прописанными в коде данными вроде этого:</p>
 
-<p><img class="center" src="/images/DRF_Angular/example_static.png"></p>
+<p>{% img center /images/DRF_Angular/example_static.png %}</p>
 
 <h2 id="xhr-----api">Используем XHR для получения постов из API</h2>
 
@@ -379,7 +379,7 @@ app = angular.module ‘example.app.basic’, []</p>
 
 <p>С сервисом <code>$http</code>, получающим список постов из нашего API, наша тестовая страница покажет список постов прямо с сервера.</p>
 
-<p><img class="center" src="/images/DRF_Angular/example_basic.png"></p>
+<p>{% img center /images/DRF_Angular/example_basic.png %}</p>
 
 <h2 id="angular-resource--api">Используем Angular-Resource для API</h2>
 
@@ -417,7 +417,7 @@ app = angular.module ‘example.app.resource’, [‘example.api’]</p>
 
 <p>В результате получим такой же список постов, как и в примере выше.</p>
 
-<p><img class="center" src="/images/DRF_Angular/example_resource.png"></p>
+<p>{% img center /images/DRF_Angular/example_resource.png %}</p>
 
 <h2 id="section-2">Добавляем фотографии в список постов</h2>
 
@@ -452,9 +452,9 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
 ]
 ```</p>
 
-<p>Также обновим наш шаблон чтобы итерировать каждую модель поста для отображения фотографий каждого поста. Обратите внимание, как AngularJS повторно обновляет представление по мере того, как данные загружаются из API. В этом случае, мы итерируем фотографии объекта, ссылающиеся на идентификаторы постов, которые в свою очередь итерируются директивой <code>ng-repeat</code>. Мы также используем директиву <code>ng-src</code> вместо аттрибута <code>src</code>, так как это не позволяет браузеру загружать картинку до того как выражение Angular было прекомпилировано (тогда бы вы увидели ошибку 404 в ваших логах о невозможности показа ’/media/{{ photo.image }}’).</p>
+<p>Также обновим наш шаблон чтобы итерировать каждую модель поста для отображения фотографий каждого поста. Обратите внимание, как AngularJS повторно обновляет представление по мере того, как данные загружаются из API. В этом случае, мы итерируем фотографии объекта, ссылающиеся на идентификаторы постов, которые в свою очередь итерируются директивой <code>ng-repeat</code>. Мы также используем директиву <code>ng-src</code> вместо аттрибута <code>src</code>, так как это не позволяет браузеру загружать картинку до того как выражение Angular было прекомпилировано (тогда бы вы увидели ошибку 404 в ваших логах о невозможности показа {% raw %}’/media/{{ photo.image }}’{% endraw %}).</p>
 
-<p>
+<p>{% raw %}
 <code>html
 &lt;div class="panel" ng-repeat="post in posts"&gt;
     &lt;div class="panel-heading clearfix"&gt;
@@ -467,17 +467,17 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
     &lt;/div&gt;
 &lt;/div&gt;
 </code>
-</p>
+{% endraw %}</p>
 
 <p>И в итоге, обновив страницу <a href="http://localhost:8000/photos">http://localhost:8000/photos</a>, получим отрендеренные фотографии:</p>
 
-<p><img class="center" src="/images/DRF_Angular/example_photos.png"></p>
+<p>{% img center /images/DRF_Angular/example_photos.png %}</p>
 
 <h2 id="angularjs----csrf">Лирическое отступление: AngularJS и защита от CSRF</h2>
 
 <p>Django Rest Framework расширяет джанговскую защиту от <a href="http://ru.wikipedia.org/wiki/%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D0%BB%D0%BA%D0%B0_%D0%BC%D0%B5%D0%B6%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2%D1%8B%D1%85_%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%BE%D0%B2">CSRF</a> (Cross Site Request Forgery) используя класс <code>SessionAuthentication</code> (как например в нашем случае: используется таже сессия браузера, что и для веб-приложения). Это способствует тому, что вредоносные сценарии не смогут использовать наших пользователей для выполнения различных запросов к нашему API, заставляя сценарии при каждом запросе отправлять генерируемый сервером токен. Модульная архитектура AngularJS и внедрение зависимостей позволяет сделать это простым конфигурированием запросов к API с помощью включения CSRF-токена в заголовок запроса (по желанию, можно также использовать куки).</p>
 
-<p>В нашем джанговском шаблоне, просто добавьте тег <code>&lt;script&gt;</code> для конфигурирования сервиса <code>$http</code> и настройте джанговское приложение, что бы шаблонная переменная <code>{{ csrf_token }}</code> передавалась в заголовок ответа для всех вызовов API.</p>
+<p>В нашем джанговском шаблоне, просто добавьте тег <code>&lt;script&gt;</code> для конфигурирования сервиса <code>$http</code> и настройте джанговское приложение, что бы шаблонная переменная {% raw %}<code>{{ csrf_token }}</code>{% endraw %} передавалась в заголовок ответа для всех вызовов API.</p>
 
 <blockquote>
   <p>Будьте уверены, что этот скрипт загружается <strong>после</strong> определений модуля.</p>
@@ -487,7 +487,7 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
   <p>Вы можете передавать CSRF токен между Angular и Django через куки или другим способом. Этот явный механизм с использованием заголовков просто обеспечивает генерацию CSRF токена при каждом запросе.</p>
 </blockquote>
 
-<p>
+<p>{% raw %}
 <code>html
 &lt;script&gt;
 // Add the CSRF Token
@@ -497,7 +497,7 @@ app.config(['$httpProvider', function($httpProvider) {
 }]);
 &lt;/script&gt;
 </code>
-</p>
+{% endraw %}</p>
 
 <h2 id="api---angularjs">Создание и модификация ресурсов API с использованием AngularJS</h2>
 
@@ -505,7 +505,7 @@ app.config(['$httpProvider', function($httpProvider) {
 
 <p>Сперва, нам нужно расшарить наш базовый шаблон, и добавить html шаблон для редактора. Мы также добавим CSRF токен, согласно приведенным выше инструкциям, так как для создания новых постов будут использоваться потенциально уязвимые методы.</p>
 
-<p>
+<p>{% raw %}
 ``` django
 {% extends ‘base.html’ %}</p>
 
@@ -542,7 +542,7 @@ app.config(['$httpProvider', function($httpProvider) {
 </script>
 {% endblock %}
 ```
-</p>
+{% endraw %}</p>
 
 <p>Теперь, у нас есть редактор - давайте сделаем контроллер для его подключения. Заметьте, что теперь у нас в зависимостях два модуля: базовый модуль нашей ленты постов и модуль API, содержащий все определения ресурсов API (<code>$resource</code>).</p>
 
@@ -562,7 +562,7 @@ $scope.save = -&gt;
 
 <p>Ранее, в представлениях API, мы добавляли некоторые ограничения прав доступа, чтобы предотвратить изменения пользователями чужих постов. До сих пор это не имело значения, какое отношение имеет пользователь к редактируемому посту. Но теперь, когда мы хотим создать пользователей, мы должны гарантировать, что обрабатываем запрос от пользователя, который имеет право на этот запрос (иначе, запрос на создание нового поста должен быть отклонен). В этом учебном примере, мы использовали хак аутентификации Django, который автоматически авторизует вас как пользователя <code>root</code>. Разумеется, в продакшене или ином недоверенном окружении так делать нельзя. Это сделано для упрощения демонстрации тестового приложения, игнорируя регистрацию и авторизацию пользователя.</p>
 
-<p><img class="center" src="/images/DRF_Angular/example_editor.png"></p>
+<p>{% img center /images/DRF_Angular/example_editor.png %}</p>
 
 <h2 id="section-3">Обработка ошибок</h2>
 
@@ -599,17 +599,17 @@ $scope.save = -&gt;
 
 <p>Также обновим шаблон, для вывода информации об ошибках:</p>
 
-<p>
+<p>{% raw %}
 <code>html
 &lt;p ng-repeat="(name, errs) in errors" class="alert alert-danger"&gt;&lt;strong&gt;{{ name }}&lt;/strong&gt;: {{ errs.join(', ') }}&lt;/p&gt;
 </code>
-</p>
+{% endraw %}</p>
 
 <p>Подобным образом довольно просто к элементам пользовательского интерфейса добавить получение обратной связи о прогрессе (индиваторы загрузки, прогресс-бары) используя цепочечные вызовы. В AngularJS есть достаточно полная обработка ошибок через цепочки вызовов, делающая обработку ошибок простой.</p>
 
 <p>В этом демонстрационном примере, мы просто перечислили ошибки и вывели их в специально оформленных элементах интерфейса. Так как ошибки имеют привязку к имени аттрибута, вы легко можете показать список ошибок возле того элемента формы, которому они соответсвуют.</p>
 
-<p><img class="center" src="/images/DRF_Angular/example_error.png"></p>
+<p>{% img center /images/DRF_Angular/example_error.png %}</p>
 
 <h2 id="section-4">Удаление своих постов</h2>
 
@@ -638,7 +638,7 @@ app = angular.module ‘example.app.manage’, [‘example.api’, ‘example.ap
 
 <p>После определения контроллера, давайте обновим наш шаблон поста и добавим кнопку удаления (при условии, что функция <code>canDelete</code> возвращает <code>true</code>).</p>
 
-<p>
+<p>{% raw %}
 ``` django
 {% extends ‘editor.html’ %}</p>
 
@@ -664,11 +664,11 @@ var app = angular.module('example.app.manage'); // Not including a list of depen
 &lt;/script&gt;
 {% endblock %}
 ```
-</p>
+{% endraw %}</p>
 
 <p>И когда вы загрузите <a href="http://localhost:8000/manage">http://localhost:8000/manage</a>, возле постов с автором <code>root</code> будет кнопка <strong>‘X’</strong>, а возле поста с автором <code>bob</code> - не будет. При нажатии на кнопку <strong>‘X’</strong> наш API удалит пост.</p>
 
-<p><img class="center" src="/images/DRF_Angular/example_managed.png"></p>
+<p>{% img center /images/DRF_Angular/example_managed.png %}</p>
 
 <p>Итак, у нас есть простая лента, в которой пользователи могут размещать посты.</p>
 
@@ -823,7 +823,7 @@ from crispy_forms.helper import FormHelper</p>
 
 <p>Это предполагает, что приложение <code>jobs</code> установлено и настроено. Базовый шаблон будет выглядеть примерно так:</p>
 
-<p></p>
+<p>{% raw %}</p>
 
 <p>``` django /jobs/base.html
 &lt;!DOCTYPE html&gt;</p>
@@ -844,13 +844,13 @@ from crispy_forms.helper import FormHelper</p>
 </html>
 <p>```</p>
 
-<p></p>
+<p>{% endraw %}</p>
 
 <p>Django-angular предлагает полезные шаблонные теги, которые включат необходимый для вас JavaScript. Я рекомендую использовать CDN и загрузить туда файлы, какие можно. Это дает географические и пропускные преимущества.</p>
 
 <p>Теперь создадим шаблон страницы, который будет рендерится нашим проектом. <em>index.html</em> будет служить главной страницей нашего одностраничного приложения, и позже может быть использован для всех CRUD (Create Read Update Delete) представлений.</p>
 
-<p></p>
+<p>{% raw %}</p>
 
 <p><code>django /jobs/index.html
 {% extends "base.html" %}
@@ -865,9 +865,9 @@ from crispy_forms.helper import FormHelper</p>
 {% endblock extra_javascript %}
 </code></p>
 
-<p></p>
+<p>{% endraw %}</p>
 
-<p></p>
+<p>{% raw %}</p>
 
 <p>``` javascript /javascript/app.js
 var app = angular.module(‘JobApp’, [
@@ -900,7 +900,7 @@ function ($scope, Restangular, CbgenRestangular, $q) {</p>
 <p>}])// end controller
 ```</p>
 
-<p></p>
+<p>{% endraw %}</p>
 
 <p>Шаблон и JS код выше очень простые, наследуется от базового шаблона. Есть несколько аттрибутов, которые вы возможно не видели прежде и в которых нужно будет разобраться.</p>
 
@@ -945,13 +945,13 @@ $stateProvider
 
 <p>Последний шаблон, который нужно создать - <em>/jobs/new.html</em>. Он будет содержать простую форму, которую вы сделали ранее с использованием django-angular.</p>
 
-<p>
+<p>{% raw %}
 <code>django /jobs/new.html
 {% load crispy_forms_tags %}
 {% crispy JobForm %}
 &lt;button type="button" class="btn btn-default"  ng-click="submitJob()"&gt;Create&lt;/button&gt;
 </code>
-</p>
+{% endraw %}</p>
 
 <p>Теперь вам нужно всего лишь представление и URL для подключения формы.</p>
 
