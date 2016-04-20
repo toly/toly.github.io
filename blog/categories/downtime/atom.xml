@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Downtime | Toly blog]]></title>
+  <link href="http://toly.github.io/blog/categories/downtime/atom.xml" rel="self"/>
+  <link href="http://toly.github.io/"/>
+  <updated>2016-04-20T18:24:00+03:00</updated>
+  <id>http://toly.github.io/</id>
+  <author>
+    <name><![CDATA[Toly]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Простой Zero-Downtime Blue-Green деплой]]></title>
+    <link href="http://toly.github.io/blog/2016/04/20/simple-0-downtime-blue-green-deployments/"/>
+    <updated>2016-04-20T12:55:06+03:00</updated>
+    <id>http://toly.github.io/blog/2016/04/20/simple-0-downtime-blue-green-deployments</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Перевод статьи Дена Бравендера <a href="http://dan.bravender.net/2014/8/24/Simple_0-Downtime_Blue_Green_Deployments.html">Simple 0-Downtime Blue Green Deployments</a></p>
+</blockquote>
+
+<p>Поработав в шести e-commerce проектах (половина из которых зарабатывает миллионы долларов год), я могу с уверенностью сказать, что периодическая неработоспособность серверов - это железобетонный способ развалить бизнес любой компании. Как ни крути, время – деньги. Я работал с командами которые пытались минимизировать время даунтайма во время релиза множеством различных способов. Вот некоторые из них:</p>
+
+<p>На одном конце спектра вы можете избегать простоя серверов, выполняя деплой только во время техобслуживания. Недостатки здесь довольно очевидны – что если релиз содержит ошибку и вы не узнаете об этом до тех пор, пока на сайт не пойдет пиковый траффик? Я видел людей, вскидывающих руки со словами “Я думаю, что наши пользователи не смогут использовать новую функциональность и будут получать ошибку, пока мы не выкатим исправление завтра утром” в магазинах, где деплоились так. Я так же наблюдал, как сайт над которым я работал был “выключен” для экстренного деплоя и мы были завалены жалобами от клиентов.</p>
+
+<p>На другом конце спектра я видел попытки blue/green phoenix деплоя - переустановка на каждой виртуальной машине с таким же ПО, но с новой версией проекта. После окончания тестирования на новых виртуальных машинах вы можете изменить настройки аппаратного свитча или сервиса, вроде HAProxy, что бы он указывал на новую версию сайта. Само собой разумеется, используя этот метод занимает очень много времени, если все, что вы хотите сделать, это развернуть исправление одной строки. Если вы не знакомы с blue/green деплоем, обязательно прочтите <a href="http://martinfowler.com/bliki/BlueGreenDeployment.html">статью Мартина Фаулера об этом</a>.</p>
+
+<p>Существует золотая середина в решении этой проблемы, при которой сайт продолжает работать и выкатка не занимает так много времени, как blue/green phoenix деплой. Тем не менее, как и со всеми техническими решениями, она не лишена своих недостатков и не везде применима.</p>
+
+<p>Вот тривиальное Flask-приложение, которое я буду развертывать для примера:</p>
+
+<p>``` python
+import os, time</p>
+
+<p>from flask import Flask</p>
+
+<p>app = Flask(<strong>name</strong>)</p>
+
+<p>@app.route(“/”)
+def hello():
+    return “Hello 0-downtime %s World!” % os.environ.get(‘BLUEGREEN’, ‘bland’)
+```</p>
+
+<p>А вот fabfile, который мы будем использовать:</p>
+
+<p>``` python
+import os
+import sys
+from StringIO import StringIO</p>
+
+<p>from fabric.api import task, local, run
+from fabric.operations import put
+from fabric.state import env</p>
+
+<p>sys.path.append(‘../’)
+from gitric.api import (  # noqa
+    git_seed, git_reset, allow_dirty, force_push,
+    init_bluegreen, swap_bluegreen
+)</p>
+
+<p>@task
+def prod():
+    env.user = ‘test-deployer’
+    env.bluegreen_root = ‘/home/test-deployer/bluegreenmachine/’
+    env.bluegreen_ports = {‘blue’: ‘8888’,
+                           ‘green’: ‘8889’}
+    init_bluegreen()</p>
+
+<p>@task
+def deploy(commit=None):
+    if not commit:
+        commit = local(‘git rev-parse HEAD’, capture=True)
+    env.repo_path = os.path.join(env.next_path, ‘repo’)
+    git_seed(env.repo_path, commit)
+    git_reset(env.repo_path, commit)
+    run(‘kill $(cat %(pidfile)s) || true’ % env)
+    run(‘virtualenv %(virtualenv_path)s’ % env)
+    run(‘source %(virtualenv_path)s/bin/activate &amp;&amp; ‘
+        ‘pip install -r %(repo_path)s/bluegreen-example/requirements.txt’
+        % env)
+    put(StringIO(‘proxy_pass http://127.0.0.1:%(bluegreen_port)s/;’ % env),
+        env.nginx_conf)
+    run(‘cd %(repo_path)s/bluegreen-example &amp;&amp; PYTHONPATH=. ‘
+        ‘BLUEGREEN=%(color)s %(virtualenv_path)s/bin/gunicorn -D ‘
+        ‘-b 0.0.0.0:%(bluegreen_port)s -p %(pidfile)s app:app’
+        % env)</p>
+
+<p>@task
+def cutover():
+    swap_bluegreen()
+    run(‘sudo /etc/init.d/nginx reload’)
+```</p>
+
+<p>Обновления в развертывании должны быть идемпотентными (то есть, если вы запускаете деплой несколько раз, то результат должен быть таким же, каждый раз, за исключением pid-ов запускаемых процессов). Здесь есть один тонкий момент - когда используете <code>git</code> для деплоя, вам нужно очистить удаленную рабочую копию репозитория. Я не делал этого здесь, но вы можете использовать команду <code>git clean</code>, чтобы быть уверенным, что в рабочей копии только то, что в репозитории. Я сделал этот пример для python-приложения, но вы можете использовать любой язык, который не требует компиляции в бинарный файл и и у которого есть возможность установки изолированных пакетов. Я предполагаю, что это может быть сделано с <code>ruby</code> и <a href="http://rvm.io/">RVM</a>. У меня также есть пример на nodejs в <a href="https://github.com/dbravender/gitric">репозитории gitric</a>.</p>
+
+<p>Структура каталогов, куда будет деплоиться проект выглядит следующим обазом:</p>
+
+<p><code>text
+├── blue
+│   ├── env
+│   ├── etc
+│   └── repo
+├── green
+│   ├── env
+│   ├── etc
+│   └── repo
+├── live -&gt; /home/test-deployer/bluegreenmachine/green
+└── next -&gt; /home/test-deployer/bluegreenmachine/blue
+</code></p>
+
+<p>Для того, чтобы сделать первичное развертывание все что вам нужно это пользователь на удаленном сервере и конфигурация хостов в <code>Nginx</code> вроде такой:</p>
+
+<p>``` text
+server {
+    listen 80;
+    server_name server.name.here;</p>
+
+<pre><code>location / {
+    include /home/test-deployer/bluegreenmachine/live/etc/nginx.conf;
+} }
+</code></pre>
+
+<p>server {
+    listen 80;
+    server_name next.server.name.here;</p>
+
+<pre><code>location / {
+    include /home/test-deployer/bluegreenmachine/next/etc/nginx.conf;
+} } ```
+</code></pre>
+
+<p>После этого вы можете запустить это:</p>
+
+<p><code>sh
+fab prod deploy
+fab prod cutover
+</code></p>
+
+<p>Эти шаги намеренно разделены, что бы вы могли проверить работоспособность проекта перед тем как переключиться на новый релиз.</p>
+
+<p>Здесь я переключаюсь на новый релиз во время работы <code>ab</code> и постоянного обращения к серверу с помощью <code>curl</code> что бы видеть, что возвращает сервер:</p>
+
+<pre><code>% ab -c 100 -n 5000 http://my.server.here/
+This is ApacheBench, Version 2.3 &lt;$Revision: 1528965 $&gt;
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking my.server.here (be patient)
+Completed 500 requests
+Completed 1000 requests
+Completed 1500 requests
+Completed 2000 requests
+Completed 2500 requests
+Completed 3000 requests
+Completed 3500 requests
+Completed 4000 requests
+Completed 4500 requests
+Completed 5000 requests
+Finished 5000 requests
+
+
+Server Software:        nginx/1.4.1
+Server Hostname:        my.server.here
+Server Port:            80
+
+Document Path:          /
+Document Length:        28 bytes
+
+Concurrency Level:      100
+Time taken for tests:   33.180 seconds
+Complete requests:      5000
+Failed requests:        2576
+   (Connect: 0, Receive: 0, Length: 2576, Exceptions: 0)
+Total transferred:      922576 bytes
+HTML transferred:       142576 bytes
+Requests per second:    150.69 #/sec (mean)
+Time per request:       663.607 ms (mean)
+Time per request:       6.636 ms (mean, across all concurrent requests)
+Transfer rate:          27.15 Kbytes/sec received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:      164  326  87.5    321    1393
+Processing:   161  308 188.7    284    4045
+Waiting:      161  307 186.5    284    4045
+Total:        338  635 216.9    646    4409
+
+Percentage of the requests served within a certain time (ms)
+  50%    646
+  66%    675
+  75%    689
+  80%    699
+  90%    723
+  95%    758
+  98%    789
+  99%    899
+ 100%   4409 (longest request)
+</code></pre>
+
+<p>Мой сервер - маленькая виртуалка на Linode (хостинг) и я нахожусь на другой стороне Земли от него, так что я не очень обеспокоен его производительностью. Я проверяю, что все запросы были обработаны, пока осуществлялся деплой, и приложение продолжало работать. Вы можете увидеть, что <code>ab</code> насчитал 2576 запросов с ошибочной длинной (failing length requests) - на самом деле это не ошибки - <code>ab</code> считает, что если содержимое ответа сервера отличается от первоначального ответа, то это ошибка; на середине нагрузочного тестирования я переключился на новый релиз.</p>
+
+<pre><code>% for x in $(seq 100); do curl -s -S http://my.server.here/ &amp;&amp; echo; done
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+</code></pre>
+
+<p>Бонусом идет эффективное использование перезагрузки, предоставляемое большинством веб-серверов (<code>Apache</code>, <code>Nginx</code>). Текущие процессы веб-сервера перестаю обрабатывать новые запросы, а новые созданные процессы веб-сервера направляют весь траффик на новую версию проекта. Вот лог моего веб-сервера сразу после переключения:</p>
+
+<p>```text
+COMMAND    PID          USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME</p>
+
+<p>nginx    13636          root    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29426      www-data    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29427      www-data    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29428      www-data    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29429      www-data    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29381      www-data   14u  IPv4 16961706      0t0  TCP SERVER_IP:80-&gt;PING_IP:46083 (ESTABLISHED)
+nginx    29381      www-data   15u  IPv4 16961707      0t0  TCP localhost:48628-&gt;localhost:8889 (ESTABLISHED)
+nginx    29429      www-data    5u  IPv4 16961753      0t0  TCP SERVER_IP:80-&gt;PING_IP:46084 (ESTABLISHED)
+nginx    29429      www-data    6u  IPv4 16961754      0t0  TCP localhost:33233-&gt;localhost:8888 (ESTABLISHED)</p>
+
+<p>gunicorn 29223 test-deployer    5u  IPv4 16953570      0t0  TCP *:8888 (LISTEN)
+gunicorn 29340 test-deployer    5u  IPv4 16953579      0t0  TCP *:8889 (LISTEN)
+gunicorn 29345 test-deployer    5u  IPv4 16953579      0t0  TCP *:8889 (LISTEN)
+gunicorn 29345 test-deployer    9u  IPv4 16962807      0t0  TCP localhost:8889-&gt;localhost:48628 (ESTABLISHED)
+gunicorn 29391 test-deployer    5u  IPv4 16953570      0t0  TCP *:8888 (LISTEN)
+gunicorn 29391 test-deployer    9u  IPv4 16960496      0t0  TCP localhost:8888-&gt;localhost:33233 (ESTABLISHED)</p>
+
+<p>root     13636  0.0  0.3  12920  3208 ?        Ss   Jun16   0:00 nginx: master process /usr/sbin/nginx
+www-data 29381  0.0  0.2  12904  2104 ?        S    14:51   0:00 nginx: worker process is shutting down
+www-data 29426  0.0  0.1  12920  1888 ?        S    14:52   0:00 nginx: worker process
+www-data 29427  0.0  0.1  12920  1888 ?        S    14:52   0:00 nginx: worker process
+www-data 29428  0.0  0.1  12920  1888 ?        S    14:52   0:00 nginx: worker process
+www-data 29429  0.0  0.2  12920  2380 ?        S    14:52   0:00 nginx: worker process
+```</p>
+
+<p>Процесс Nginx с pid 29381 (помеченый как “nginx: worker process is shutting down”) обрабатывает старый запрос, направляя его на старый релиз, и будет завершен после окончания обработки. Запрос, который поступил после выкатки направляется на порт 8888 (новый релиз). Все последующие запросы будут поступать на новые процессы nginx-a, которые передадут их на 8888-й порт. Вот так nginx выполняет мягкую перезагрузку, но для использования этого метода нет необходимости понимать как это происходит.</p>
+
+<p>Использование <code>git</code> для развертывания кода для языков, не требующих сборки, вроде Python и Руби, сокращает время, необходимое для создания пакетов и развертывания. Я <a href="http://dan.bravender.net//2012/5/11/git-based_fabric_deploys_are_awesome.html">писал</a> об этом несколько лет назад. Совместное испольование с blue/green  развертывания на том же сервере, привело к очень приятному опыт развертывания для меня и моей команды за прошедший год-полтора. Наш процесс деплоя был последовательным, но когда наш парк серверов вырос, процесс развертывания не стал медленнее, так как мы начали использовать декоратор <code>@parallel</code> во время фазы обновления.</p>
+
+<p>Дополнительно требуется немного планирования для написания кода и миграций, которые могут быть развернуты без выключения сервиса, но со времнем, экспериментируя, вы поймете что совершаете не так уж и много допонительной работы. <a href="http://www.slideshare.net/zeeg/djangocon-2010-scaling-disqus">Вот классное видео</a> от команды Disqus. Вам нужно добавить префикс в виде короткой git-ссылки для ключей в memcache и прогреть кеш перед переключением. Для Postgres можно без проблем создавать новые таблицы и даже новые столбцы с Null по умолчанию, но вы определенно захотите протестировать работспособность миграций на тестовом окружении с эмуляцией блокировки строк (если вы используете <code>SELECT FOR UPDATE</code>, что бы быть уверенным в консистентности данных). Если вы испольуете фоновый процесс, вроде celery-задач, то процесс может какое-то время использовать старую версию кода, поэтому вам всегда нужно обрабатывать случай вызова старого кода:</p>
+
+<p><code>python
+@task
+def process_order(order_id, resent=None):
+    ....
+</code></p>
+
+<p>Если в очереди существует задача <code>process_order</code> с функцией, имеющую старую сигнатуру, то если вы не передадите появившиеся параметры; поэтому выставляйте значения по умолчанию. Это одно из множества предостережений, которое я смог придумать. Всегда проверяйте деплой и откат назад, если сомневаетесь, для того что бы обнаружить потенциальную ошибку.</p>
+
+<p>Есть мноество причин, по которым вы захотите обновлять API или веб-сайт без простоя используя blue/green деплой:</p>
+
+<ul>
+  <li>
+    <p>Удовлетворение потребностей клиентов - живя и работая на другом конце света (Корея), я очень
+расстраиваюсь, когда разработчики сервисов, нужных мне для выполнения работы, считают, что технические работы можно проводить когда у меня разгар рабочего дня, так как у них ночь.</p>
+  </li>
+  <li>
+    <p>Вы можете откатить назад релиз с ошибками без переразвертывания - старый релиз по прежнему все еще там, так что вы можете переключиться на него, если у вас возникнут проблемы в новом релизе.</p>
+  </li>
+  <li>
+    <p>Возможность быстро исправить непредвиденные проблемы - вы можете выяснить что есть ошибка, которая не является достаточно большой, что бы возвращаться к старому релизу и вы можете выложить исправлеиние ошибки даже когда ваш сервис используют тысячи и миллионы клиентов, не прерывая их.</p>
+  </li>
+  <li>
+    <p>Вы на один шаг ближе к непрерывному развертыванию.</p>
+  </li>
+</ul>
+
+<p>Как я говорил выше, существует множество техник, которые могут быть использованы для деплоя ПО и они имеют свои компромиссы. Пакеты уровня операционной системы нельзя обновить так же изолированно, как <code>virtualenv</code>. Критики могут сказать, что это работает только для пакетов на уровне языка программирования, но не для пакетов уровня ОС или даже обновления ОС. Я полностью понимаю эту точку зрения, и я думаю, что это просто компромисс. Будущее выглядит очень ярким, когда речь идет о методах, которые обеспечивают еще большую изоляцию и более быстрое развертывание, вроде <a href="https://www.docker.com/">докера</a> (<code>Docker</code>) и других аналогичных проектов. Я с нетерпением жду, чтобы с помощью подобных инструментов, делать деплой проектов в будущем даже с меньшим временем простоя. В то же время эта статья написана как раз для того типа проектов над которыми я работаю сейчас.</p>
+]]></content>
+  </entry>
+  
+</feed>

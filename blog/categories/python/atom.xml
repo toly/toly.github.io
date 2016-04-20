@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Python | Toly blog]]></title>
   <link href="http://toly.github.io/blog/categories/python/atom.xml" rel="self"/>
   <link href="http://toly.github.io/"/>
-  <updated>2015-04-12T14:48:22+03:00</updated>
+  <updated>2016-04-20T18:24:00+03:00</updated>
   <id>http://toly.github.io/</id>
   <author>
     <name><![CDATA[Toly]]></name>
@@ -12,6 +12,278 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Простой Zero-Downtime Blue-Green деплой]]></title>
+    <link href="http://toly.github.io/blog/2016/04/20/simple-0-downtime-blue-green-deployments/"/>
+    <updated>2016-04-20T12:55:06+03:00</updated>
+    <id>http://toly.github.io/blog/2016/04/20/simple-0-downtime-blue-green-deployments</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>Перевод статьи Дена Бравендера <a href="http://dan.bravender.net/2014/8/24/Simple_0-Downtime_Blue_Green_Deployments.html">Simple 0-Downtime Blue Green Deployments</a></p>
+</blockquote>
+
+<p>Поработав в шести e-commerce проектах (половина из которых зарабатывает миллионы долларов год), я могу с уверенностью сказать, что периодическая неработоспособность серверов - это железобетонный способ развалить бизнес любой компании. Как ни крути, время – деньги. Я работал с командами которые пытались минимизировать время даунтайма во время релиза множеством различных способов. Вот некоторые из них:</p>
+
+<p>На одном конце спектра вы можете избегать простоя серверов, выполняя деплой только во время техобслуживания. Недостатки здесь довольно очевидны – что если релиз содержит ошибку и вы не узнаете об этом до тех пор, пока на сайт не пойдет пиковый траффик? Я видел людей, вскидывающих руки со словами “Я думаю, что наши пользователи не смогут использовать новую функциональность и будут получать ошибку, пока мы не выкатим исправление завтра утром” в магазинах, где деплоились так. Я так же наблюдал, как сайт над которым я работал был “выключен” для экстренного деплоя и мы были завалены жалобами от клиентов.</p>
+
+<p>На другом конце спектра я видел попытки blue/green phoenix деплоя - переустановка на каждой виртуальной машине с таким же ПО, но с новой версией проекта. После окончания тестирования на новых виртуальных машинах вы можете изменить настройки аппаратного свитча или сервиса, вроде HAProxy, что бы он указывал на новую версию сайта. Само собой разумеется, используя этот метод занимает очень много времени, если все, что вы хотите сделать, это развернуть исправление одной строки. Если вы не знакомы с blue/green деплоем, обязательно прочтите <a href="http://martinfowler.com/bliki/BlueGreenDeployment.html">статью Мартина Фаулера об этом</a>.</p>
+
+<p>Существует золотая середина в решении этой проблемы, при которой сайт продолжает работать и выкатка не занимает так много времени, как blue/green phoenix деплой. Тем не менее, как и со всеми техническими решениями, она не лишена своих недостатков и не везде применима.</p>
+
+<p>Вот тривиальное Flask-приложение, которое я буду развертывать для примера:</p>
+
+<p>``` python
+import os, time</p>
+
+<p>from flask import Flask</p>
+
+<p>app = Flask(<strong>name</strong>)</p>
+
+<p>@app.route(“/”)
+def hello():
+    return “Hello 0-downtime %s World!” % os.environ.get(‘BLUEGREEN’, ‘bland’)
+```</p>
+
+<p>А вот fabfile, который мы будем использовать:</p>
+
+<p>``` python
+import os
+import sys
+from StringIO import StringIO</p>
+
+<p>from fabric.api import task, local, run
+from fabric.operations import put
+from fabric.state import env</p>
+
+<p>sys.path.append(‘../’)
+from gitric.api import (  # noqa
+    git_seed, git_reset, allow_dirty, force_push,
+    init_bluegreen, swap_bluegreen
+)</p>
+
+<p>@task
+def prod():
+    env.user = ‘test-deployer’
+    env.bluegreen_root = ‘/home/test-deployer/bluegreenmachine/’
+    env.bluegreen_ports = {‘blue’: ‘8888’,
+                           ‘green’: ‘8889’}
+    init_bluegreen()</p>
+
+<p>@task
+def deploy(commit=None):
+    if not commit:
+        commit = local(‘git rev-parse HEAD’, capture=True)
+    env.repo_path = os.path.join(env.next_path, ‘repo’)
+    git_seed(env.repo_path, commit)
+    git_reset(env.repo_path, commit)
+    run(‘kill $(cat %(pidfile)s) || true’ % env)
+    run(‘virtualenv %(virtualenv_path)s’ % env)
+    run(‘source %(virtualenv_path)s/bin/activate &amp;&amp; ‘
+        ‘pip install -r %(repo_path)s/bluegreen-example/requirements.txt’
+        % env)
+    put(StringIO(‘proxy_pass http://127.0.0.1:%(bluegreen_port)s/;’ % env),
+        env.nginx_conf)
+    run(‘cd %(repo_path)s/bluegreen-example &amp;&amp; PYTHONPATH=. ‘
+        ‘BLUEGREEN=%(color)s %(virtualenv_path)s/bin/gunicorn -D ‘
+        ‘-b 0.0.0.0:%(bluegreen_port)s -p %(pidfile)s app:app’
+        % env)</p>
+
+<p>@task
+def cutover():
+    swap_bluegreen()
+    run(‘sudo /etc/init.d/nginx reload’)
+```</p>
+
+<p>Обновления в развертывании должны быть идемпотентными (то есть, если вы запускаете деплой несколько раз, то результат должен быть таким же, каждый раз, за исключением pid-ов запускаемых процессов). Здесь есть один тонкий момент - когда используете <code>git</code> для деплоя, вам нужно очистить удаленную рабочую копию репозитория. Я не делал этого здесь, но вы можете использовать команду <code>git clean</code>, чтобы быть уверенным, что в рабочей копии только то, что в репозитории. Я сделал этот пример для python-приложения, но вы можете использовать любой язык, который не требует компиляции в бинарный файл и и у которого есть возможность установки изолированных пакетов. Я предполагаю, что это может быть сделано с <code>ruby</code> и <a href="http://rvm.io/">RVM</a>. У меня также есть пример на nodejs в <a href="https://github.com/dbravender/gitric">репозитории gitric</a>.</p>
+
+<p>Структура каталогов, куда будет деплоиться проект выглядит следующим обазом:</p>
+
+<p><code>text
+├── blue
+│   ├── env
+│   ├── etc
+│   └── repo
+├── green
+│   ├── env
+│   ├── etc
+│   └── repo
+├── live -&gt; /home/test-deployer/bluegreenmachine/green
+└── next -&gt; /home/test-deployer/bluegreenmachine/blue
+</code></p>
+
+<p>Для того, чтобы сделать первичное развертывание все что вам нужно это пользователь на удаленном сервере и конфигурация хостов в <code>Nginx</code> вроде такой:</p>
+
+<p>``` text
+server {
+    listen 80;
+    server_name server.name.here;</p>
+
+<pre><code>location / {
+    include /home/test-deployer/bluegreenmachine/live/etc/nginx.conf;
+} }
+</code></pre>
+
+<p>server {
+    listen 80;
+    server_name next.server.name.here;</p>
+
+<pre><code>location / {
+    include /home/test-deployer/bluegreenmachine/next/etc/nginx.conf;
+} } ```
+</code></pre>
+
+<p>После этого вы можете запустить это:</p>
+
+<p><code>sh
+fab prod deploy
+fab prod cutover
+</code></p>
+
+<p>Эти шаги намеренно разделены, что бы вы могли проверить работоспособность проекта перед тем как переключиться на новый релиз.</p>
+
+<p>Здесь я переключаюсь на новый релиз во время работы <code>ab</code> и постоянного обращения к серверу с помощью <code>curl</code> что бы видеть, что возвращает сервер:</p>
+
+<pre><code>% ab -c 100 -n 5000 http://my.server.here/
+This is ApacheBench, Version 2.3 &lt;$Revision: 1528965 $&gt;
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking my.server.here (be patient)
+Completed 500 requests
+Completed 1000 requests
+Completed 1500 requests
+Completed 2000 requests
+Completed 2500 requests
+Completed 3000 requests
+Completed 3500 requests
+Completed 4000 requests
+Completed 4500 requests
+Completed 5000 requests
+Finished 5000 requests
+
+
+Server Software:        nginx/1.4.1
+Server Hostname:        my.server.here
+Server Port:            80
+
+Document Path:          /
+Document Length:        28 bytes
+
+Concurrency Level:      100
+Time taken for tests:   33.180 seconds
+Complete requests:      5000
+Failed requests:        2576
+   (Connect: 0, Receive: 0, Length: 2576, Exceptions: 0)
+Total transferred:      922576 bytes
+HTML transferred:       142576 bytes
+Requests per second:    150.69 #/sec (mean)
+Time per request:       663.607 ms (mean)
+Time per request:       6.636 ms (mean, across all concurrent requests)
+Transfer rate:          27.15 Kbytes/sec received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:      164  326  87.5    321    1393
+Processing:   161  308 188.7    284    4045
+Waiting:      161  307 186.5    284    4045
+Total:        338  635 216.9    646    4409
+
+Percentage of the requests served within a certain time (ms)
+  50%    646
+  66%    675
+  75%    689
+  80%    699
+  90%    723
+  95%    758
+  98%    789
+  99%    899
+ 100%   4409 (longest request)
+</code></pre>
+
+<p>Мой сервер - маленькая виртуалка на Linode (хостинг) и я нахожусь на другой стороне Земли от него, так что я не очень обеспокоен его производительностью. Я проверяю, что все запросы были обработаны, пока осуществлялся деплой, и приложение продолжало работать. Вы можете увидеть, что <code>ab</code> насчитал 2576 запросов с ошибочной длинной (failing length requests) - на самом деле это не ошибки - <code>ab</code> считает, что если содержимое ответа сервера отличается от первоначального ответа, то это ошибка; на середине нагрузочного тестирования я переключился на новый релиз.</p>
+
+<pre><code>% for x in $(seq 100); do curl -s -S http://my.server.here/ &amp;&amp; echo; done
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime blue World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+Hello 0-downtime green World!
+</code></pre>
+
+<p>Бонусом идет эффективное использование перезагрузки, предоставляемое большинством веб-серверов (<code>Apache</code>, <code>Nginx</code>). Текущие процессы веб-сервера перестаю обрабатывать новые запросы, а новые созданные процессы веб-сервера направляют весь траффик на новую версию проекта. Вот лог моего веб-сервера сразу после переключения:</p>
+
+<p>```text
+COMMAND    PID          USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME</p>
+
+<p>nginx    13636          root    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29426      www-data    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29427      www-data    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29428      www-data    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29429      www-data    8u  IPv4 11283302      0t0  TCP *:80 (LISTEN)
+nginx    29381      www-data   14u  IPv4 16961706      0t0  TCP SERVER_IP:80-&gt;PING_IP:46083 (ESTABLISHED)
+nginx    29381      www-data   15u  IPv4 16961707      0t0  TCP localhost:48628-&gt;localhost:8889 (ESTABLISHED)
+nginx    29429      www-data    5u  IPv4 16961753      0t0  TCP SERVER_IP:80-&gt;PING_IP:46084 (ESTABLISHED)
+nginx    29429      www-data    6u  IPv4 16961754      0t0  TCP localhost:33233-&gt;localhost:8888 (ESTABLISHED)</p>
+
+<p>gunicorn 29223 test-deployer    5u  IPv4 16953570      0t0  TCP *:8888 (LISTEN)
+gunicorn 29340 test-deployer    5u  IPv4 16953579      0t0  TCP *:8889 (LISTEN)
+gunicorn 29345 test-deployer    5u  IPv4 16953579      0t0  TCP *:8889 (LISTEN)
+gunicorn 29345 test-deployer    9u  IPv4 16962807      0t0  TCP localhost:8889-&gt;localhost:48628 (ESTABLISHED)
+gunicorn 29391 test-deployer    5u  IPv4 16953570      0t0  TCP *:8888 (LISTEN)
+gunicorn 29391 test-deployer    9u  IPv4 16960496      0t0  TCP localhost:8888-&gt;localhost:33233 (ESTABLISHED)</p>
+
+<p>root     13636  0.0  0.3  12920  3208 ?        Ss   Jun16   0:00 nginx: master process /usr/sbin/nginx
+www-data 29381  0.0  0.2  12904  2104 ?        S    14:51   0:00 nginx: worker process is shutting down
+www-data 29426  0.0  0.1  12920  1888 ?        S    14:52   0:00 nginx: worker process
+www-data 29427  0.0  0.1  12920  1888 ?        S    14:52   0:00 nginx: worker process
+www-data 29428  0.0  0.1  12920  1888 ?        S    14:52   0:00 nginx: worker process
+www-data 29429  0.0  0.2  12920  2380 ?        S    14:52   0:00 nginx: worker process
+```</p>
+
+<p>Процесс Nginx с pid 29381 (помеченый как “nginx: worker process is shutting down”) обрабатывает старый запрос, направляя его на старый релиз, и будет завершен после окончания обработки. Запрос, который поступил после выкатки направляется на порт 8888 (новый релиз). Все последующие запросы будут поступать на новые процессы nginx-a, которые передадут их на 8888-й порт. Вот так nginx выполняет мягкую перезагрузку, но для использования этого метода нет необходимости понимать как это происходит.</p>
+
+<p>Использование <code>git</code> для развертывания кода для языков, не требующих сборки, вроде Python и Руби, сокращает время, необходимое для создания пакетов и развертывания. Я <a href="http://dan.bravender.net//2012/5/11/git-based_fabric_deploys_are_awesome.html">писал</a> об этом несколько лет назад. Совместное испольование с blue/green  развертывания на том же сервере, привело к очень приятному опыт развертывания для меня и моей команды за прошедший год-полтора. Наш процесс деплоя был последовательным, но когда наш парк серверов вырос, процесс развертывания не стал медленнее, так как мы начали использовать декоратор <code>@parallel</code> во время фазы обновления.</p>
+
+<p>Дополнительно требуется немного планирования для написания кода и миграций, которые могут быть развернуты без выключения сервиса, но со времнем, экспериментируя, вы поймете что совершаете не так уж и много допонительной работы. <a href="http://www.slideshare.net/zeeg/djangocon-2010-scaling-disqus">Вот классное видео</a> от команды Disqus. Вам нужно добавить префикс в виде короткой git-ссылки для ключей в memcache и прогреть кеш перед переключением. Для Postgres можно без проблем создавать новые таблицы и даже новые столбцы с Null по умолчанию, но вы определенно захотите протестировать работспособность миграций на тестовом окружении с эмуляцией блокировки строк (если вы используете <code>SELECT FOR UPDATE</code>, что бы быть уверенным в консистентности данных). Если вы испольуете фоновый процесс, вроде celery-задач, то процесс может какое-то время использовать старую версию кода, поэтому вам всегда нужно обрабатывать случай вызова старого кода:</p>
+
+<p><code>python
+@task
+def process_order(order_id, resent=None):
+    ....
+</code></p>
+
+<p>Если в очереди существует задача <code>process_order</code> с функцией, имеющую старую сигнатуру, то если вы не передадите появившиеся параметры; поэтому выставляйте значения по умолчанию. Это одно из множества предостережений, которое я смог придумать. Всегда проверяйте деплой и откат назад, если сомневаетесь, для того что бы обнаружить потенциальную ошибку.</p>
+
+<p>Есть мноество причин, по которым вы захотите обновлять API или веб-сайт без простоя используя blue/green деплой:</p>
+
+<ul>
+  <li>
+    <p>Удовлетворение потребностей клиентов - живя и работая на другом конце света (Корея), я очень
+расстраиваюсь, когда разработчики сервисов, нужных мне для выполнения работы, считают, что технические работы можно проводить когда у меня разгар рабочего дня, так как у них ночь.</p>
+  </li>
+  <li>
+    <p>Вы можете откатить назад релиз с ошибками без переразвертывания - старый релиз по прежнему все еще там, так что вы можете переключиться на него, если у вас возникнут проблемы в новом релизе.</p>
+  </li>
+  <li>
+    <p>Возможность быстро исправить непредвиденные проблемы - вы можете выяснить что есть ошибка, которая не является достаточно большой, что бы возвращаться к старому релизу и вы можете выложить исправлеиние ошибки даже когда ваш сервис используют тысячи и миллионы клиентов, не прерывая их.</p>
+  </li>
+  <li>
+    <p>Вы на один шаг ближе к непрерывному развертыванию.</p>
+  </li>
+</ul>
+
+<p>Как я говорил выше, существует множество техник, которые могут быть использованы для деплоя ПО и они имеют свои компромиссы. Пакеты уровня операционной системы нельзя обновить так же изолированно, как <code>virtualenv</code>. Критики могут сказать, что это работает только для пакетов на уровне языка программирования, но не для пакетов уровня ОС или даже обновления ОС. Я полностью понимаю эту точку зрения, и я думаю, что это просто компромисс. Будущее выглядит очень ярким, когда речь идет о методах, которые обеспечивают еще большую изоляцию и более быстрое развертывание, вроде <a href="https://www.docker.com/">докера</a> (<code>Docker</code>) и других аналогичных проектов. Я с нетерпением жду, чтобы с помощью подобных инструментов, делать деплой проектов в будущем даже с меньшим временем простоя. В то же время эта статья написана как раз для того типа проектов над которыми я работаю сейчас.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Проект на Django Rest Framework и AngularJS]]></title>
@@ -241,7 +513,7 @@ from .models import User, Post, Photo</p>
 
 <p>Просто загрузив одну из ваших API сущностей в браузер, Django Rest Framework предоставит вам удобный клиентсткий интерфейс для взаимодействия с API.</p>
 
-<p>{% img left /images/DRF_Angular/browser_user_posts.png 300 %} {% img left /images/DRF_Angular/browser_users.png 300 %}</p>
+<p><img class="left" src="/images/DRF_Angular/browser_user_posts.png" width="300"> <img class="left" src="/images/DRF_Angular/browser_users.png" width="300"></p>
 
 <h2 id="api-3">Добавление прав доступа и принадлежности в API</h2>
 
@@ -306,10 +578,10 @@ class PostMixin(object):
 </blockquote>
 
 <blockquote>
-  <p>Я заключил некоторые части шаблона в джанговсий тег {% raw %}<code>{% block %}</code>{% endraw %}, чтобы потом наследовать этот шаблон для каждого из примеров.</p>
+  <p>Я заключил некоторые части шаблона в джанговсий тег <code>{% block %}</code>, чтобы потом наследовать этот шаблон для каждого из примеров.</p>
 </blockquote>
 
-<p>{% raw %}
+<p>
 ``` django
 {% load staticfiles %}</p>
 
@@ -336,7 +608,7 @@ class PostMixin(object):
 </body>
 </html>
 <p>```
-{% endraw %}</p>
+</p>
 
 <p>Теперь, давайте дополним шаблон простым контроллером, который будет возвращать список постов. Сейчас мы жестко пропишем посты, а потом будем получать их через AJAX.</p>
 
@@ -360,7 +632,7 @@ app = angular.module ‘example.app.static’, []</p>
 
 <p>Если вы установили все зависимости и запустили <code>grunt</code>, что бы скомпилить CoffeScript в JavaScript, то вы должны увидеть наш шаблон с прописанными в коде данными вроде этого:</p>
 
-<p>{% img center /images/DRF_Angular/example_static.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_static.png"></p>
 
 <h2 id="xhr-----api">Используем XHR для получения постов из API</h2>
 
@@ -379,7 +651,7 @@ app = angular.module ‘example.app.basic’, []</p>
 
 <p>С сервисом <code>$http</code>, получающим список постов из нашего API, наша тестовая страница покажет список постов прямо с сервера.</p>
 
-<p>{% img center /images/DRF_Angular/example_basic.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_basic.png"></p>
 
 <h2 id="angular-resource--api">Используем Angular-Resource для API</h2>
 
@@ -417,7 +689,7 @@ app = angular.module ‘example.app.resource’, [‘example.api’]</p>
 
 <p>В результате получим такой же список постов, как и в примере выше.</p>
 
-<p>{% img center /images/DRF_Angular/example_resource.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_resource.png"></p>
 
 <h2 id="section-2">Добавляем фотографии в список постов</h2>
 
@@ -452,9 +724,9 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
 ]
 ```</p>
 
-<p>Также обновим наш шаблон чтобы итерировать каждую модель поста для отображения фотографий каждого поста. Обратите внимание, как AngularJS повторно обновляет представление по мере того, как данные загружаются из API. В этом случае, мы итерируем фотографии объекта, ссылающиеся на идентификаторы постов, которые в свою очередь итерируются директивой <code>ng-repeat</code>. Мы также используем директиву <code>ng-src</code> вместо аттрибута <code>src</code>, так как это не позволяет браузеру загружать картинку до того как выражение Angular было прекомпилировано (тогда бы вы увидели ошибку 404 в ваших логах о невозможности показа {% raw %}’/media/{{ photo.image }}’{% endraw %}).</p>
+<p>Также обновим наш шаблон чтобы итерировать каждую модель поста для отображения фотографий каждого поста. Обратите внимание, как AngularJS повторно обновляет представление по мере того, как данные загружаются из API. В этом случае, мы итерируем фотографии объекта, ссылающиеся на идентификаторы постов, которые в свою очередь итерируются директивой <code>ng-repeat</code>. Мы также используем директиву <code>ng-src</code> вместо аттрибута <code>src</code>, так как это не позволяет браузеру загружать картинку до того как выражение Angular было прекомпилировано (тогда бы вы увидели ошибку 404 в ваших логах о невозможности показа ’/media/{{ photo.image }}’).</p>
 
-<p>{% raw %}
+<p>
 <code>html
 &lt;div class="panel" ng-repeat="post in posts"&gt;
     &lt;div class="panel-heading clearfix"&gt;
@@ -467,17 +739,17 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
     &lt;/div&gt;
 &lt;/div&gt;
 </code>
-{% endraw %}</p>
+</p>
 
 <p>И в итоге, обновив страницу <a href="http://localhost:8000/photos">http://localhost:8000/photos</a>, получим отрендеренные фотографии:</p>
 
-<p>{% img center /images/DRF_Angular/example_photos.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_photos.png"></p>
 
 <h2 id="angularjs----csrf">Лирическое отступление: AngularJS и защита от CSRF</h2>
 
 <p>Django Rest Framework расширяет джанговскую защиту от <a href="http://ru.wikipedia.org/wiki/%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D0%BB%D0%BA%D0%B0_%D0%BC%D0%B5%D0%B6%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2%D1%8B%D1%85_%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%BE%D0%B2">CSRF</a> (Cross Site Request Forgery) используя класс <code>SessionAuthentication</code> (как например в нашем случае: используется таже сессия браузера, что и для веб-приложения). Это способствует тому, что вредоносные сценарии не смогут использовать наших пользователей для выполнения различных запросов к нашему API, заставляя сценарии при каждом запросе отправлять генерируемый сервером токен. Модульная архитектура AngularJS и внедрение зависимостей позволяет сделать это простым конфигурированием запросов к API с помощью включения CSRF-токена в заголовок запроса (по желанию, можно также использовать куки).</p>
 
-<p>В нашем джанговском шаблоне, просто добавьте тег <code>&lt;script&gt;</code> для конфигурирования сервиса <code>$http</code> и настройте джанговское приложение, что бы шаблонная переменная {% raw %}<code>{{ csrf_token }}</code>{% endraw %} передавалась в заголовок ответа для всех вызовов API.</p>
+<p>В нашем джанговском шаблоне, просто добавьте тег <code>&lt;script&gt;</code> для конфигурирования сервиса <code>$http</code> и настройте джанговское приложение, что бы шаблонная переменная <code>{{ csrf_token }}</code> передавалась в заголовок ответа для всех вызовов API.</p>
 
 <blockquote>
   <p>Будьте уверены, что этот скрипт загружается <strong>после</strong> определений модуля.</p>
@@ -487,7 +759,7 @@ app = angular.module ‘example.app.photos’, [‘example.api’]</p>
   <p>Вы можете передавать CSRF токен между Angular и Django через куки или другим способом. Этот явный механизм с использованием заголовков просто обеспечивает генерацию CSRF токена при каждом запросе.</p>
 </blockquote>
 
-<p>{% raw %}
+<p>
 <code>html
 &lt;script&gt;
 // Add the CSRF Token
@@ -497,7 +769,7 @@ app.config(['$httpProvider', function($httpProvider) {
 }]);
 &lt;/script&gt;
 </code>
-{% endraw %}</p>
+</p>
 
 <h2 id="api---angularjs">Создание и модификация ресурсов API с использованием AngularJS</h2>
 
@@ -505,7 +777,7 @@ app.config(['$httpProvider', function($httpProvider) {
 
 <p>Сперва, нам нужно расшарить наш базовый шаблон, и добавить html шаблон для редактора. Мы также добавим CSRF токен, согласно приведенным выше инструкциям, так как для создания новых постов будут использоваться потенциально уязвимые методы.</p>
 
-<p>{% raw %}
+<p>
 ``` django
 {% extends ‘base.html’ %}</p>
 
@@ -542,7 +814,7 @@ app.config(['$httpProvider', function($httpProvider) {
 </script>
 {% endblock %}
 ```
-{% endraw %}</p>
+</p>
 
 <p>Теперь, у нас есть редактор - давайте сделаем контроллер для его подключения. Заметьте, что теперь у нас в зависимостях два модуля: базовый модуль нашей ленты постов и модуль API, содержащий все определения ресурсов API (<code>$resource</code>).</p>
 
@@ -562,7 +834,7 @@ $scope.save = -&gt;
 
 <p>Ранее, в представлениях API, мы добавляли некоторые ограничения прав доступа, чтобы предотвратить изменения пользователями чужих постов. До сих пор это не имело значения, какое отношение имеет пользователь к редактируемому посту. Но теперь, когда мы хотим создать пользователей, мы должны гарантировать, что обрабатываем запрос от пользователя, который имеет право на этот запрос (иначе, запрос на создание нового поста должен быть отклонен). В этом учебном примере, мы использовали хак аутентификации Django, который автоматически авторизует вас как пользователя <code>root</code>. Разумеется, в продакшене или ином недоверенном окружении так делать нельзя. Это сделано для упрощения демонстрации тестового приложения, игнорируя регистрацию и авторизацию пользователя.</p>
 
-<p>{% img center /images/DRF_Angular/example_editor.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_editor.png"></p>
 
 <h2 id="section-3">Обработка ошибок</h2>
 
@@ -599,17 +871,17 @@ $scope.save = -&gt;
 
 <p>Также обновим шаблон, для вывода информации об ошибках:</p>
 
-<p>{% raw %}
+<p>
 <code>html
 &lt;p ng-repeat="(name, errs) in errors" class="alert alert-danger"&gt;&lt;strong&gt;{{ name }}&lt;/strong&gt;: {{ errs.join(', ') }}&lt;/p&gt;
 </code>
-{% endraw %}</p>
+</p>
 
 <p>Подобным образом довольно просто к элементам пользовательского интерфейса добавить получение обратной связи о прогрессе (индиваторы загрузки, прогресс-бары) используя цепочечные вызовы. В AngularJS есть достаточно полная обработка ошибок через цепочки вызовов, делающая обработку ошибок простой.</p>
 
 <p>В этом демонстрационном примере, мы просто перечислили ошибки и вывели их в специально оформленных элементах интерфейса. Так как ошибки имеют привязку к имени аттрибута, вы легко можете показать список ошибок возле того элемента формы, которому они соответсвуют.</p>
 
-<p>{% img center /images/DRF_Angular/example_error.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_error.png"></p>
 
 <h2 id="section-4">Удаление своих постов</h2>
 
@@ -638,7 +910,7 @@ app = angular.module ‘example.app.manage’, [‘example.api’, ‘example.ap
 
 <p>После определения контроллера, давайте обновим наш шаблон поста и добавим кнопку удаления (при условии, что функция <code>canDelete</code> возвращает <code>true</code>).</p>
 
-<p>{% raw %}
+<p>
 ``` django
 {% extends ‘editor.html’ %}</p>
 
@@ -664,11 +936,11 @@ var app = angular.module('example.app.manage'); // Not including a list of depen
 &lt;/script&gt;
 {% endblock %}
 ```
-{% endraw %}</p>
+</p>
 
 <p>И когда вы загрузите <a href="http://localhost:8000/manage">http://localhost:8000/manage</a>, возле постов с автором <code>root</code> будет кнопка <strong>‘X’</strong>, а возле поста с автором <code>bob</code> - не будет. При нажатии на кнопку <strong>‘X’</strong> наш API удалит пост.</p>
 
-<p>{% img center /images/DRF_Angular/example_managed.png %}</p>
+<p><img class="center" src="/images/DRF_Angular/example_managed.png"></p>
 
 <p>Итак, у нас есть простая лента, в которой пользователи могут размещать посты.</p>
 
@@ -823,7 +1095,7 @@ from crispy_forms.helper import FormHelper</p>
 
 <p>Это предполагает, что приложение <code>jobs</code> установлено и настроено. Базовый шаблон будет выглядеть примерно так:</p>
 
-<p>{% raw %}</p>
+<p></p>
 
 <p>``` django /jobs/base.html
 &lt;!DOCTYPE html&gt;</p>
@@ -844,13 +1116,13 @@ from crispy_forms.helper import FormHelper</p>
 </html>
 <p>```</p>
 
-<p>{% endraw %}</p>
+<p></p>
 
 <p>Django-angular предлагает полезные шаблонные теги, которые включат необходимый для вас JavaScript. Я рекомендую использовать CDN и загрузить туда файлы, какие можно. Это дает географические и пропускные преимущества.</p>
 
 <p>Теперь создадим шаблон страницы, который будет рендерится нашим проектом. <em>index.html</em> будет служить главной страницей нашего одностраничного приложения, и позже может быть использован для всех CRUD (Create Read Update Delete) представлений.</p>
 
-<p>{% raw %}</p>
+<p></p>
 
 <p><code>django /jobs/index.html
 {% extends "base.html" %}
@@ -865,9 +1137,9 @@ from crispy_forms.helper import FormHelper</p>
 {% endblock extra_javascript %}
 </code></p>
 
-<p>{% endraw %}</p>
+<p></p>
 
-<p>{% raw %}</p>
+<p></p>
 
 <p>``` javascript /javascript/app.js
 var app = angular.module(‘JobApp’, [
@@ -900,7 +1172,7 @@ function ($scope, Restangular, CbgenRestangular, $q) {</p>
 <p>}])// end controller
 ```</p>
 
-<p>{% endraw %}</p>
+<p></p>
 
 <p>Шаблон и JS код выше очень простые, наследуется от базового шаблона. Есть несколько аттрибутов, которые вы возможно не видели прежде и в которых нужно будет разобраться.</p>
 
@@ -945,13 +1217,13 @@ $stateProvider
 
 <p>Последний шаблон, который нужно создать - <em>/jobs/new.html</em>. Он будет содержать простую форму, которую вы сделали ранее с использованием django-angular.</p>
 
-<p>{% raw %}
+<p>
 <code>django /jobs/new.html
 {% load crispy_forms_tags %}
 {% crispy JobForm %}
 &lt;button type="button" class="btn btn-default"  ng-click="submitJob()"&gt;Create&lt;/button&gt;
 </code>
-{% endraw %}</p>
+</p>
 
 <p>Теперь вам нужно всего лишь представление и URL для подключения формы.</p>
 
@@ -1847,203 +2119,6 @@ pool.join() ```
 
 <p>Так что, так. Распараллеливание в одну (почти) строку.</p>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Начиная Python-проект: The Right Way]]></title>
-    <link href="http://toly.github.io/blog/2014/02/09/starting-a-python-project-the-right-way/"/>
-    <updated>2014-02-09T21:33:26+04:00</updated>
-    <id>http://toly.github.io/blog/2014/02/09/starting-a-python-project-the-right-way</id>
-    <content type="html"><![CDATA[<blockquote>
-  <p>Достаточно вольный (настолько вольный, что отсутствуют два абзаца и изменен код) перевод статьи Джефа Кнаппа </p>
-
-  <p><a href="http://www.jeffknupp.com/blog/2014/02/04/starting-a-python-project-the-right-way/">Starting A Python Project The Right Way</a></p>
-</blockquote>
-
-<p>Если вы подобны большинству начинающих python-программистов, вы вероятно в состоянии представить себе работу приложения целиком, но когда приходит время начать писать код и перед вами пустое окно редактора, вы чувствуете себя потерянным и подавленным. В этой статье я опишу метод, который использую когда начинаю писать программу с нуля. К концу статьи у вас будет хороший план для начала разработки любого приложения.</p>
-
-<!-- more -->
-
-<h2 id="section">Установка</h2>
-
-<p>До того как написать хоть строчку кода, первое что я делаю - создаю <em>виртуальное окружение</em>. Что такое виртуальное окружение? Это установка python отдельно от остальной части системы (и дефолтного pythona’а). Какая от этого польза? Представьте себе, что у вас есть два проекта, над которыми вы работаете. Если оба испольузют какую-либо библиотеку (например, <strong>requests</strong>), и в одном из проектов используется старая версия (которую нельзя корректно обновить, т.к. другие библиотеки используют старую версию <strong>requests</strong>), как вы сможете использовать новую версию <strong>requests</strong> в другом проекте? С помощью виртуального окружения.</p>
-
-<p>Для начала установите <strong>virtualenvwrapper</strong> (обертка над фантастическим пакетом <strong>virtualenv</strong>). Добавьте в ваш <strong>.bashrc</strong> строчку <code>/usr/local/bin/virtualenvwrapper.sh</code> и перезагрузите свой профиль с помощью <strong>source</strong>:</p>
-
-<pre><code>source ~/.bashrc
-</code></pre>
-
-<p>Теперь у вас должна появиться команда <strong>mkvirtualenv</strong>, доступная через автодополнение с помощью <em>tab</em>. Если вы используете Python старше версии 3.3, виртуальное окружение поддерживает этот язык и установка этого пакета не требуется. <code>mkvirtualenv &lt;my_project&gt;</code> создаст новое виртуальное окружение под названием my_project с уже установленными <strong>pip</strong> и <strong>setuptools</strong>. Для Python 3 требуемые команды выглядят так:</p>
-
-<pre><code>python -m venv &lt;my_project&gt;
-source &lt;my_project&gt;/bin/activate
-</code></pre>
-
-<p>Теперь когда виртуальное окружение создано, пришло время инициализировать средство управления исходниками. Предполагая что это <strong>git</strong> (ну, потому что он…), введем</p>
-
-<pre><code>git init .
-</code></pre>
-
-<p>Так же полезно добавить в <strong>.gitignore</strong> все скомпилированые Python-ом файлы и каталоги <code>__pychache__</code>. Для этого создайте файл <code>.gitignore</code> и поместите в него следующее:</p>
-
-<pre><code>*.pyc
-__pycache__
-</code></pre>
-
-<p>Теперь подходящее время добавить в проект <strong>README</strong> файл. Даже если вы единственный, кто будет видеть код, это хорошее упражнение для организации ваших мыслей. <strong>README</strong> файл должен описывать что делает проект, его зависимости и как его использовать. Я пишу <strong>README</strong> файлы с использованием разметки <em>Markdown</em>, во-первых потому что GitHub автоматически оформляет любой файл названный <strong>README.md</strong>, а во-вторых потому что я пишу все (!) документы в разметке <em>Markdown</em>.</p>
-
-<p>И наконец, сделайте первый коммит содержащий два файла (<strong>.gitignore</strong>, <strong>README.md</strong>), которые вы только что создали. Для этого введите:</p>
-
-<pre><code>git add .gitignore README.md
-git commit -m "initial commit"
-</code></pre>
-
-<h2 id="section-1">Каркасы!</h2>
-
-<p>Почти каждое приложение я начинаю одинаково: создаю каркас приложения, состоящий из функций и классов с заполненой документацией, но без реализации. Я считаю, что необходимо сперва вынужденно писать документацию для функции, иначе если я не способен кратко описать что-либо, то у меня нет достаточно мыслей о проблеме.</p>
-
-<p>В качестве примера приложения я использую скрипт, недавно написанный обучаемым во время одного из наших занятий. Цель скрипта - создать csv-файл, содержащий самые кассовые фильмы прошлого года (по версии IMDB) и ключевые слова связанные с этими фильмами на IMDB. Это был довольно простой проект, для того что бы завершить его за одно занятие, но достаточный по сложности, что бы требовать размышлений.</p>
-
-<p>Сперва создайте основной файл, который будет точкой входа в приложение. Я назвал его <strong>imdb.py</strong>. Потом скопируйте следующий код в редактор:</p>
-
-<p>``` python
-	““Script to gather IMDB keywords from 2013’s top grossing movies.”””
-	import sys</p>
-
-<pre><code>def main():
-    """Main entry point for the script."""
-    pass
-
-if __name__ == '__main__':
-    sys.exit(main()) ```
-</code></pre>
-
-<p>Звучит неправдоподобно, но это вполне функциональная программа. Вы можете запустить ее и получить правильный код выхода (т.е. <strong>0</strong>, хотя справедливо отметить, что пустой файл будет так же возвращать правильный код). Затем я делаю заглушки для функций и/или классов, которые по моему мнению будут нужны:</p>
-
-<p>``` python
-	“"”Script to gather IMDB keywords from 2013’s top grossing movies.”””
-	import sys</p>
-
-<pre><code>URL = "http://www.imdb.com/search/title?at=0&amp;sort=boxoffice_gross_us,desc&amp;start=1&amp;year=2013,2013"
-
-def main():
-    """Main entry point for the script."""
-    pass
-
-def get_top_grossing_movie_links(url):
-    """Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB
-    page."""
-    pass
-
-def get_keywords_for_movie(url):
-    """Return a list of keywords associated with *movie*."""
-    pass
-
-if __name__ == '__main__':
-    sys.exit(main()) ```
-</code></pre>
-
-<p>Выглядит сносно. Отмечу, что обе функции включают параметры (например, <strong>get_keywords_for_movie</strong> принимает параметр <strong>url</strong>). Это может показаться странным для заглушек. Зачем здесь параметры? Аргументация такая же, как и для предварительного документирования заглушек: если я не знаю какие агрументы должна принимать функция, значит я недостаточно об этом думал.</p>
-
-<p>В этом месте я верятно закомичусь, т.к. проделал определенную часть работы, которую не хотел бы потерять. После этого перейдем к реализации. Я всегда начинаю с реализации функции <strong>main</strong>, т.к. “центр” использующий все остальные функции. Вот реализация функции <strong>main</strong> в <strong>imdb.py</strong>:</p>
-
-<p>``` python
-	import csv</p>
-
-<pre><code>def main():
-    """Main entry point for the script."""
-    movies = get_top_grossing_movie_links(URL)
-    with open('output.csv', 'w') as output:
-        csvwriter = csv.writer(output)
-        for title, url in movies:
-            keywords = get_keywords_for_movie(
-                'http://www.imdb.com{}keywords/'.format(url))
-            csvwriter.writerow([title, keywords]) ```
-</code></pre>
-
-<p>Несмотря на то что <strong>get_top_grossing_movie_links</strong> и <strong>get_keywords_for_movie</strong> не реализованы, я знаю достаточно о том, как их использовать. Функция <strong>main</strong> делает именно то, что мы обсуждали вначале: получает самые кассовые фильмы года и пишет их в csv-файл вместе с их ключевыми словами.</p>
-
-<p>Теперь все что осталось, это реализовать недостающие функции. Любопытно, что даже если мы знаем, что <strong>get_keywords_for_movie</strong> будет вызван после <strong>get_top_grossing_movie_links</strong>, мы можем реализовать их в том порядке, который больше нравится. Это не тот случай, когда пишешь скрипт с нуля и добавляешь функционал в том порядке, в которм идет разработка. Вы были бы вынуждены полностью написать первую функцию, прежде чем перети ко второй. Тот факт, что мы можем реализовать (и проверить!) функции в любом порядкепоказывает, что они слабо связаны.</p>
-
-<p>Давайте первым реализуем функцию <strong>get_keywords_for_movie</strong>:</p>
-
-<p><code>python
-def get_keywords_for_movie(url):
-    """Return a list of keywords associated with *movie*."""
-    keywords = []
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text)
-    tables = soup.find_all('table', class_='dataTable')
-    table = tables[0]
-    return [td.text for tr in table.find_all('tr') for td in tr.find_all('td')]
-</code></p>
-
-<p>Мы используем библиотеки <strong>requests</strong> и <strong>BeautifulSoup</strong>, поэтому нам нужно установить их через <em>pip</em>.	Теперь можно внести в список зависимостей проекта новые библиотеки: <code>pip freeze requirements.txt</code> и закомитить изменения. Таким образом мы всегда сможем создать виртуальное окружение и установить именно те библиотеки (и версии) которые нужны для запуска приложения.</p>
-
-<p>Наконец напишем реализацию для функции <strong>get_top_grossing_movie_links</strong>:</p>
-
-<p><code>python
-def get_top_grossing_movie_links(url):
-    """Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB
-    page."""
-    response = requests.get(url)
-    movies_list = []
-    for each_url in BeautifulSoup(response.text).select('.title a[href*="title"]'):
-        movie_title = each_url.text 
-        movies_list.append((movie_title, each_url['href']))
-    return movies_list
-</code></p>
-
-<p>Вот финальное содержание <strong>imdb.py</strong>:</p>
-
-<p>``` python
-““Script to gather IMDB keywords from 2013’s top grossing movies.”””
-import sys
-import requests
-from bs4 import BeautifulSoup
-import csv</p>
-
-<p>URL = “http://www.imdb.com/search/title?at=0&amp;sort=boxoffice_gross_us,desc&amp;start=1&amp;year=2013,2013”</p>
-
-<p>def get_top_grossing_movie_links(url):
-    “"”Return a list of tuples containing the top grossing movies of 2013 and link to their IMDB
-    page.”””
-    response = requests.get(url)
-    movies_list = []
-    for each_url in BeautifulSoup(response.text).select(‘.title a[href*=”title”]’):
-        movie_title = each_url.text 
-        movies_list.append((movie_title, each_url[‘href’]))
-    return movies_list</p>
-
-<p>def get_keywords_for_movie(url):
-    “"”Return a list of keywords associated with <em>movie</em>.”””
-    keywords = []
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text)
-    tables = soup.find_all(‘table’, class_=’dataTable’)
-    table = tables[0]
-    return [td.text for tr in table.find_all(‘tr’) for td in tr.find_all(‘td’)]</p>
-
-<p>def main():
-    “"”Main entry point for the script.”””
-    movies = get_top_grossing_movie_links(URL)
-    with open(‘output.csv’, ‘w’) as output:
-        csvwriter = csv.writer(output)
-        for title, url in movies:
-            keywords = get_keywords_for_movie(‘http://www.imdb.com{}keywords/’.format(url))
-            csvwriter.writerow([title, keywords])</p>
-
-<p>if <strong>name</strong> == ‘<strong>main</strong>’:
-    sys.exit(main())</p>
-
-<p>```</p>
-
-<p>Приложение, которое начиналось с пустого окна редактора готово. После запуска скрипт сгенерирует <strong>output.csv</strong>, содержащий именно то, что нужно. Для скрипта такого размера я не стал бы писать тесты, т.к. результат работы программы и есть тест. Тем не менее, написание тестов в данном случае возможно (так как наши функции слабо связаны), что бы проверить каждую функцию отдельно (изолированно).</p>
-
-<h2 id="section-2">Заключение</h2>
-
-<p>Надеюсь теперь у вас есть план действий для начала работы над python-проектом с нуля. Не смотря на то, что у каждого есть свой метод начала работы над проектом, скорее всего мой метод подойдет и вам. Как всегда, если у вас есть какие-либо вопросы, не стесняйтесь задавать их в комментариях или напишите мне на jeff@jeffknupp.com.</p>
 ]]></content>
   </entry>
   
